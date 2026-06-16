@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "EnglishMitraAI",
+    "slug": "englishmitra-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/images/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./src/assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#4F46E5"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.techdoquest.englishmitraai",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "We need microphone access to practice your English pronunciation.",
+        "NSSpeechRecognitionUsageDescription": "We use speech recognition to help improve your pronunciation.",
+        "NSCameraUsageDescription": "Camera access for profile photo."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/images/adaptive-icon.png",
+        "backgroundColor": "#4F46E5"
+      },
+      "package": "com.techdoquest.englishmitraai",
+      "permissions": [
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED"
+      ],
+      "googleServicesFile": "./google-services.json"
+    },
+    "web": {
+      "favicon": "./src/assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./src/assets/images/notification-icon.png",
+          "color": "#4F46E5"
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow EnglishMitraAI to access your microphone for pronunciation practice."
+        }
+      ]
+    ],
+    "scheme": "englishmitraai",
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
+    }
+  }
+}
