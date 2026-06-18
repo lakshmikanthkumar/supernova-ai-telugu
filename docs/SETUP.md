@@ -33,7 +33,7 @@ npm install
 ### Install free service packages
 
 ```bash
-npm install react-native-voice@^3.2.4
+npm install @react-native-voice/voice@^3.2.4
 npm install expo-speech@^12.0.2
 npm install google-translate-api-x@^10.7.1
 npm install axios@^1.7.7

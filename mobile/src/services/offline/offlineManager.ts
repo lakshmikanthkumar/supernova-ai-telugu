@@ -7,6 +7,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import NetInfo from '@react-native-community/netinfo'
 import type { Lesson, Flashcard, LessonCategory } from '../../types'
+import { gamificationService, flashcardService } from '../api'
 
 const CACHE_KEYS = {
   CATEGORIES: 'cache:categories',
@@ -117,8 +118,7 @@ class OfflineManager {
 
   private async executeAction(action: QueuedAction) {
     const { type, payload } = action
-    // Import lazily to avoid circular deps
-    const { gamificationService, flashcardService } = await import('../api')
+    // Services are imported statically at the top of the file
 
     switch (type) {
       case 'complete_lesson':

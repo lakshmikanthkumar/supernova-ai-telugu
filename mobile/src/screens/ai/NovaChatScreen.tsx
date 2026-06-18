@@ -121,13 +121,13 @@ export default function NovaChatScreen() {
       const assistantMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: response.content,
+        content: response.message,
         corrections,
         timestamp: new Date(),
       }
 
       setMessages(prev => [...prev, assistantMsg])
-      speak(response.content, { language: 'en-IN', rate: 'normal' }).catch(() => {})
+      speak(response.message, { language: 'en-IN', rate: 'normal' }).catch(() => {})
     } catch {
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),

@@ -433,14 +433,17 @@ export const gamificationService = {
       .limit(50)
     if (error) throw error
 
-    return (data || []).map((entry, i) => ({
-      rank: i + 1,
-      user_id: entry.user_id,
-      full_name: (entry.profiles as Profile).full_name,
-      avatar_url: (entry.profiles as Profile).avatar_url,
-      xp_earned: entry.xp_earned,
-      week_start: entry.week_start,
-    }))
+    return (data || []).map((entry, i) => {
+      const profile = entry.profiles as any
+      return {
+        rank: i + 1,
+        user_id: entry.user_id,
+        full_name: Array.isArray(profile) ? profile[0]?.full_name : profile?.full_name,
+        avatar_url: Array.isArray(profile) ? profile[0]?.avatar_url : profile?.avatar_url,
+        xp_earned: entry.xp_earned,
+        week_start: entry.week_start,
+      }
+    })
   },
 
   async getDailyChallenge(): Promise<DailyChallenge | null> {

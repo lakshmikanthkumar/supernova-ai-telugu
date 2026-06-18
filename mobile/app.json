@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#4F46E5"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.techdoquest.englishmitraai",
@@ -33,8 +35,7 @@
         "WRITE_EXTERNAL_STORAGE",
         "VIBRATE",
         "RECEIVE_BOOT_COMPLETED"
-      ],
-      "googleServicesFile": "./google-services.json"
+      ]
     },
     "web": {
       "favicon": "./src/assets/images/favicon.png"
@@ -54,12 +55,13 @@
         {
           "microphonePermission": "Allow EnglishMitraAI to access your microphone for pronunciation practice."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "scheme": "englishmitraai",
     "extra": {
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "6d776523-27d0-4864-a799-000401dc819e"
       }
     }
   }
