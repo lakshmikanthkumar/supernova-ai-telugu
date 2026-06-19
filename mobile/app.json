@@ -56,6 +56,13 @@
           "microphonePermission": "Allow EnglishMitraAI to access your microphone for pronunciation practice."
         }
       ],
+      [
+        "@react-native-voice/voice",
+        {
+          "microphonePermission": "Allow EnglishMitraAI to access your microphone for pronunciation practice.",
+          "speechRecognitionPermission": "Allow EnglishMitraAI to recognize your speech."
+        }
+      ],
       "expo-secure-store"
     ],
     "scheme": "englishmitraai",
