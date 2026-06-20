@@ -59,7 +59,7 @@ export default function OnboardingScreen() {
 
   const handleGetStarted = async () => {
     await AsyncStorage.setItem('onboarded', 'true')
-    router.replace('/auth/login')
+    router.replace('/login')
   }
 
   const handleNext = () => {

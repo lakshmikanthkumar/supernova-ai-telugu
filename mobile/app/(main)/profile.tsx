@@ -36,7 +36,7 @@ export default function ProfileScreen() {
         onPress: async () => {
           await authService.signOut()
           dispatch(clearAuth())
-          router.replace('/auth/login')
+          router.replace('/login')
         },
       },
     ])

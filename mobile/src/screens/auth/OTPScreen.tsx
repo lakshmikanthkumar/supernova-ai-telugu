@@ -63,7 +63,7 @@ export default function OTPScreen() {
       if (session && user) {
         dispatch(setSession({ session, user }))
         await dispatch(fetchProfile(user.id))
-        router.replace('/main/home')
+        router.replace('/home')
       }
     } catch (err: any) {
       Alert.alert('Invalid OTP', 'The OTP you entered is incorrect. Please try again.')

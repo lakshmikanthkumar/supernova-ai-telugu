@@ -1,14 +1,16 @@
-import React, { useState } from 'react'
-import {
-  View, Text, TextInput, TouchableOpacity,
-  StyleSheet, KeyboardAvoidingView, Platform,
-  ScrollView, ActivityIndicator, Alert,
-} from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
-import { authService } from '../../services/api'
+import React, { useState } from 'react'
+import {
+  ActivityIndicator, Alert,
+  KeyboardAvoidingView, Platform,
+  ScrollView,
+  StyleSheet,
+  Text, TextInput, TouchableOpacity,
+  View,
+} from 'react-native'
 import { useAppDispatch } from '../../hooks/useStore'
-import { setLoading, setError } from '../../store/slices/authSlice'
+import { authService } from '../../services/api'
 
 export default function LoginScreen() {
   const dispatch = useAppDispatch()
@@ -33,7 +35,7 @@ export default function LoginScreen() {
     setLocalLoading(true)
     try {
       await authService.sendOTP(formattedPhone)
-      router.push({ pathname: '/auth/otp', params: { phone: formattedPhone } })
+      router.push({ pathname: '/otp', params: { phone: formattedPhone } })
     } catch (err: any) {
       Alert.alert('Error', err.message || 'Failed to send OTP. Please try again.')
     } finally {
@@ -64,7 +66,7 @@ export default function LoginScreen() {
           </View>
           <TextInput
             style={styles.input}
-            placeholder="9876543210"
+            placeholder="8886492932"
             placeholderTextColor="#9CA3AF"
             keyboardType="phone-pad"
             maxLength={10}

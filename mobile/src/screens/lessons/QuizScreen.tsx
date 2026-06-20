@@ -155,7 +155,7 @@ export default function QuizScreen() {
             )
           })}
 
-          <TouchableOpacity style={styles.doneBtn} onPress={() => router.replace('/main/home')}>
+          <TouchableOpacity style={styles.doneBtn} onPress={() => router.replace('/home')}>
             <Text style={styles.doneBtnText}>Back to Home 🏠</Text>
           </TouchableOpacity>
         </ScrollView>

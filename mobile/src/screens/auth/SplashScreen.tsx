@@ -34,13 +34,13 @@ export default function SplashScreen() {
       if (session?.user) {
         dispatch(setSession({ session, user: session.user }))
         await dispatch(fetchProfile(session.user.id))
-        router.replace('/main/home')
+        router.replace('/home')
       } else {
         const onboarded = await AsyncStorage.getItem('onboarded')
         if (onboarded) {
-          router.replace('/auth/login')
+          router.replace('/login')
         } else {
-          router.replace('/auth/onboarding')
+          router.replace('/onboarding')
         }
       }
     }

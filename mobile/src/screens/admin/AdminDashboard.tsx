@@ -21,7 +21,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!profile?.is_admin) {
-      router.replace('/main/home')
+      router.replace('/home')
       return
     }
     loadData()
