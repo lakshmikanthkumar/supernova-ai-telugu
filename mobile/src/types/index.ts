@@ -238,7 +238,7 @@ export type RootStackParamList = {
   Splash: undefined
   Onboarding: undefined
   Login: undefined
-  OTPVerify: { phone: string }
+  Signup: undefined
   Main: undefined
   Lesson: { lessonId: string }
   Quiz: { lessonId: string }

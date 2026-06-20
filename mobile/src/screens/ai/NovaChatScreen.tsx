@@ -6,6 +6,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { useSelector } from 'react-redux'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { RootState } from '../../store'
 import { supabase } from '../../services/supabase'
 import { chatWithNova, checkGrammar } from '../../services/ai/groqService'
@@ -73,16 +74,38 @@ export default function NovaChatScreen() {
   }
 
   const initSession = async () => {
-    if (!user) return
+    const isGuest = await AsyncStorage.getItem('is_guest_mode') === 'true'
+    if (isGuest || !user) {
+      setSessionId('mock-session-id-1234')
+      setMessages([{
+        id: 'welcome',
+        role: 'assistant',
+        content: "Hello! I'm Nova, your English tutor! 😊 నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
+        timestamp: new Date(),
+      }])
+      return
+    }
 
-    const { data, error } = await supabase
-      .from('chat_sessions')
-      .insert({ user_id: user.id, session_type: 'free_chat', messages_count: 0 })
-      .select('id')
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('chat_sessions')
+        .insert({ user_id: user.id, session_type: 'free_chat', messages_count: 0 })
+        .select('id')
+        .single()
 
-    if (!error && data) {
-      setSessionId(data.id)
+      if (!error && data) {
+        setSessionId(data.id)
+        setMessages([{
+          id: 'welcome',
+          role: 'assistant',
+          content: "Hello! I'm Nova, your English tutor! 😊 నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
+          timestamp: new Date(),
+        }])
+      } else {
+        throw error || new Error('Failed to create session')
+      }
+    } catch {
+      setSessionId('mock-session-id-1234')
       setMessages([{
         id: 'welcome',
         role: 'assistant',

@@ -89,7 +89,7 @@ export default function HomeDashboard() {
         <View style={styles.quickActions}>
           <QuickActionCard
             emoji="🎤" title="Talk to Nova" titleTelugu="నోవాతో మాట్లాడండి"
-            color="#4F46E5" onPress={() => router.push('/ai/nova-chat')}
+            color="#4F46E5" onPress={() => router.push('/nova')}
           />
           <QuickActionCard
             emoji="🎭" title="Roleplay" titleTelugu="రోల్‌ప్లే"
@@ -114,7 +114,7 @@ export default function HomeDashboard() {
             <LessonCard
               key={cat.id}
               category={cat}
-              onPress={() => router.push({ pathname: '/lessons/category', params: { id: cat.id } })}
+              onPress={() => router.push({ pathname: '/lessons/[id]', params: { id: cat.id } })}
             />
           ))}
         </View>

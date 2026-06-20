@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  TextInput, Alert, Switch,
+  TextInput, Alert, Switch, Platform,
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
@@ -10,9 +10,11 @@ import { updateProfile } from '../../src/store/slices/authSlice'
 import { authService } from '../../src/services/api'
 import { clearAuth } from '../../src/store/slices/authSlice'
 
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
 export default function ProfileScreen() {
   const dispatch = useAppDispatch()
-  const { profile } = useAppSelector(s => s.auth)
+  const { user, profile } = useAppSelector(s => s.auth)
   const { showTeluguTranslations } = useAppSelector(s => s.ui)
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(profile?.full_name || '')
@@ -25,21 +27,35 @@ export default function ProfileScreen() {
       updates: { full_name: name, daily_goal_minutes: parseInt(dailyGoal) },
     }))
     setEditing(false)
-    Alert.alert('Saved!', 'Profile updated successfully.')
+    if (Platform.OS === 'web') {
+      alert('Profile updated successfully.')
+    } else {
+      Alert.alert('Saved!', 'Profile updated successfully.')
+    }
+  }
+
+  const performSignOut = async () => {
+    await AsyncStorage.removeItem('is_guest_mode')
+    await authService.signOut()
+    dispatch(clearAuth())
+    router.replace('/login')
   }
 
   const handleSignOut = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Sign Out', style: 'destructive',
-        onPress: async () => {
-          await authService.signOut()
-          dispatch(clearAuth())
-          router.replace('/login')
+    if (Platform.OS === 'web') {
+      const confirmSignOut = window.confirm('Are you sure you want to sign out?')
+      if (confirmSignOut) {
+        performSignOut()
+      }
+    } else {
+      Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out', style: 'destructive',
+          onPress: performSignOut,
         },
-      },
-    ])
+      ])
+    }
   }
 
   return (
@@ -50,7 +66,7 @@ export default function ProfileScreen() {
             <Text style={styles.avatarText}>{profile?.full_name?.charAt(0).toUpperCase() || '👤'}</Text>
           </View>
           <Text style={styles.profileName}>{profile?.full_name || 'English Learner'}</Text>
-          <Text style={styles.profilePhone}>{profile?.phone_number}</Text>
+          <Text style={styles.profilePhone}>{user?.email || profile?.phone_number || ''}</Text>
           <View style={styles.levelBadge}>
             <Text style={styles.levelBadgeText}>Level {profile?.current_level} • {profile?.xp_total} XP</Text>
           </View>

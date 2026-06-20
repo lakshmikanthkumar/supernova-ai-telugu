@@ -11,39 +11,46 @@ import {
 } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useAppDispatch } from '../../hooks/useStore'
-import { authService, profileService } from '../../services/api'
+import { authService } from '../../services/api'
 import { setSession, setProfile } from '../../store/slices/authSlice'
 
-export default function LoginScreen() {
+export default function SignupScreen() {
   const dispatch = useAppDispatch()
+  const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLocalLoading] = useState(false)
 
-  const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Missing Fields', 'Please enter both email and password.')
+  const handleSignup = async () => {
+    if (!fullName.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
+      Alert.alert('Missing Fields', 'Please fill in all the fields.')
+      return
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Password Mismatch', 'Passwords do not match.')
+      return
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Weak Password', 'Password must be at least 6 characters long.')
       return
     }
 
     setLocalLoading(true)
     try {
-      const data = await authService.signInWithEmail(email.trim(), password)
+      const data = await authService.signUpWithEmail(email.trim(), password, fullName.trim())
       
-      let profile = null
-      if ('profile' in data && data.profile) {
-        profile = data.profile
-      } else if (data.user) {
-        profile = await profileService.getProfile(data.user.id)
-      }
-
       dispatch(setSession({ session: data.session, user: data.user }))
-      if (profile) {
-        dispatch(setProfile(profile))
+      if (data.profile) {
+        dispatch(setProfile(data.profile))
       }
+      
+      Alert.alert('Account Created!', 'Your account has been created successfully. Welcome to EnglishMitraAI!')
       router.replace('/home')
     } catch (err: any) {
-      Alert.alert('Login Failed', err.message || 'Invalid email or password.')
+      Alert.alert('Signup Failed', err.message || 'Failed to create account. Please try again.')
     } finally {
       setLocalLoading(false)
     }
@@ -114,9 +121,24 @@ export default function LoginScreen() {
       </LinearGradient>
 
       <ScrollView contentContainerStyle={styles.formContainer} keyboardShouldPersistTaps="handled">
-        <Text style={styles.welcomeText}>Login (లాగిన్) 👋</Text>
-        <Text style={styles.welcomeSubtext}>మీ ఈమెయిల్ మరియు పాస్‌వర్డ్ నమోదు చేయండి</Text>
-        <Text style={styles.welcomeSubtextEn}>Enter your email and password to continue</Text>
+        <Text style={styles.welcomeText}>Create Account (ఖాతాను సృష్టించండి) ✨</Text>
+        <Text style={styles.welcomeSubtext}>మీ వివరాలు నమోదు చేయండి</Text>
+        <Text style={styles.welcomeSubtextEn}>Enter your details to create an account</Text>
+
+        <View style={styles.inputWrapper}>
+          <Text style={styles.inputLabel}>Full Name (పూర్తి పేరు)</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Ravi Kumar"
+              placeholderTextColor="#9CA3AF"
+              autoCapitalize="words"
+              autoCorrect={false}
+              value={fullName}
+              onChangeText={setFullName}
+            />
+          </View>
+        </View>
 
         <View style={styles.inputWrapper}>
           <Text style={styles.inputLabel}>Email (ఈమెయిల్)</Text>
@@ -139,7 +161,7 @@ export default function LoginScreen() {
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              placeholder="••••••••"
+              placeholder="•••••••• (Min. 6 chars)"
               placeholderTextColor="#9CA3AF"
               secureTextEntry
               autoCapitalize="none"
@@ -150,24 +172,40 @@ export default function LoginScreen() {
           </View>
         </View>
 
+        <View style={styles.inputWrapper}>
+          <Text style={styles.inputLabel}>Confirm Password (పాస్‌వర్డ్‌ను ధృవీకరించండి)</Text>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="••••••••"
+              placeholderTextColor="#9CA3AF"
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
+          </View>
+        </View>
+
         <TouchableOpacity
           style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
-          onPress={handleLogin}
+          onPress={handleSignup}
           disabled={loading}
         >
           {loading ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text style={styles.primaryButtonText}>Login →</Text>
+            <Text style={styles.primaryButtonText}>Create Account →</Text>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push('/signup')} style={styles.switchAuthMode}>
+        <TouchableOpacity onPress={() => router.push('/login')} style={styles.switchAuthMode}>
           <Text style={styles.switchAuthText}>
-            Don't have an account? <Text style={styles.switchAuthLink}>Create Account</Text>
+            Already have an account? <Text style={styles.switchAuthLink}>Login</Text>
           </Text>
           <Text style={styles.switchAuthTextTelugu}>
-            ఖాతా లేదా? <Text style={styles.switchAuthLink}>ఖాతాను సృష్టించండి</Text>
+            ఇప్పటికే ఖాతా ఉందా? <Text style={styles.switchAuthLink}>లాగిన్</Text>
           </Text>
         </TouchableOpacity>
 
@@ -206,7 +244,7 @@ const styles = StyleSheet.create({
   appName: { fontSize: 28, fontWeight: '800', color: 'white' },
   tagline: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 6, textAlign: 'center', paddingHorizontal: 20 },
   formContainer: { padding: 32, backgroundColor: 'white', flexGrow: 1 },
-  welcomeText: { fontSize: 24, fontWeight: '800', color: '#111827', marginBottom: 6 },
+  welcomeText: { fontSize: 22, fontWeight: '800', color: '#111827', marginBottom: 6 },
   welcomeSubtext: { fontSize: 14, color: '#4B5563', marginBottom: 2 },
   welcomeSubtextEn: { fontSize: 13, color: '#9CA3AF', marginBottom: 24 },
   inputWrapper: { marginBottom: 16 },

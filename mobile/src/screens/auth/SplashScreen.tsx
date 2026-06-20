@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { supabase } from '../../services/supabase'
 import { useAppDispatch } from '../../hooks/useStore'
-import { setSession, fetchProfile, setOnboarded } from '../../store/slices/authSlice'
+import { setSession, fetchProfile, setProfile, setOnboarded } from '../../store/slices/authSlice'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const { width } = Dimensions.get('window')
@@ -29,19 +29,68 @@ export default function SplashScreen() {
     const checkAuth = async () => {
       await new Promise(r => setTimeout(r, 2000)) // Minimum splash duration
 
-      const { data: { session } } = await supabase.auth.getSession()
-
-      if (session?.user) {
-        dispatch(setSession({ session, user: session.user }))
-        await dispatch(fetchProfile(session.user.id))
-        router.replace('/home')
-      } else {
-        const onboarded = await AsyncStorage.getItem('onboarded')
-        if (onboarded) {
-          router.replace('/login')
-        } else {
-          router.replace('/onboarding')
+      const isGuest = await AsyncStorage.getItem('is_guest_mode')
+      if (isGuest === 'true') {
+        const MOCK_USER = {
+          id: 'guest-user-id-1234-5678',
+          email: 'guest@englishmitra.ai',
+          phone: '+919999999999',
+          aud: 'authenticated',
+          role: 'authenticated',
+          created_at: new Date().toISOString(),
+          app_metadata: {},
+          user_metadata: {},
         }
+        const MOCK_SESSION = {
+          access_token: 'mock-access-token-jwt',
+          token_type: 'bearer',
+          expires_in: 3600,
+          refresh_token: 'mock-refresh-token',
+          user: MOCK_USER,
+          expires_at: Math.floor(Date.now() / 1000) + 3600,
+        }
+        const MOCK_PROFILE = {
+          id: 'guest-user-id-1234-5678',
+          phone_number: '+919999999999',
+          full_name: 'Guest Learner',
+          avatar_url: null,
+          native_language: 'telugu',
+          current_level: 1,
+          xp_total: 120,
+          xp_today: 0,
+          streak_current: 3,
+          streak_longest: 5,
+          last_active_date: new Date().toISOString(),
+          is_admin: true,
+          is_premium: true,
+          daily_goal_minutes: 15,
+          notifications_enabled: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+
+        dispatch(setSession({ session: MOCK_SESSION as any, user: MOCK_USER as any }))
+        dispatch(setProfile(MOCK_PROFILE as any))
+        router.replace('/home')
+        return
+      }
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+
+        if (session?.user) {
+          dispatch(setSession({ session, user: session.user }))
+          await dispatch(fetchProfile(session.user.id))
+          router.replace('/home')
+          return
+        }
+      } catch { /* ignore and route to login */ }
+
+      const onboarded = await AsyncStorage.getItem('onboarded')
+      if (onboarded) {
+        router.replace('/login')
+      } else {
+        router.replace('/onboarding')
       }
     }
 

@@ -53,10 +53,6 @@ export default function OnboardingScreen() {
   const flatListRef = useRef<FlatList>(null)
   const scrollX = useRef(new Animated.Value(0)).current
 
-  const viewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
-    if (viewableItems[0]) setActiveIndex(viewableItems[0].index || 0)
-  }).current
-
   const handleGetStarted = async () => {
     await AsyncStorage.setItem('onboarded', 'true')
     router.replace('/login')
@@ -64,11 +60,33 @@ export default function OnboardingScreen() {
 
   const handleNext = () => {
     if (activeIndex < slides.length - 1) {
-      flatListRef.current?.scrollToIndex({ index: activeIndex + 1 })
+      const nextIndex = activeIndex + 1
+      flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true })
+      setActiveIndex(nextIndex)
     } else {
       handleGetStarted()
     }
   }
+
+  const getItemLayout = (_: any, index: number) => ({
+    length: width,
+    offset: width * index,
+    index,
+  })
+
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+    {
+      useNativeDriver: false,
+      listener: (event: any) => {
+        const xOffset = event.nativeEvent.contentOffset.x
+        const index = Math.round(xOffset / width)
+        if (index >= 0 && index < slides.length) {
+          setActiveIndex(index)
+        }
+      }
+    }
+  )
 
   return (
     <View style={styles.container}>
@@ -79,9 +97,9 @@ export default function OnboardingScreen() {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: false })}
-        onViewableItemsChanged={viewableItemsChanged}
-        viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        getItemLayout={getItemLayout}
         renderItem={({ item }) => (
           <LinearGradient colors={item.gradient as [string, string]} style={styles.slide}>
             <View style={styles.slideContent}>

@@ -169,6 +169,35 @@ export async function chatWithNova(
   userMessage: string,
   systemPromptOverride?: string
 ): Promise<GroqResponse> {
+  const isGuest = await AsyncStorage.getItem('is_guest_mode') === 'true'
+  if (isGuest || !GROQ_API_KEY) {
+    const lower = userMessage.toLowerCase()
+    let message = "That is very interesting! Can you tell me more about it?"
+    
+    if (lower.includes('hello') || lower.includes('hi')) {
+      message = "Hello! I am Nova, your AI English tutor. How can I help you learn English today? 😊"
+    } else if (lower.includes('how are you')) {
+      message = "I am doing great, thank you! How are you doing today? Are you ready to practice?"
+    } else if (lower.includes('telugu')) {
+      message = "Yes, I can understand Telugu, but let's practice speaking in English! It is very easy."
+    } else if (lower.includes('name')) {
+      message = "My name is Nova! What is your name? Tell me in English like: 'My name is...'"
+    }
+
+    const corrections: GrammarCorrection[] = []
+    if (lower.includes('i am go')) {
+      corrections.push({
+        original: 'i am go',
+        corrected: 'I am going / I go',
+        explanation: 'We use "I am going" for present continuous or "I go" for daily routine.',
+        explanation_telugu: 'ప్రస్తుతం జరుగుతున్న దానికి "I am going" అని, రోజువారీ అలవాటుకి "I go" అని చెప్పాలి.',
+      })
+    }
+
+    await new Promise(r => setTimeout(r, 800))
+    return { message, corrections, tokensUsed: 10 }
+  }
+
   const history = await getConversationHistory(sessionId)
 
   const systemPrompt = systemPromptOverride || NOVA_SYSTEM_PROMPT
@@ -204,6 +233,24 @@ export async function chatWithNova(
 // ============================================================
 
 export async function checkGrammar(sentence: string): Promise<GrammarCheckResult> {
+  const isGuest = await AsyncStorage.getItem('is_guest_mode') === 'true'
+  if (isGuest || !GROQ_API_KEY) {
+    const lower = sentence.toLowerCase()
+    if (lower.includes('i am go')) {
+      return {
+        has_errors: true,
+        corrections: [{
+          original: 'i am go',
+          corrected: 'I am going',
+          explanation: 'Use present continuous structure.',
+          explanation_telugu: 'ప్రస్తుతం జరుగుతున్న దానికి "I am going" అని చెప్పాలి.'
+        }],
+        improved_sentence: sentence.replace(/i am go/i, 'I am going')
+      }
+    }
+    return { has_errors: false, corrections: [], improved_sentence: sentence }
+  }
+
   if (sentence.trim().length < 4) {
     return { has_errors: false, corrections: [], improved_sentence: sentence }
   }
@@ -237,6 +284,20 @@ export async function chatRoleplay(
   personaSystemPrompt: string,
   personaName: string
 ): Promise<GroqResponse> {
+  const isGuest = await AsyncStorage.getItem('is_guest_mode') === 'true'
+  if (isGuest || !GROQ_API_KEY) {
+    let message = `Hello! I am acting as a ${personaName || 'helper'}. How can I assist you today?`
+    const lower = userMessage.toLowerCase()
+    if (lower.includes('coffee') || lower.includes('tea') || lower.includes('order')) {
+      message = "Sure, I can help you with your order! Would you like a hot coffee or iced tea?"
+    } else if (lower.includes('interview') || lower.includes('job')) {
+      message = "Welcome to the interview! Can you tell me a little bit about yourself?"
+    }
+    
+    await new Promise(r => setTimeout(r, 800))
+    return { message, corrections: [], tokensUsed: 10 }
+  }
+
   const history = await getConversationHistory(sessionId)
 
   // Add roleplay-specific instruction to keep responses short
@@ -289,6 +350,17 @@ export async function explainWord(
   pronunciation_tip: string
   usage_tips: string[]
 }> {
+  const isGuest = await AsyncStorage.getItem('is_guest_mode') === 'true'
+  if (isGuest || !GROQ_API_KEY) {
+    return {
+      meaning_english: `"${word}" is an English word.`,
+      meaning_telugu: word,
+      example_sentences: [`Please use ${word} in a sentence.`],
+      pronunciation_tip: word,
+      usage_tips: ['Practice using this word daily'],
+    }
+  }
+
   const prompt = `Explain the English word "${word}"${context ? ` used in: "${context}"` : ''} for a Telugu-medium student.
 
 Return ONLY valid JSON:
@@ -329,6 +401,22 @@ export async function generateDailyVocabularyChallenge(): Promise<{
   words: Array<{ word: string; telugu: string; sentence: string }>
   quiz: Array<{ question: string; options: string[]; answer: string }>
 }> {
+  const isGuest = await AsyncStorage.getItem('is_guest_mode') === 'true'
+  if (isGuest || !GROQ_API_KEY) {
+    return {
+      words: [
+        { word: 'Opportunity', telugu: 'అవకాశం', sentence: 'This is a great opportunity for you.' },
+        { word: 'Confident', telugu: 'నమ్మకంగా', sentence: 'Speak confident English every day.' },
+        { word: 'Practice', telugu: 'అభ్యాసం', sentence: 'Practice makes perfect.' },
+        { word: 'Improve', telugu: 'మెరుగుపరచు', sentence: 'I want to improve my English.' },
+        { word: 'Fluent', telugu: 'అనర్గళంగా', sentence: 'She speaks fluent English.' },
+      ],
+      quiz: [
+        { question: "What does 'Opportunity' mean?", options: ['అవకాశం', 'సమస్య', 'పని', 'నీరు'], answer: 'అవకాశం' },
+      ],
+    }
+  }
+
   const prompt = `Generate a daily vocabulary challenge for Telugu-medium English learners.
 
 Return ONLY valid JSON with 5 English words that are commonly used in daily/office life:
@@ -384,6 +472,18 @@ export async function coachInterviewAnswer(
   score: number
   telugu_tip: string
 }> {
+  const isGuest = await AsyncStorage.getItem('is_guest_mode') === 'true'
+  if (isGuest || !GROQ_API_KEY) {
+    return {
+      overall_feedback: 'Good attempt! Keep practicing.',
+      grammar_feedback: 'Please review your grammar.',
+      vocabulary_suggestions: ['Consider using more formal words'],
+      improved_answer: answer,
+      score: 5,
+      telugu_tip: 'రోజూ అభ్యాసం చేయండి!',
+    }
+  }
+
   const prompt = `You are an interview coach for Telugu-medium students applying for jobs in India.
 
 Interview Question: "${question}"

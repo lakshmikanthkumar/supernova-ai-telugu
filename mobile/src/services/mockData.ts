@@ -1,0 +1,399 @@
+// ============================================================
+// EnglishMitraAi - Mock Data for Guest & Dev Modes (Offline)
+// ============================================================
+
+import type {
+  LessonCategory, Lesson, Flashcard, QuizQuestion,
+  Achievement, LeaderboardEntry, DailyChallenge, RoleplayScenario
+} from '../types'
+
+export const MOCK_CATEGORIES: LessonCategory[] = [
+  {
+    id: 'cat-basics',
+    name: 'English Basics',
+    name_telugu: 'ఇంగ్లీష్ ప్రాథమికాలు',
+    description: 'Learn simple greetings, introductions, and everyday phrases.',
+    description_telugu: 'సాధారణ అభినందనలు, పరిచయాలు మరియు రోజువారీ పదబంధాలను నేర్చుకోండి.',
+    icon_name: 'book-open',
+    color_hex: '#4F46E5',
+    sort_order: 1,
+    is_active: true,
+  },
+  {
+    id: 'cat-grammar',
+    name: 'Essential Grammar',
+    name_telugu: 'ముఖ్యమైన వ్యాకరణం',
+    description: 'Master tenses, verbs, nouns, and sentence structures.',
+    description_telugu: 'కాలాలు (tenses), క్రియలు (verbs), నామవాచకాలు (nouns) మరియు వాక్య నిర్మాణాలపై పట్టు సాధించండి.',
+    icon_name: 'help-circle',
+    color_hex: '#10B981',
+    sort_order: 2,
+    is_active: true,
+  },
+  {
+    id: 'cat-conversation',
+    name: 'Daily Conversation',
+    name_telugu: 'రోజువారీ సంభాషణలు',
+    description: 'Practice speaking in shops, restaurants, and public places.',
+    description_telugu: 'దుకాణాలు, రెస్టారెంట్లు మరియు బహిరంగ ప్రదేశాలలో మాట్లాడటం ప్రాక్టీస్ చేయండి.',
+    icon_name: 'chatbubble-ellipses',
+    color_hex: '#F59E0B',
+    sort_order: 3,
+    is_active: true,
+  },
+]
+
+export const MOCK_LESSONS: Record<string, Lesson[]> = {
+  'cat-basics': [
+    {
+      id: 'lesson-greetings',
+      category_id: 'cat-basics',
+      title: 'Greetings & Introductions',
+      title_telugu: 'పలకరింపులు & పరిచయాలు',
+      description: 'Learn how to greet people and introduce yourself in English.',
+      description_telugu: 'ఇంగ్లీష్‌లో వ్యక్తులను ఎలా పలకరించాలో మరియు మిమ్మల్ని మీరు ఎలా పరిచయం చేసుకోవాలో నేర్చుకోండి.',
+      difficulty_level: 1,
+      xp_reward: 30,
+      estimated_minutes: 5,
+      sort_order: 1,
+      is_premium: false,
+      is_active: true,
+      thumbnail_url: null,
+      audio_url: null,
+      created_at: new Date().toISOString(),
+      content: {
+        vocabulary: [
+          { word: 'Hello', telugu: 'నమస్కారం / హలో', phonetic: 'he-loh', example: 'Hello! How are you?' },
+          { word: 'Welcome', telugu: 'స్వాగతం', phonetic: 'wel-kuhm', example: 'Welcome to our class.' },
+          { word: 'Introduce', telugu: 'పరిచయం చేయు', phonetic: 'in-truh-dyoos', example: 'Let me introduce myself.' },
+          { word: 'Friend', telugu: 'స్నేహితుడు / స్నేహితురాలు', phonetic: 'frend', example: 'He is my best friend.' },
+        ],
+        dialogues: [
+          {
+            title: 'Meeting a New Colleague',
+            lines: [
+              { speaker: 'Ravi', text: 'Hello! I am Ravi. What is your name?', telugu: 'హలో! నేను రవి. మీ పేరేమిటి?' },
+              { speaker: 'John', text: 'Hi Ravi! My name is John. Nice to meet you.', telugu: 'హాయ్ రవి! నా పేరు జాన్. మిమ్మల్ని కలవడం సంతోషంగా ఉంది.' },
+              { speaker: 'Ravi', text: 'Nice to meet you too, John. Where are you from?', telugu: 'మిమ్మల్ని కలవడం కూడా సంతోషంగా ఉంది, జాన్. మీది ఏ ఊరు?' },
+              { speaker: 'John', text: 'I am from Hyderabad. What about you?', telugu: 'నేను హైదరాబాద్ నుండి వచ్చాను. మరి మీ సంగతి ఏంటి?' },
+            ],
+          },
+        ],
+        tips: [
+          { tip: 'Always make eye contact and smile while introducing yourself.', tip_telugu: 'మిమ్మల్ని మీరు పరిచయం చేసుకునేటప్పుడు ఎల్లప్పుడూ కళ్ళల్లోకి చూస్తూ నవ్వండి.' },
+        ],
+      },
+    },
+    {
+      id: 'lesson-numbers',
+      category_id: 'cat-basics',
+      title: 'Numbers & Time',
+      title_telugu: 'సంఖ్యలు & సమయం',
+      description: 'Count numbers and tell time in English conversations.',
+      description_telugu: 'ఇంగ్లీష్ సంభాషణలలో సంఖ్యలను లెక్కించడం మరియు సమయం చెప్పడం నేర్చుకోండి.',
+      difficulty_level: 1,
+      xp_reward: 20,
+      estimated_minutes: 4,
+      sort_order: 2,
+      is_premium: false,
+      is_active: true,
+      thumbnail_url: null,
+      audio_url: null,
+      created_at: new Date().toISOString(),
+      content: {
+        vocabulary: [
+          { word: 'Quarter', telugu: 'పావు గంట (15 నిమిషాలు)', phonetic: 'kwor-ter', example: 'It is quarter past ten.' },
+          { word: 'Half', telugu: 'అర గంట (30 నిమిషాలు)', phonetic: 'haf', example: 'We will meet in half an hour.' },
+          { word: 'Minutes', telugu: 'నిమిషాలు', phonetic: 'mi-nits', example: 'Give me five minutes.' },
+        ],
+        dialogues: [
+          {
+            title: 'Asking for Time',
+            lines: [
+              { speaker: 'Sita', text: 'Excuse me, what time is it now?', telugu: 'క్షమించండి, ఇప్పుడు సమయం ఎంత అయింది?' },
+              { speaker: 'Gita', text: 'It is half past four.', telugu: 'నాలుగున్నర అయింది (4:30).' },
+              { speaker: 'Sita', text: 'Thank you! I have a bus at five o\'clock.', telugu: 'ధన్యవాదాలు! నాకు ఐదు గంటలకి బస్సు ఉంది.' },
+            ],
+          },
+        ],
+        tips: [
+          { tip: 'Use "past" for minutes after the hour (e.g., ten past two) and "to" for minutes before (e.g., ten to three).', tip_telugu: 'గంట దాటిన నిమిషాలకు "past" మరియు గంటకు ముందున్న నిమిషాలకు "to" ఉపయోగించండి.' },
+        ],
+      },
+    },
+  ],
+  'cat-grammar': [
+    {
+      id: 'lesson-tenses-present',
+      category_id: 'cat-grammar',
+      title: 'Simple Present Tense',
+      title_telugu: 'వర్తమాన కాలం',
+      description: 'Understand habits, general truths, and daily routines.',
+      description_telugu: 'అలవాట్లు, సాధారణ సత్యాలు మరియు రోజువారీ దినచర్యలను వ్యక్తపరచడం నేర్చుకోండి.',
+      difficulty_level: 2,
+      xp_reward: 40,
+      estimated_minutes: 7,
+      sort_order: 1,
+      is_premium: false,
+      is_active: true,
+      thumbnail_url: null,
+      audio_url: null,
+      created_at: new Date().toISOString(),
+      content: {
+        vocabulary: [
+          { word: 'Routine', telugu: 'దినచర్య / నిత్యకృత్యం', phonetic: 'roo-teen', example: 'Reading is my daily routine.' },
+          { word: 'Always', telugu: 'ఎల్లప్పుడూ', phonetic: 'awl-weyz', example: 'She always speaks the truth.' },
+          { word: 'Habit', telugu: 'అలవాటు', phonetic: 'ha-bit', example: 'Early rising is a good habit.' },
+        ],
+        dialogues: [
+          {
+            title: 'Daily Routine Discussion',
+            lines: [
+              { speaker: 'Kiran', text: 'What time do you wake up every day?', telugu: 'నువ్వు ప్రతిరోజూ ఏ సమయానికి నిద్రలేస్తావు?' },
+              { speaker: 'Anil', text: 'I wake up at 6 AM. I go for a walk daily.', telugu: 'నేను ఉదయం 6 గంటలకి నిద్రలేస్తాను. నేను రోజువారీ నడకకు వెళ్తాను.' },
+              { speaker: 'Kiran', text: 'Does your brother also join you?', telugu: 'మీ తమ్ముడు కూడా నీతో వస్తాడా?' },
+              { speaker: 'Anil', text: 'No, he prefers sleeping late.', telugu: 'లేదు, అతను ఆలస్యంగా నిద్రలేవడానికి ఇష్టపడతాడు.' },
+            ],
+          },
+        ],
+        tips: [
+          { tip: 'Remember to add -s or -es to verbs for third-person singular subjects (He, She, It).', tip_telugu: 'మూడవ పురుష ఏకవచన కర్తలకు (He, She, It) క్రియ చివర -s లేదా -es చేర్చాలని గుర్తుంచుకోండి.' },
+        ],
+      },
+    },
+  ],
+  'cat-conversation': [
+    {
+      id: 'lesson-restaurant',
+      category_id: 'cat-conversation',
+      title: 'Ordering Food in a Restaurant',
+      title_telugu: 'రెస్టారెంట్ లో ఆర్డర్ ఇవ్వడం',
+      description: 'Practice talking to a waiter and placing orders politely.',
+      description_telugu: 'వెయిటర్‌తో మాట్లాడటం మరియు మర్యాదగా ఆర్డర్ ఇవ్వడం ప్రాక్టీస్ చేయండి.',
+      difficulty_level: 2,
+      xp_reward: 35,
+      estimated_minutes: 6,
+      sort_order: 1,
+      is_premium: false,
+      is_active: true,
+      thumbnail_url: null,
+      audio_url: null,
+      created_at: new Date().toISOString(),
+      content: {
+        vocabulary: [
+          { word: 'Menu', telugu: 'వంటకాల పట్టిక', phonetic: 'me-nyoo', example: 'May I see the menu, please?' },
+          { word: 'Bill', telugu: 'బిల్లు', phonetic: 'bil', example: 'Waiter, bring the bill, please.' },
+          { word: 'Delicious', telugu: 'చాలా రుచికరమైన', phonetic: 'di-li-shuhs', example: 'The food was delicious.' },
+        ],
+        dialogues: [
+          {
+            title: 'Ordering Lunch',
+            lines: [
+              { speaker: 'Waiter', text: 'Hello! Are you ready to order?', telugu: 'హలో! మీరు ఆర్డర్ ఇవ్వడానికి సిద్ధంగా ఉన్నారా?' },
+              { speaker: 'Customer', text: 'Yes. I would like a Veg Biryani and a cold drink.', telugu: 'అవును. నాకు వెజ్ బిర్యానీ మరియు కోల్డ్ డ్రింక్ కావాలి.' },
+              { speaker: 'Waiter', text: 'Sure! Would you like anything else?', telugu: 'తప్పకుండా! ఇంకేదైనా కావాలా?' },
+              { speaker: 'Customer', text: 'No, that is all for now. Thank you.', telugu: 'లేదు, ప్రస్తుతానికి అంతే. ధన్యవాదాలు.' },
+            ],
+          },
+        ],
+        tips: [
+          { tip: 'Use "I would like..." or "Could I have..." instead of "I want..." to sound more polite.', tip_telugu: 'మరింత మర్యాదగా మాట్లాడటానికి "I want..." కు బదులుగా "I would like..." లేదా "Could I have..." ఉపయోగించండి.' },
+        ],
+      },
+    },
+  ],
+}
+
+export const MOCK_FLASHCARDS: Flashcard[] = [
+  {
+    id: 'fc-1',
+    lesson_id: 'lesson-greetings',
+    category_id: 'cat-basics',
+    english_word: 'Greeting',
+    telugu_meaning: 'పలకరింపు / అభినందన',
+    pronunciation_guide: 'గ్రీటింగ్',
+    example_sentence: 'Smiling is a great way of greeting someone.',
+    example_sentence_telugu: 'చిరునవ్వు అనేది ఎవరినైనా పలకరించడానికి ఒక గొప్ప మార్గం.',
+    audio_url: null,
+    image_url: null,
+    difficulty: 1,
+  },
+  {
+    id: 'fc-2',
+    lesson_id: 'lesson-greetings',
+    category_id: 'cat-basics',
+    english_word: 'Introduce',
+    telugu_meaning: 'పరిచయం చేయు',
+    pronunciation_guide: 'ఇంట్రడ్యూస్',
+    example_sentence: 'I would like to introduce my brother.',
+    example_sentence_telugu: 'నేను నా సోదరుడిని పరిచయం చేయాలనుకుంటున్నాను.',
+    audio_url: null,
+    image_url: null,
+    difficulty: 1,
+  },
+  {
+    id: 'fc-3',
+    lesson_id: 'lesson-restaurant',
+    category_id: 'cat-conversation',
+    english_word: 'Delicious',
+    telugu_meaning: 'చాలా రుచికరమైన',
+    pronunciation_guide: 'డెలిషియస్',
+    example_sentence: 'My mother cooks delicious food.',
+    example_sentence_telugu: 'మా అమ్మ చాలా రుచికరమైన వంట చేస్తుంది.',
+    audio_url: null,
+    image_url: null,
+    difficulty: 2,
+  },
+]
+
+export const MOCK_QUIZ_QUESTIONS: Record<string, QuizQuestion[]> = {
+  'lesson-greetings': [
+    {
+      id: 'q-g-1',
+      lesson_id: 'lesson-greetings',
+      question_text: 'Complete the sentence: "Hi Ravi, ______ to meet you!"',
+      question_text_telugu: 'వాక్యాన్ని పూర్తి చేయండి: "హాయ్ రవి, మిమ్మల్ని కలవడం ______!"',
+      question_type: 'multiple_choice',
+      options: ['Fine', 'Nice', 'How', 'Good'],
+      correct_answer: 'Nice',
+      explanation: '"Nice to meet you" is the standard polite greeting when meeting someone new.',
+      explanation_telugu: 'కొత్త వారిని కలిసినప్పుడు "Nice to meet you" అనేది ఒక ప్రామాణికమైన మర్యాదపూర్వక పలకరింపు.',
+      points: 10,
+    },
+    {
+      id: 'q-g-2',
+      lesson_id: 'lesson-greetings',
+      question_text: 'What does "Introduce" mean in Telugu?',
+      question_text_telugu: 'ఇంగ్లీష్ పదం "Introduce" కు తెలుగు అర్థం ఏమిటి?',
+      question_type: 'multiple_choice',
+      options: ['పరిచయం చేయు', 'వెళ్ళిపోవు', 'భోజనం చేయు', 'నిద్రపోవు'],
+      correct_answer: 'పరిచయం చేయు',
+      explanation: '"Introduce" means making someone known to others.',
+      explanation_telugu: '"Introduce" అంటే ఇతరులకు పరిచయం చేయడం.',
+      points: 10,
+    },
+    {
+      id: 'q-g-3',
+      lesson_id: 'lesson-greetings',
+      question_text: 'Choose the correct answer: "Where ______ you from?"',
+      question_text_telugu: 'సరైన జవాబును ఎంచుకోండి: "Where ______ you from?"',
+      question_type: 'multiple_choice',
+      options: ['is', 'am', 'are', 'was'],
+      correct_answer: 'are',
+      explanation: 'We use "are" with the subject pronoun "you".',
+      explanation_telugu: 'కర్త "you" అయినప్పుడు మనం "are" సహాయక క్రియను ఉపయోగిస్తాము.',
+      points: 10,
+    },
+  ],
+  'lesson-numbers': [
+    {
+      id: 'q-n-1',
+      lesson_id: 'lesson-numbers',
+      question_text: 'How do you say "4:30" in words?',
+      question_text_telugu: 'సమయం "4:30" ని ఇంగ్లీష్‌లో ఏమంటారు?',
+      question_type: 'multiple_choice',
+      options: ['Quarter past four', 'Half past four', 'Quarter to five', 'Four minutes to thirty'],
+      correct_answer: 'Half past four',
+      explanation: '30 minutes is represented as "half past". So 4:30 is "half past four".',
+      explanation_telugu: '30 నిమిషాలను "half past" అంటారు. కాబట్టి 4:30 అంటే "half past four".',
+      points: 10,
+    },
+  ],
+}
+
+export const MOCK_ACHIEVEMENTS: Achievement[] = [
+  {
+    id: 'ach-first',
+    name: 'First Steps',
+    name_telugu: 'తొలి అడుగులు',
+    description: 'Complete your first lesson.',
+    description_telugu: 'మీ మొదటి పాఠాన్ని పూర్తి చేయండి.',
+    icon_name: 'flag',
+    badge_color: '#3B82F6',
+    requirement_type: 'lessons_completed',
+    requirement_value: 1,
+    xp_reward: 50,
+  },
+  {
+    id: 'ach-streak-3',
+    name: 'Dedicated Learner',
+    name_telugu: 'శ్రద్ధ గల విద్యార్థి',
+    description: 'Maintain a 3-day learning streak.',
+    description_telugu: '3 రోజుల లెర్నింగ్ స్ట్రీక్ ని కొనసాగించండి.',
+    icon_name: 'flame',
+    badge_color: '#EF4444',
+    requirement_type: 'streak_days',
+    requirement_value: 3,
+    xp_reward: 100,
+  },
+  {
+    id: 'ach-xp-500',
+    name: 'XP Master',
+    name_telugu: 'ఎక్స్‌పీ మాస్టర్',
+    description: 'Earn a total of 500 XP.',
+    description_telugu: 'మొత్తం 500 XP సంపాదించండి.',
+    icon_name: 'trophy',
+    badge_color: '#F59E0B',
+    requirement_type: 'xp_total',
+    requirement_value: 500,
+    xp_reward: 200,
+  },
+]
+
+export const MOCK_LEADERBOARD: LeaderboardEntry[] = [
+  { rank: 1, user_id: 'leader-1', full_name: 'Satish Kumar', avatar_url: null, xp_earned: 450, week_start: '' },
+  { rank: 2, user_id: 'leader-2', full_name: 'Priya Chowdary', avatar_url: null, xp_earned: 390, week_start: '' },
+  { rank: 3, user_id: 'leader-3', full_name: 'Anjali Reddy', avatar_url: null, xp_earned: 320, week_start: '' },
+  { rank: 4, user_id: 'guest-user-id-1234-5678', full_name: 'Guest Learner (You)', avatar_url: null, xp_earned: 120, week_start: '' },
+  { rank: 5, user_id: 'leader-5', full_name: 'Naresh Goud', avatar_url: null, xp_earned: 90, week_start: '' },
+]
+
+export const MOCK_DAILY_CHALLENGE: DailyChallenge = {
+  id: 'challenge-today',
+  title: 'Word of the Day',
+  title_telugu: 'నేటి పదం',
+  description: 'Learn the meaning of "Appreciate" and complete a quiz!',
+  challenge_type: 'vocabulary',
+  content: {
+    word: 'Appreciate',
+    meaning_telugu: 'అభినందించడం / కృతజ్ఞతలు చెప్పడం',
+    sentence: 'I appreciate your help.',
+    sentence_telugu: 'నేను మీ సహాయాన్ని అభినందిస్తున్నాను.',
+  },
+  xp_reward: 15,
+  valid_date: new Date().toISOString().split('T')[0],
+  completed: false,
+}
+
+export const MOCK_SCENARIOS: RoleplayScenario[] = [
+  {
+    id: 'rp-coffee',
+    title: 'Buying a Coffee',
+    title_telugu: 'కాఫీ కొనడం',
+    description: 'Practice ordering a drink at a coffee shop in English.',
+    description_telugu: 'ఒక కాఫీ షాప్‌లో డ్రింక్ ఎలా ఆర్డర్ చేయాలో ప్రాక్టీస్ చేయండి.',
+    scenario_type: 'roleplay',
+    ai_persona: 'Barista',
+    ai_persona_description: 'A friendly coffee shop worker.',
+    system_prompt: 'You are a friendly barista at a coffee shop called Coffee Haven. Talk to the customer politely. Guide them through ordering, asking about cup size, sugar preference, and payment.',
+    starter_message: 'Welcome to Coffee Haven! How can I help you today?',
+    difficulty_level: 1,
+    xp_reward: 25,
+    is_premium: false,
+  },
+  {
+    id: 'rp-interview',
+    title: 'Job Interview Practice',
+    title_telugu: 'ఉద్యోగ ఇంటర్వ్యూ సాధన',
+    description: 'Introduce yourself and answer simple career questions.',
+    description_telugu: 'మిమ్మల్ని మీరు పరిచయం చేసుకోండి మరియు కెరీర్ గురించిన ప్రశ్నలకు సమాధానాలు ఇవ్వండి.',
+    scenario_type: 'interview',
+    ai_persona: 'HR Manager',
+    ai_persona_description: 'An experienced corporate recruiter.',
+    system_prompt: 'You are an HR Manager conducting a basic job interview for an entry-level position. Ask the candidate to introduce themselves, talk about their strengths, and why they want this job. Keep questions simple and encouraging.',
+    starter_message: 'Hello! Welcome to the interview. To start, could you please introduce yourself?',
+    difficulty_level: 3,
+    xp_reward: 50,
+    is_premium: false,
+  },
+]
