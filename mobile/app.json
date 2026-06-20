@@ -63,7 +63,8 @@
           "speechRecognitionPermission": "Allow EnglishMitraAI to recognize your speech."
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "./plugins/withAndroidBuildFixes"
     ],
     "scheme": "englishmitraai",
     "extra": {
