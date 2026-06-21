@@ -59,7 +59,7 @@ export default function AdminDashboard() {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#1F2937', '#374151']} style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}>
           <Text style={styles.backBtn}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>⚙️ Admin Dashboard</Text>

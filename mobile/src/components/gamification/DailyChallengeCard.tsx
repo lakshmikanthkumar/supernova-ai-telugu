@@ -8,7 +8,7 @@ interface Props { challenge: DailyChallenge }
 
 export default function DailyChallengeCard({ challenge }: Props) {
   return (
-    <TouchableOpacity onPress={() => router.push('/main/daily-challenge')} activeOpacity={0.85}>
+    <TouchableOpacity onPress={() => router.push('/daily-challenge')} activeOpacity={0.85}>
       <LinearGradient
         colors={challenge.completed ? ['#6B7280', '#4B5563'] : ['#7C3AED', '#4F46E5']}
         style={styles.card}

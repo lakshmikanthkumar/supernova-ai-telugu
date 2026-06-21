@@ -16,7 +16,7 @@ const CARD_WIDTH = width - 48
 
 export default function FlashcardScreen() {
   const dispatch = useAppDispatch()
-  const { flashcards } = useAppSelector(s => s.lessons)
+  const { flashcards, loading } = useAppSelector(s => s.lessons)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 })
@@ -74,8 +74,23 @@ export default function FlashcardScreen() {
   const frontRotate = flipAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] })
   const backRotate = flipAnim.interpolate({ inputRange: [0, 1], outputRange: ['180deg', '360deg'] })
 
-  if (flashcards.length === 0) {
+  if (loading) {
     return <View style={styles.loading}><ActivityIndicator size="large" color="#D97706" /></View>
+  }
+
+  if (flashcards.length === 0) {
+    return (
+      <View style={styles.loading}>
+        <Text style={{ fontSize: 48, marginBottom: 16 }}>🃏</Text>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#374151', marginBottom: 8 }}>No Flashcards Yet</Text>
+        <Text style={{ fontSize: 14, color: '#6B7280', textAlign: 'center', paddingHorizontal: 32 }}>
+          Flashcard content is being added. Check back soon!
+        </Text>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')} style={{ marginTop: 24, padding: 12 }}>
+          <Text style={{ color: '#D97706', fontWeight: '700', fontSize: 16 }}>← Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    )
   }
 
   if (sessionComplete) {
@@ -111,7 +126,7 @@ export default function FlashcardScreen() {
           }}>
             <Text style={styles.restartBtnText}>Review Again 🔄</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.homeBtn} onPress={() => router.back()}>
+          <TouchableOpacity style={styles.homeBtn} onPress={() => router.replace('/home')}>
             <Text style={styles.homeBtnText}>Back to Home</Text>
           </TouchableOpacity>
         </View>
@@ -122,7 +137,7 @@ export default function FlashcardScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#D97706', '#B45309']} style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}>
           <Text style={styles.backBtn}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>🃏 Flashcards</Text>

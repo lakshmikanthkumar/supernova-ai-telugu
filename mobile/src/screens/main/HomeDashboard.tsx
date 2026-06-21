@@ -55,7 +55,7 @@ export default function HomeDashboard() {
             <Text style={styles.userName}>{profile?.full_name || 'Student'}</Text>
             <Text style={styles.levelText}>Level {profile?.current_level || 1} • English Learner</Text>
           </View>
-          <TouchableOpacity onPress={() => router.push('/main/profile')}>
+          <TouchableOpacity onPress={() => router.push('/profile')}>
             <View style={styles.avatarCircle}>
               <Text style={styles.avatarEmoji}>
                 {profile?.full_name?.charAt(0).toUpperCase() || '👤'}

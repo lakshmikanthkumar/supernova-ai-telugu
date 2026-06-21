@@ -49,6 +49,12 @@ export default function MainLayout() {
           tabBarIcon: ({ focused }) => <TabIcon emoji="👤" label="Profile" focused={focused} />,
         }}
       />
+      <Tabs.Screen
+        name="daily-challenge"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   )
 }

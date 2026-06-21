@@ -25,16 +25,17 @@ export default function SplashScreen() {
       Animated.timing(taglineOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
     ]).start()
 
-    // Check auth state
+    // Determine routing after minimum splash duration
     const checkAuth = async () => {
       await new Promise(r => setTimeout(r, 2000)) // Minimum splash duration
 
       const isGuest = await AsyncStorage.getItem('is_guest_mode')
       if (isGuest === 'true') {
+        const guestUserId = 'guest-user-id-1234-5678'
         const MOCK_USER = {
-          id: 'guest-user-id-1234-5678',
+          id: guestUserId,
           email: 'guest@englishmitra.ai',
-          phone: '+919999999999',
+          phone: null,
           aud: 'authenticated',
           role: 'authenticated',
           created_at: new Date().toISOString(),
@@ -50,8 +51,8 @@ export default function SplashScreen() {
           expires_at: Math.floor(Date.now() / 1000) + 3600,
         }
         const MOCK_PROFILE = {
-          id: 'guest-user-id-1234-5678',
-          phone_number: '+919999999999',
+          id: guestUserId,
+          phone_number: null,
           full_name: 'Guest Learner',
           avatar_url: null,
           native_language: 'telugu',
@@ -61,8 +62,8 @@ export default function SplashScreen() {
           streak_current: 3,
           streak_longest: 5,
           last_active_date: new Date().toISOString(),
-          is_admin: true,
-          is_premium: true,
+          is_admin: false,
+          is_premium: false,
           daily_goal_minutes: 15,
           notifications_enabled: true,
           created_at: new Date().toISOString(),
@@ -71,20 +72,26 @@ export default function SplashScreen() {
 
         dispatch(setSession({ session: MOCK_SESSION as any, user: MOCK_USER as any }))
         dispatch(setProfile(MOCK_PROFILE as any))
+        console.log('[SplashScreen] guest mode — routing to home')
         router.replace('/home')
         return
       }
 
       try {
         const { data: { session } } = await supabase.auth.getSession()
+        console.log('[SplashScreen] session check | userId:', session?.user?.id ?? 'none')
 
         if (session?.user) {
+          // Set session in Redux — useAuth's onAuthStateChange also handles fetchProfile
           dispatch(setSession({ session, user: session.user }))
+          // Fetch profile here too (belt-and-suspenders for the SplashScreen path)
           await dispatch(fetchProfile(session.user.id))
           router.replace('/home')
           return
         }
-      } catch { /* ignore and route to login */ }
+      } catch (err) {
+        console.warn('[SplashScreen] getSession error:', err)
+      }
 
       const onboarded = await AsyncStorage.getItem('onboarded')
       if (onboarded) {

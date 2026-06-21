@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Ionicons } from '@expo/vector-icons'
 import { useAppDispatch } from '../../hooks/useStore'
 import { authService } from '../../services/api'
 import { setSession, setProfile } from '../../store/slices/authSlice'
@@ -21,20 +22,60 @@ export default function SignupScreen() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLocalLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [errors, setErrors] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  })
+
+  const validate = () => {
+    const newErrors = { fullName: '', email: '', password: '', confirmPassword: '' }
+    let isValid = true
+
+    if (!fullName.trim()) {
+      newErrors.fullName = 'Full Name is required (పూర్తి పేరు తప్పనిసరి)'
+      isValid = false
+    } else if (fullName.trim().length < 2) {
+      newErrors.fullName = 'Full Name must be at least 2 characters (పూర్తి పేరు కనీసం 2 అక్షరాలు ఉండాలి)'
+      isValid = false
+    }
+
+    if (!email.trim()) {
+      newErrors.email = 'Email is required (ఈమెయిల్ తప్పనిసరి)'
+      isValid = false
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email.trim())) {
+        newErrors.email = 'Please enter a valid email address (సరైన ఈమెయిల్ నమోదు చేయండి)'
+        isValid = false
+      }
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required (పాస్‌వర్డ్ తప్పనిసరి)'
+      isValid = false
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters (పాస్‌వర్డ్ కనీసం 6 అక్షరాలు ఉండాలి)'
+      isValid = false
+    }
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Confirm Password is required (పాస్‌వర్డ్‌ను ధృవీకరించడం తప్పనిసరి)'
+      isValid = false
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match (పాస్‌వర్డ్‌లు సరిపోలడం లేదు)'
+      isValid = false
+    }
+
+    setErrors(newErrors)
+    return isValid
+  }
 
   const handleSignup = async () => {
-    if (!fullName.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
-      Alert.alert('Missing Fields', 'Please fill in all the fields.')
-      return
-    }
-
-    if (password !== confirmPassword) {
-      Alert.alert('Password Mismatch', 'Passwords do not match.')
-      return
-    }
-
-    if (password.length < 6) {
-      Alert.alert('Weak Password', 'Password must be at least 6 characters long.')
+    if (!validate()) {
       return
     }
 
@@ -42,13 +83,21 @@ export default function SignupScreen() {
     try {
       const data = await authService.signUpWithEmail(email.trim(), password, fullName.trim())
       
-      dispatch(setSession({ session: data.session, user: data.user }))
-      if (data.profile) {
-        dispatch(setProfile(data.profile))
+      if (data.session) {
+        dispatch(setSession({ session: data.session, user: data.user }))
+        if (data.profile) {
+          dispatch(setProfile(data.profile))
+        }
+        Alert.alert('Account Created!', 'Your account has been created successfully. Welcome to EnglishMitraAI!')
+        router.replace('/home')
+      } else {
+        // Email confirmation is enabled in Supabase
+        Alert.alert(
+          'Verification Email Sent',
+          'Please check your email and click the confirmation link to activate your account before logging in.',
+          [{ text: 'OK', onPress: () => router.replace('/login') }]
+        )
       }
-      
-      Alert.alert('Account Created!', 'Your account has been created successfully. Welcome to EnglishMitraAI!')
-      router.replace('/home')
     } catch (err: any) {
       Alert.alert('Signup Failed', err.message || 'Failed to create account. Please try again.')
     } finally {
@@ -127,7 +176,7 @@ export default function SignupScreen() {
 
         <View style={styles.inputWrapper}>
           <Text style={styles.inputLabel}>Full Name (పూర్తి పేరు)</Text>
-          <View style={styles.inputContainer}>
+          <View style={[styles.inputContainer, errors.fullName ? styles.inputErrorBorder : null]}>
             <TextInput
               style={styles.input}
               placeholder="Ravi Kumar"
@@ -135,14 +184,22 @@ export default function SignupScreen() {
               autoCapitalize="words"
               autoCorrect={false}
               value={fullName}
-              onChangeText={setFullName}
+              onChangeText={(text) => {
+                setFullName(text)
+                if (errors.fullName) {
+                  setErrors(prev => ({ ...prev, fullName: '' }))
+                }
+              }}
             />
           </View>
+          {errors.fullName ? (
+            <Text style={styles.errorText}>{errors.fullName}</Text>
+          ) : null}
         </View>
 
         <View style={styles.inputWrapper}>
           <Text style={styles.inputLabel}>Email (ఈమెయిల్)</Text>
-          <View style={styles.inputContainer}>
+          <View style={[styles.inputContainer, errors.email ? styles.inputErrorBorder : null]}>
             <TextInput
               style={styles.input}
               placeholder="example@gmail.com"
@@ -151,41 +208,87 @@ export default function SignupScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text)
+                if (errors.email) {
+                  setErrors(prev => ({ ...prev, email: '' }))
+                }
+              }}
             />
           </View>
+          {errors.email ? (
+            <Text style={styles.errorText}>{errors.email}</Text>
+          ) : null}
         </View>
 
         <View style={styles.inputWrapper}>
           <Text style={styles.inputLabel}>Password (పాస్‌వర్డ్)</Text>
-          <View style={styles.inputContainer}>
+          <View style={[styles.inputContainer, errors.password ? styles.inputErrorBorder : null]}>
             <TextInput
               style={styles.input}
               placeholder="•••••••• (Min. 6 chars)"
               placeholderTextColor="#9CA3AF"
-              secureTextEntry
+              secureTextEntry={!showPassword}
               autoCapitalize="none"
               autoCorrect={false}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => {
+                setPassword(text)
+                if (errors.password) {
+                  setErrors(prev => ({ ...prev, password: '' }))
+                }
+              }}
             />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.showHideButton}
+              activeOpacity={0.7}
+            >
+              <Ionicons
+                name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                size={22}
+                color="#6B7280"
+              />
+            </TouchableOpacity>
           </View>
+          {errors.password ? (
+            <Text style={styles.errorText}>{errors.password}</Text>
+          ) : null}
         </View>
 
         <View style={styles.inputWrapper}>
           <Text style={styles.inputLabel}>Confirm Password (పాస్‌వర్డ్‌ను ధృవీకరించండి)</Text>
-          <View style={styles.inputContainer}>
+          <View style={[styles.inputContainer, errors.confirmPassword ? styles.inputErrorBorder : null]}>
             <TextInput
               style={styles.input}
               placeholder="••••••••"
               placeholderTextColor="#9CA3AF"
-              secureTextEntry
+              secureTextEntry={!showConfirmPassword}
               autoCapitalize="none"
               autoCorrect={false}
               value={confirmPassword}
-              onChangeText={setConfirmPassword}
+              onChangeText={(text) => {
+                setConfirmPassword(text)
+                if (errors.confirmPassword) {
+                  setErrors(prev => ({ ...prev, confirmPassword: '' }))
+                }
+              }}
             />
+            <TouchableOpacity
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={styles.showHideButton}
+              activeOpacity={0.7}
+            >
+              <Ionicons
+                name={showConfirmPassword ? 'eye-outline' : 'eye-off-outline'}
+                size={22}
+                color="#6B7280"
+              />
+            </TouchableOpacity>
           </View>
+          {errors.confirmPassword ? (
+            <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+          ) : null}
         </View>
 
         <TouchableOpacity
@@ -250,10 +353,35 @@ const styles = StyleSheet.create({
   inputWrapper: { marginBottom: 16 },
   inputLabel: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6 },
   inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 2, borderColor: '#4F46E5', borderRadius: 14,
     overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
   },
-  input: { paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, color: '#111827' },
+  input: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: '#111827',
+  },
+  inputErrorBorder: {
+    borderColor: '#EF4444',
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
+    fontWeight: '500',
+  },
+  showHideButton: {
+    paddingHorizontal: 16,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   primaryButton: {
     backgroundColor: '#4F46E5', paddingVertical: 16,
     borderRadius: 14, alignItems: 'center', elevation: 3,

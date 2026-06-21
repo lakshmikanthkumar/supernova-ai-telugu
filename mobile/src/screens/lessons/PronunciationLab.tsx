@@ -180,7 +180,7 @@ export default function PronunciationLab() {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#059669', '#047857']} style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}>
           <Text style={styles.backBtn}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>🔊 Pronunciation Lab</Text>

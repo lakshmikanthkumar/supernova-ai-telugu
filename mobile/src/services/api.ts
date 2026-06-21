@@ -75,21 +75,26 @@ export const authService = {
       return { session: MOCK_SESSION as any, user: MOCK_USER as any, profile: MOCK_PROFILE }
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    if (error) throw error
+    console.log('[signInWithEmail] signing in:', email)
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      console.error('[signInWithEmail] error:', error.message)
+      throw error
+    }
+    console.log('[signInWithEmail] success | userId:', data.user?.id, '| session:', data.session ? 'active' : 'none')
     return data
   },
 
   async signUpWithEmail(email: string, password: string, fullName: string) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-    if (error) throw error
+    console.log('[signUpWithEmail] creating account for:', email)
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    if (error) {
+      console.error('[signUpWithEmail] auth error:', error.message)
+      throw error
+    }
     if (!data.user) throw new Error('Signup failed: No user returned.')
+
+    console.log('[signUpWithEmail] user created:', data.user.id, '| session:', data.session ? 'yes' : 'no (email confirmation needed)')
 
     const defaultProfile: Profile = {
       id: data.user.id,
@@ -112,14 +117,18 @@ export const authService = {
     }
 
     try {
+      // Use upsert so it works whether or not the row already exists
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert(defaultProfile)
+        .upsert(defaultProfile)
       if (profileError) {
-        console.warn('Profile insert error: ', profileError)
+        console.warn('[signUpWithEmail] profile upsert error:', profileError.code, profileError.message)
+        // Non-fatal: profile will be auto-created by getProfile on next fetch
+      } else {
+        console.log('[signUpWithEmail] profile row created successfully')
       }
     } catch (err) {
-      console.warn('Failed to insert default profile: ', err)
+      console.warn('[signUpWithEmail] profile creation exception:', err)
     }
 
     return { session: data.session, user: data.user, profile: defaultProfile }
@@ -156,9 +165,10 @@ export const authService = {
 export const profileService = {
   async getProfile(userId: string): Promise<Profile> {
     if (await checkIsGuest() || userId.startsWith('guest-') || userId.startsWith('dev-')) {
+      console.log('[getProfile] guest/dev mode, returning mock profile for:', userId)
       return {
         id: userId,
-        phone_number: '+919999999999',
+        phone_number: null,
         full_name: userId.startsWith('dev-') ? 'Developer Learner' : 'Guest Learner',
         avatar_url: null,
         native_language: 'telugu',
@@ -168,54 +178,117 @@ export const profileService = {
         streak_current: userId.startsWith('dev-') ? 12 : 3,
         streak_longest: userId.startsWith('dev-') ? 24 : 5,
         last_active_date: new Date().toISOString(),
-        is_admin: true,
-        is_premium: true,
+        is_admin: false,
+        is_premium: false,
         daily_goal_minutes: 15,
         notifications_enabled: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }
     }
+
+    console.log('[getProfile] fetching from Supabase for userId:', userId)
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single()
-      if (error) throw error
+        .maybeSingle()
+
+      if (error) {
+        console.error('[getProfile] Supabase error:', error.code, error.message)
+        throw error
+      }
+
+      if (!data) {
+        console.log('[getProfile] No profile row, auto-creating default...')
+        const defaultProfile: Profile = {
+          id: userId,
+          phone_number: null,
+          full_name: 'English Learner',
+          avatar_url: null,
+          native_language: 'telugu',
+          current_level: 1,
+          xp_total: 100,
+          xp_today: 0,
+          streak_current: 1,
+          streak_longest: 1,
+          last_active_date: new Date().toISOString(),
+          is_admin: false,
+          is_premium: false,
+          daily_goal_minutes: 15,
+          notifications_enabled: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+        const { data: created, error: createErr } = await supabase
+          .from('profiles')
+          .upsert(defaultProfile)
+          .select()
+          .maybeSingle()
+        if (createErr) {
+          console.error('[getProfile] auto-create failed:', createErr.message)
+        } else {
+          console.log('[getProfile] default profile auto-created')
+        }
+        return created || defaultProfile
+      }
+
+      console.log('[getProfile] success:', data.full_name, '| level:', data.current_level, '| xp:', data.xp_total)
       return data
     } catch (err) {
-      return {
-        id: userId,
-        phone_number: null,
-        full_name: 'Offline Learner',
-        avatar_url: null,
-        native_language: 'telugu',
-        current_level: 1,
-        xp_total: 100,
-        xp_today: 0,
-        streak_current: 1,
-        streak_longest: 1,
-        last_active_date: null,
-        is_admin: false,
-        is_premium: false,
-        daily_goal_minutes: 15,
-        notifications_enabled: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }
+      console.error('[getProfile] catch block:', err)
+      throw err
     }
   },
 
-  async updateProfile(userId: string, updates: Partial<Profile>) {
-    if (await checkIsGuest()) return
+  async updateProfile(userId: string, updates: Partial<Profile>): Promise<Partial<Profile>> {
+    if (await checkIsGuest()) {
+      console.log('[updateProfile] guest mode — skipping Supabase write, returning updates locally')
+      return updates
+    }
+
+    console.log('[updateProfile] writing to Supabase | userId:', userId, '| fields:', Object.keys(updates).join(', '))
+
     try {
-      const { error } = await supabase
+      const payload = { ...updates, updated_at: new Date().toISOString() }
+
+      // Use UPDATE (not upsert) + SELECT to get confirmed data back from DB
+      const { data, error } = await supabase
         .from('profiles')
-        .update(updates)
+        .update(payload)
         .eq('id', userId)
-      if (error) throw error
-    } catch { /* ignore for offline */ }
+        .select()
+        .single()
+
+      if (error) {
+        console.error('[updateProfile] Supabase UPDATE error:', error.code, error.message)
+
+        // If row doesn't exist yet, fall back to upsert
+        if (error.code === 'PGRST116') {
+          console.log('[updateProfile] Row not found, falling back to upsert...')
+          const { data: upserted, error: upsertErr } = await supabase
+            .from('profiles')
+            .upsert({ id: userId, ...payload })
+            .select()
+            .single()
+          if (upsertErr) {
+            console.error('[updateProfile] Upsert also failed:', upsertErr.message)
+            throw upsertErr
+          }
+          console.log('[updateProfile] upsert success:', upserted?.full_name)
+          return upserted || updates
+        }
+
+        throw error
+      }
+
+      console.log('[updateProfile] Supabase confirmed update | full_name:', data?.full_name, '| level:', data?.current_level)
+      return data || updates
+    } catch (err) {
+      console.error('[updateProfile] catch block:', err)
+      throw err
+    }
   },
 
   async uploadAvatar(userId: string, fileUri: string): Promise<string> {
@@ -373,10 +446,21 @@ export const flashcardService = {
       const { data, error } = await query.limit(50)
       if (error) throw error
 
-      return (data || []).map(fc => ({
+      const results = (data || []).map(fc => ({
         ...fc,
         user_progress: fc.user_flashcard_progress?.[0] || null,
       }))
+
+      // Fall back to mock data if the flashcards table has no seed data yet
+      if (results.length === 0) {
+        console.log('[getFlashcards] no data in Supabase, using mock flashcards')
+        let filtered = MOCK_FLASHCARDS
+        if (lessonId) filtered = filtered.filter(f => f.lesson_id === lessonId)
+        if (categoryId) filtered = filtered.filter(f => f.category_id === categoryId)
+        return filtered
+      }
+
+      return results
     } catch {
       let filtered = MOCK_FLASHCARDS
       if (lessonId) filtered = filtered.filter(f => f.lesson_id === lessonId)
@@ -825,8 +909,8 @@ export const gamificationService = {
         .select(`*, user_daily_challenges!left(completed, score)`)
         .eq('valid_date', today)
         .eq('is_active', true)
-        .single()
-      if (error) return MOCK_DAILY_CHALLENGE
+        .maybeSingle()
+      if (error || !data) return MOCK_DAILY_CHALLENGE
       return {
         ...data,
         completed: data.user_daily_challenges?.[0]?.completed || false,

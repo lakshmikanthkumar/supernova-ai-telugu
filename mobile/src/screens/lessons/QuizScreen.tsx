@@ -170,7 +170,7 @@ export default function QuizScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#7C3AED', '#4F46E5']} style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}>
           <Text style={styles.backBtn}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Quiz Time! 🧠</Text>
