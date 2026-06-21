@@ -42,6 +42,7 @@ export interface SpeechRecognitionOptions {
 // ============================================================
 
 let isListening = false
+let isStopping = false
 let currentOptions: SpeechRecognitionOptions = {}
 let webRecognition: any = null
 
@@ -138,9 +139,13 @@ export function initializeSpeechRecognition(): void {
 // ============================================================
 
 export async function startListening(options: SpeechRecognitionOptions = {}): Promise<void> {
-  if (isListening) {
+  // If already listening or currently stopping, force stop and wait
+  if (isListening || isStopping) {
     await stopListening()
   }
+
+  // Guard delay: Wait 250ms to let native SpeechRecognizer release audio focus and reset
+  await new Promise(resolve => setTimeout(resolve, 250))
 
   currentOptions = options
   const language = options.language || 'en-IN'
@@ -220,16 +225,36 @@ export async function startListening(options: SpeechRecognitionOptions = {}): Pr
     return
   }
 
-  try {
-    await Voice.start(language, {
-      EXTRA_PARTIAL_RESULTS: options.partialResults ?? true,
-      EXTRA_MAX_RESULTS: 1,
-    })
-    isListening = true
-  } catch (err: any) {
-    isListening = false
-    options.onError?.(getReadableError(err.message || 'Failed to start speech recognition'))
+  let attempts = 0
+  const maxAttempts = 2
+
+  const tryStart = async (): Promise<void> => {
+    try {
+      await Voice.start(language, {
+        EXTRA_PARTIAL_RESULTS: options.partialResults ?? true,
+        EXTRA_MAX_RESULTS: 1,
+      })
+      isListening = true
+    } catch (err: any) {
+      const errMsg = String(err.message || 'unknown')
+      const isBusyOrRateLimited = errMsg.includes('8') || errMsg.includes('11') || errMsg.toLowerCase().includes('busy') || errMsg.toLowerCase().includes('request')
+
+      if (isBusyOrRateLimited && attempts < maxAttempts - 1) {
+        attempts++
+        try {
+          await Voice.destroy()
+        } catch {}
+        // Wait 500ms and try again
+        await new Promise(resolve => setTimeout(resolve, 500))
+        return tryStart()
+      }
+
+      isListening = false
+      options.onError?.(getReadableError(errMsg))
+    }
   }
+
+  await tryStart()
 }
 
 // ============================================================
@@ -247,10 +272,15 @@ export async function stopListening(): Promise<void> {
     return
   }
 
+  isStopping = true
   try {
     await Voice.stop()
-    isListening = false
   } catch { /* ignore */ }
+
+  // Wait 150ms for native speech recognition engine to completely close
+  await new Promise(resolve => setTimeout(resolve, 150))
+  isListening = false
+  isStopping = false
 }
 
 // ============================================================
@@ -269,11 +299,15 @@ export async function cancelListening(): Promise<void> {
     return
   }
 
+  isStopping = true
   try {
     await Voice.cancel()
-    isListening = false
-    currentOptions = {}
   } catch { /* ignore */ }
+
+  await new Promise(resolve => setTimeout(resolve, 150))
+  isListening = false
+  isStopping = false
+  currentOptions = {}
 }
 
 // ============================================================
@@ -293,11 +327,15 @@ export async function destroySpeechRecognition(): Promise<void> {
     return
   }
 
+  isStopping = true
   try {
     await Voice.destroy()
-    isListening = false
-    currentOptions = {}
   } catch { /* ignore */ }
+
+  await new Promise(resolve => setTimeout(resolve, 150))
+  isListening = false
+  isStopping = false
+  currentOptions = {}
 }
 
 // ============================================================
@@ -396,6 +434,25 @@ export function getIsListening(): boolean {
 // ============================================================
 
 function getReadableError(errorCode: string): string {
+  const errStr = String(errorCode).toLowerCase();
+
+  // Handle specific Android API 31+ error codes mapping (fallback message is 11/Didn't understand etc. from react-native-voice default case)
+  if (errStr.includes('11/') || errStr === '11' || errStr.includes('too_many_requests')) {
+    return 'Speech service is temporarily busy. Please wait a second and try again.';
+  }
+  if (errStr.includes('10/') || errStr === '10' || errStr.includes('server_disconnected')) {
+    return 'Speech service disconnected from server. Please check your internet connection.';
+  }
+  if (errStr.includes('12/') || errStr === '12' || errStr.includes('cannot_check_support')) {
+    return 'Speech service support could not be checked on this device.';
+  }
+  if (errStr.includes('13/') || errStr === '13' || errStr.includes('language_not_supported')) {
+    return 'The selected language is not supported for speech recognition on this device.';
+  }
+  if (errStr.includes('14/') || errStr === '14' || errStr.includes('language_unavailable')) {
+    return 'Language data is not downloaded or available on this device. Please check Google Speech settings.';
+  }
+
   const errorMap: Record<string, string> = {
     '7': 'No speech detected. Please speak clearly and try again.',
     'no-speech': 'No speech detected. Please speak clearly and try again.',
@@ -409,7 +466,7 @@ function getReadableError(errorCode: string): string {
   }
 
   for (const [key, message] of Object.entries(errorMap)) {
-    if (errorCode.toLowerCase().includes(key.toLowerCase())) {
+    if (errStr.includes(key.toLowerCase())) {
       return message
     }
   }
