@@ -1,7 +1,7 @@
 // ============================================================
 // EnglishMitraAi - AI Tutor Chat Edge Function (FREE STACK)
 // Replaces: OpenAI GPT-4 (paid)
-// Uses: Groq API with llama-3.3-70b-versatile (FREE)
+// Uses: Groq API with multi-model failover
 // Free tier: 14,400 req/day, 500,000 tokens/day
 // ============================================================
 
@@ -13,8 +13,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
-const GROQ_MODEL = 'llama-3.3-70b-versatile'
 const MAX_TOKENS = 512 // Keep token usage low for free tier
 const MAX_HISTORY_MESSAGES = 8 // Limit context to save tokens
 
@@ -40,44 +38,76 @@ interface GrammarCorrection {
 }
 
 // ============================================================
-// GROQ API CALLER
+// MODEL FAILOVER CHAIN
 // ============================================================
 
-async function callGroq(
-  messages: GroqMessage[],
-  maxTokens: number = MAX_TOKENS,
-  temperature: number = 0.7,
-  jsonMode: boolean = false
-): Promise<string> {
-  const groqApiKey = Deno.env.get('GROQ_API_KEY')
-  if (!groqApiKey) throw new Error('GROQ_API_KEY not set in Edge Function secrets')
+const MODEL_CHAIN = [
+  { id: 'llama-3.3-70b-versatile', priority: 1 },
+  { id: 'llama-3.1-8b-instant', priority: 2 },
+  { id: 'gemma2-9b-it', priority: 3 },
+  { id: 'mistral-saba-24b', priority: 4 },
+]
 
-  const response = await fetch(GROQ_API_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${groqApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: GROQ_MODEL,
-      messages,
-      max_tokens: maxTokens,
-      temperature,
-      ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
-    }),
-  })
+async function callGroqWithFallback(
+  messages: any[],
+  options: { maxTokens?: number; temperature?: number; jsonMode?: boolean } = {}
+): Promise<{ content: string; model: string; tokens: number }> {
+  const { maxTokens = 512, temperature = 0.7, jsonMode = false } = options
+  const GROQ_API_KEY = Deno.env.get('GROQ_API_KEY')
 
-  if (!response.ok) {
-    const err = await response.text()
-    // Handle Groq rate limiting gracefully
-    if (response.status === 429) {
-      throw new Error('Rate limit reached. Please wait a moment and try again.')
+  let lastError: unknown
+
+  for (const model of MODEL_CHAIN) {
+    try {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${GROQ_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: model.id,
+          messages,
+          max_tokens: maxTokens,
+          temperature,
+          ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
+        }),
+        signal: AbortSignal.timeout(15000), // 15s timeout per model
+      })
+
+      if (response.status === 429) {
+        console.warn(`[Fallback] ${model.id} rate limited, trying next...`)
+        lastError = { type: 'rate_limit', model: model.id }
+        continue
+      }
+
+      if (!response.ok) {
+        console.warn(`[Fallback] ${model.id} returned ${response.status}, trying next...`)
+        lastError = { type: 'http_error', status: response.status, model: model.id }
+        continue
+      }
+
+      const data = await response.json()
+      const content = data.choices?.[0]?.message?.content ?? ''
+
+      if (!content) {
+        console.warn(`[Fallback] ${model.id} returned empty content, trying next...`)
+        continue
+      }
+
+      console.log(`[Fallback] Success with model: ${model.id}`)
+      return {
+        content,
+        model: model.id,
+        tokens: data.usage?.total_tokens ?? 0,
+      }
+    } catch (err) {
+      console.warn(`[Fallback] ${model.id} error: ${err}, trying next...`)
+      lastError = err
     }
-    throw new Error(`Groq API error ${response.status}: ${err}`)
   }
 
-  const data = await response.json()
-  return data.choices[0].message.content || ''
+  throw new Error(`All models failed. Last error: ${JSON.stringify(lastError)}`)
 }
 
 // ============================================================
@@ -160,8 +190,9 @@ serve(async (req) => {
       { role: 'user', content: message },
     ]
 
-    // Call Groq for main response
-    const assistantMessage = await callGroq(messages, MAX_TOKENS, 0.8)
+    // Call Groq with failover for main response
+    const mainResult = await callGroqWithFallback(messages, { maxTokens: MAX_TOKENS, temperature: 0.8 })
+    const assistantMessage = mainResult.content
 
     // Grammar correction (only if requested and message is substantial)
     let corrections: GrammarCorrection[] = []
@@ -171,8 +202,8 @@ serve(async (req) => {
           { role: 'system', content: GRAMMAR_CHECK_PROMPT },
           { role: 'user', content: `Check: "${message}"` },
         ]
-        const grammarRaw = await callGroq(grammarMessages, 300, 0.1, true)
-        const parsed = JSON.parse(grammarRaw)
+        const grammarResult = await callGroqWithFallback(grammarMessages, { maxTokens: 300, temperature: 0.1, jsonMode: true })
+        const parsed = JSON.parse(grammarResult.content)
         corrections = parsed.corrections || []
       } catch { /* grammar check failure is non-fatal */ }
     }
@@ -187,7 +218,8 @@ serve(async (req) => {
           { role: 'system', content: 'Translate to Telugu. Return only the Telugu translation, nothing else.' },
           { role: 'user', content: assistantMessage.slice(0, 200) }, // Limit for token savings
         ]
-        translation = await callGroq(transMessages, 200, 0.1)
+        const transResult = await callGroqWithFallback(transMessages, { maxTokens: 200, temperature: 0.1 })
+        translation = transResult.content
       } catch { /* translation failure is non-fatal */ }
     }
 
@@ -232,7 +264,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ message: assistantMessage, corrections, translation }),
+      JSON.stringify({ message: assistantMessage, corrections, translation, model_used: mainResult.model }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {

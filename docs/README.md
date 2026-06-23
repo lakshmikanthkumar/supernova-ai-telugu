@@ -1,37 +1,52 @@
-# EnglishMitraAi 🎓
+# EnglishMitraAI
 
-> AI-powered Spoken English learning app for Telugu medium students — **100% Free Stack**
+> AI-powered real-world English communication platform for Telugu-medium students — **100% Free Stack**
 
-## What is EnglishMitraAi?
+## What is EnglishMitraAI?
 
-EnglishMitraAi ("English Friend AI") is a React Native mobile app that helps Telugu-medium students in Andhra Pradesh and Telangana build spoken English confidence through:
+EnglishMitraAI ("English Friend AI") helps Telugu-medium students in Andhra Pradesh and Telangana build real-world English confidence through 13 communication modules, powered by a multi-model AI system that never goes down.
 
-- **AI Tutor "Nova"** — Conversational practice powered by Groq (free)
-- **Pronunciation Lab** — Record and get scored on your pronunciation
-- **10 Lesson Categories** — Daily life, greetings, shopping, interviews, and more
-- **Flashcards & Quizzes** — SM-2 spaced repetition for vocabulary
-- **Roleplay Scenarios** — Practice real conversations (job interview, doctor visit, shopping)
-- **Gamification** — XP, streaks, achievements, weekly leaderboard
-- **100% Telugu UI** — All instructions and feedback in Telugu
+### Modules
 
-## Free Stack (Zero Cost)
+| Module | What it does |
+|--------|-------------|
+| **AI Tutor Nova** | Conversational practice with grammar correction |
+| **Daily Greetings** | Randomized situational greetings, fresh every session |
+| **Self Introduction Builder** | Build and practice professional introductions |
+| **Office Conversations** | Real workplace dialogue scenarios |
+| **Email Writing Assistant** | Generate, improve, and simplify professional emails |
+| **Phone Conversation Simulator** | Practice calls (customer service, appointments) |
+| **Interview Training** | AI-coached mock interviews with scored feedback |
+| **Public Speaking** | Filler-word detection, WPM tracking, fluency score |
+| **Grammar Engine** | Real-time corrections with Telugu explanations |
+| **Pronunciation Lab** | Record → score → AI feedback |
+| **Flashcards & Quizzes** | SM-2 spaced repetition, never repeats within session |
+| **Daily Challenges** | Personalized daily content that rotates each day |
+| **Learn Hub** | Unified access to all modules with progress tracking |
 
-| What | Technology | Why |
-|------|-----------|-----|
-| AI Chat | Groq llama-3.3-70b-versatile | 14,400 req/day free |
-| Database | Supabase PostgreSQL | 500MB free |
-| Speech Input | react-native-voice | Device-native, free |
-| Voice Output | expo-speech | Device-native, free |
-| Translation | google-translate-api-x | Unofficial Google Translate, free |
-| Offline | AsyncStorage | Device storage, free |
+## Free Stack
+
+| What | Technology | Cost |
+|------|-----------|------|
+| AI (primary) | Groq `llama-3.3-70b-versatile` | Free — 14,400 req/day |
+| AI (fallback 1) | Groq `llama-3.1-8b-instant` | Free — same limits |
+| AI (fallback 2) | Groq `gemma2-9b-it` | Free — same limits |
+| AI (fallback 3) | Groq `mistral-saba-24b` | Free — same limits |
+| Database | Supabase PostgreSQL | Free — 500MB |
+| Edge Functions | Supabase Deno Runtime | Free |
+| Speech Input | react-native-voice (device STT) | Free |
+| Voice Output | expo-speech (device TTS) | Free |
+| Translation | google-translate-api-x | Free |
+| Offline Cache | AsyncStorage | Free |
 
 ## Tech Stack
 
-- **Frontend**: React Native + Expo + TypeScript
-- **Routing**: Expo Router (file-based)
-- **State**: Redux Toolkit
-- **Backend**: Supabase (PostgreSQL + Edge Functions)
-- **Auth**: Supabase Phone OTP
+- **Frontend**: React Native 0.76.9 + Expo 52 + TypeScript
+- **Routing**: Expo Router 4 (file-based)
+- **State**: Redux Toolkit (11 slices)
+- **Backend**: Supabase (PostgreSQL + Edge Functions/Deno)
+- **Auth**: Supabase Email/Password + Phone OTP
+- **AI Orchestration**: 4-model failover with circuit breaker, response cache, rate limiter
 
 ## Quick Start
 
@@ -39,34 +54,49 @@ EnglishMitraAi ("English Friend AI") is a React Native mobile app that helps Tel
 cd mobile && npm install && npx expo start
 ```
 
-See [SETUP.md](SETUP.md) for full instructions including API key setup.
+See [SETUP.md](SETUP.md) for full environment setup including API keys.
 
 ## Project Structure
 
 ```
-EnglishMitraAi/
-├── mobile/                    # React Native Expo app
-│   ├── app/                   # Expo Router screens
-│   │   ├── (auth)/            # Login, OTP, Onboarding
-│   │   ├── (main)/            # Home, Nova Chat, Progress
-│   │   ├── lessons/           # Lesson, Quiz, Flashcards, Pronunciation
-│   │   └── ai/                # Roleplay
+EnglishMitraAI/
+├── mobile/                          # React Native Expo app
+│   ├── app/                         # Expo Router screens
+│   │   ├── (auth)/                  # Login, Signup, Splash
+│   │   ├── (main)/                  # Home, Progress, Daily Challenge, Learn Hub
+│   │   ├── lessons/                 # Lesson, Quiz, Flashcards, Pronunciation
+│   │   ├── ai/                      # Nova Chat, Roleplay
+│   │   └── features/                # 9 communication module screens
 │   └── src/
 │       ├── services/
-│       │   ├── ai/            # groqService.ts (Groq API)
-│       │   ├── audio/         # textToSpeech.ts, speechRecognition.ts
-│       │   ├── pronunciation/ # pronunciationScorer.ts (offline)
-│       │   └── translation/   # translationService.ts
-│       ├── store/             # Redux slices
-│       ├── screens/           # Screen components
-│       └── components/        # Reusable components
+│       │   ├── ai/                  # Multi-model AI orchestration layer
+│       │   │   ├── index.ts         # Public API (import from here)
+│       │   │   ├── aiOrchestrator.ts       # Main entry — 4-model failover
+│       │   │   ├── modelRouter.ts          # Task → model selector
+│       │   │   ├── aiProviderAdapter.ts    # Unified Groq caller
+│       │   │   ├── aiHealthMonitor.ts      # Circuit breaker per provider
+│       │   │   ├── aiRateLimiter.ts        # Per-provider sliding window
+│       │   │   ├── aiResponseCache.ts      # Memory + disk cache
+│       │   │   └── groqService.ts          # Legacy re-export shim
+│       │   ├── audio/               # textToSpeech.ts, speechRecognition.ts
+│       │   ├── randomization/       # contentEngine.ts — SM-2, seeded shuffle
+│       │   ├── personalization/     # Daily feed, content rotation
+│       │   ├── pronunciation/       # Offline Levenshtein scorer
+│       │   └── translation/         # 3-tier cache (static → storage → API)
+│       ├── store/                   # Redux slices (11 total)
+│       ├── screens/                 # Screen components
+│       └── components/              # Reusable UI components
 └── backend/
     └── supabase/
-        ├── migrations/        # SQL schema + seed data
-        └── functions/         # Edge Functions (Deno)
-            ├── tutor-chat/    # Groq AI chat
-            ├── speech-to-text/ # Pronunciation feedback
-            └── update-progress/ # XP + achievements
+        ├── migrations/              # 008 SQL migrations (run in order)
+        └── functions/               # Edge Functions (Deno)
+            ├── tutor-chat/          # AI chat + XP rewards
+            ├── interview-coach/     # Structured interview feedback
+            ├── email-assistant/     # Email generation/improvement
+            ├── grammar-engine/      # Grammar check + quiz generation
+            ├── public-speaking-coach/ # Filler detection, WPM, fluency
+            ├── ai-content-generator/  # Daily content generation + 7-day cache
+            └── update-progress/     # XP + achievements
 ```
 
 ## License

@@ -30,7 +30,7 @@ export default function RoleplayScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#0891B2', '#0E7490']} style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}>
           <Text style={styles.backBtn}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>🎭 AI Roleplay</Text>

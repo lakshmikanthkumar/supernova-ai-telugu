@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import { useLocalSearchParams } from 'expo-router'
 import { useAppSelector, useAppDispatch } from '../../hooks/useStore'
 import { fetchAchievements, fetchLeaderboard } from '../../store/slices/gamificationSlice'
 import type { Achievement, LeaderboardEntry } from '../../types'
@@ -9,7 +10,14 @@ export default function ProgressScreen() {
   const dispatch = useAppDispatch()
   const { profile } = useAppSelector(s => s.auth)
   const { achievements, leaderboard } = useAppSelector(s => s.gamification)
-  const [activeTab, setActiveTab] = useState<'achievements' | 'leaderboard'>('achievements')
+  const { tab } = useLocalSearchParams<{ tab?: 'achievements' | 'leaderboard' }>()
+  const [activeTab, setActiveTab] = useState<'achievements' | 'leaderboard'>(tab || 'achievements')
+
+  useEffect(() => {
+    if (tab) {
+      setActiveTab(tab)
+    }
+  }, [tab])
 
   useEffect(() => {
     if (profile?.id) {

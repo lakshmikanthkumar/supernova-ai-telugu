@@ -15,6 +15,9 @@ export default function MainLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        headerStyle: { backgroundColor: '#1E1B4B' },
+        headerTintColor: '#fff',
+        headerTitleStyle: { fontWeight: 'bold', color: '#fff' },
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
       }}
@@ -28,7 +31,7 @@ export default function MainLayout() {
       <Tabs.Screen
         name="lessons"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📚" label="Learn" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon emoji="📖" label="Learn" focused={focused} />,
         }}
       />
       <Tabs.Screen
@@ -49,13 +52,19 @@ export default function MainLayout() {
           tabBarIcon: ({ focused }) => <TabIcon emoji="👤" label="Profile" focused={focused} />,
         }}
       />
+      <Tabs.Screen
+        name="daily-challenge"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   )
 }
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
     borderTopColor: '#E5E7EB',
     height: Platform.OS === 'ios' ? 80 : 64,

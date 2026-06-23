@@ -25,7 +25,7 @@ INSERT INTO lesson_categories (name, name_telugu, description, description_telug
 -- Daily Conversations Lessons
 INSERT INTO lessons (category_id, title, title_telugu, description, description_telugu, difficulty_level, xp_reward, estimated_minutes, sort_order, content) VALUES
 (
-  (SELECT id FROM lesson_categories WHERE name = 'Daily Conversations'),
+  (SELECT id FROM lesson_categories WHERE name = 'Daily Conversations' LIMIT 1),
   'Greetings & Introductions',
   'నమస్కారాలు & పరిచయాలు',
   'Learn how to greet people and introduce yourself in English',
@@ -58,7 +58,7 @@ INSERT INTO lessons (category_id, title, title_telugu, description, description_
   }'
 ),
 (
-  (SELECT id FROM lesson_categories WHERE name = 'Daily Conversations'),
+  (SELECT id FROM lesson_categories WHERE name = 'Daily Conversations' LIMIT 1),
   'Asking for Directions',
   'దారి అడగడం',
   'Learn how to ask and give directions in English',
@@ -91,7 +91,7 @@ INSERT INTO lessons (category_id, title, title_telugu, description, description_
 -- Office & Work Lessons
 INSERT INTO lessons (category_id, title, title_telugu, description, description_telugu, difficulty_level, xp_reward, estimated_minutes, sort_order, content) VALUES
 (
-  (SELECT id FROM lesson_categories WHERE name = 'Office & Work'),
+  (SELECT id FROM lesson_categories WHERE name = 'Office & Work' LIMIT 1),
   'Job Interview English',
   'జాబ్ ఇంటర్వ్యూ ఇంగ్లీష్',
   'Master common interview questions and professional answers',
@@ -129,23 +129,23 @@ INSERT INTO lessons (category_id, title, title_telugu, description, description_
 
 INSERT INTO flashcards (lesson_id, english_word, telugu_meaning, pronunciation_guide, example_sentence, example_sentence_telugu) VALUES
 (
-  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions'),
+  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions' LIMIT 1),
   'Hello', 'హలో', 'heh-loh', 'Hello, how are you?', 'హలో, మీరు ఎలా ఉన్నారు?'
 ),
 (
-  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions'),
+  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions' LIMIT 1),
   'Good morning', 'శుభోదయం', 'good mor-ning', 'Good morning, sir!', 'శుభోదయం, సర్!'
 ),
 (
-  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions'),
+  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions' LIMIT 1),
   'Thank you', 'ధన్యవాదాలు', 'thank yoo', 'Thank you for your help.', 'మీ సహాయానికి ధన్యవాదాలు.'
 ),
 (
-  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions'),
+  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions' LIMIT 1),
   'Please', 'దయచేసి', 'pleez', 'Please sit down.', 'దయచేసి కూర్చోండి.'
 ),
 (
-  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions'),
+  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions' LIMIT 1),
   'Sorry', 'క్షమించండి', 'sor-ee', 'Sorry, I am late.', 'క్షమించండి, నేను ఆలస్యంగా వచ్చాను.'
 ),
 (NULL, 'Understand', 'అర్థం చేసుకోండి', 'un-der-stand', 'Do you understand?', 'మీకు అర్థమైందా?'),
@@ -160,7 +160,7 @@ INSERT INTO flashcards (lesson_id, english_word, telugu_meaning, pronunciation_g
 
 INSERT INTO quiz_questions (lesson_id, question_text, question_text_telugu, question_type, options, correct_answer, explanation, explanation_telugu, points) VALUES
 (
-  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions'),
+  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions' LIMIT 1),
   'Which phrase do you use when meeting someone for the first time?',
   'మొదటిసారి ఒకరిని కలిసినప్పుడు మీరు ఏ వాక్యం ఉపయోగిస్తారు?',
   'multiple_choice',
@@ -171,7 +171,7 @@ INSERT INTO quiz_questions (lesson_id, question_text, question_text_telugu, ques
   10
 ),
 (
-  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions'),
+  (SELECT id FROM lessons WHERE title = 'Greetings & Introductions' LIMIT 1),
   'How do you say "నా పేరు రాహుల్" in English?',
   '"నా పేరు రాహుల్" ని ఇంగ్లీష్‌లో ఎలా చెప్తారు?',
   'multiple_choice',
@@ -182,7 +182,7 @@ INSERT INTO quiz_questions (lesson_id, question_text, question_text_telugu, ques
   10
 ),
 (
-  (SELECT id FROM lessons WHERE title = 'Asking for Directions'),
+  (SELECT id FROM lessons WHERE title = 'Asking for Directions' LIMIT 1),
   'What do you say when you want to stop someone politely and ask a question?',
   'మర్యాదగా ఒకరిని ఆపి ప్రశ్న అడగాలనుకున్నప్పుడు ఏమంటారు?',
   'multiple_choice',

@@ -29,13 +29,31 @@ ALTER TABLE public.leaderboard_weekly ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own profile" ON profiles
   FOR SELECT USING (auth.uid() = id);
 
-CREATE POLICY "Users can update own profile" ON profiles
-  FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can insert own profile" ON profiles
+  FOR INSERT WITH CHECK (auth.uid() = id);
 
-CREATE POLICY "Admins can view all profiles" ON profiles
-  FOR SELECT USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = TRUE)
-  );
+CREATE POLICY "Users can update own profile" ON profiles
+  FOR UPDATE USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
+
+-- Security-definer function: checks admin without querying profiles inside a profiles policy
+-- (prevents infinite recursion that causes 500 errors)
+CREATE OR REPLACE FUNCTION is_admin_user()
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+STABLE
+SET search_path = public
+AS $$
+DECLARE
+  admin_status BOOLEAN;
+BEGIN
+  SELECT is_admin INTO admin_status FROM public.profiles WHERE id = auth.uid() LIMIT 1;
+  RETURN COALESCE(admin_status, FALSE);
+END;
+$$;
+
+
 
 -- ============================================================
 -- PUBLIC READ - Lesson content visible to all authenticated users
@@ -45,33 +63,25 @@ CREATE POLICY "Authenticated users can read categories" ON lesson_categories
   FOR SELECT TO authenticated USING (is_active = TRUE);
 
 CREATE POLICY "Admins can manage categories" ON lesson_categories
-  FOR ALL USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = TRUE)
-  );
+  FOR ALL USING (is_admin_user());
 
 CREATE POLICY "Authenticated users can read lessons" ON lessons
   FOR SELECT TO authenticated USING (is_active = TRUE);
 
 CREATE POLICY "Admins can manage lessons" ON lessons
-  FOR ALL USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = TRUE)
-  );
+  FOR ALL USING (is_admin_user());
 
 CREATE POLICY "Authenticated users can read flashcards" ON flashcards
   FOR SELECT TO authenticated USING (is_active = TRUE);
 
 CREATE POLICY "Admins can manage flashcards" ON flashcards
-  FOR ALL USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = TRUE)
-  );
+  FOR ALL USING (is_admin_user());
 
 CREATE POLICY "Authenticated users can read quiz questions" ON quiz_questions
   FOR SELECT TO authenticated USING (TRUE);
 
 CREATE POLICY "Admins can manage quiz questions" ON quiz_questions
-  FOR ALL USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = TRUE)
-  );
+  FOR ALL USING (is_admin_user());
 
 CREATE POLICY "Authenticated users can read pronunciation phrases" ON pronunciation_phrases
   FOR SELECT TO authenticated USING (TRUE);
@@ -154,8 +164,7 @@ CREATE POLICY "Lesson assets public read" ON storage.objects
 
 CREATE POLICY "Admins can upload lesson assets" ON storage.objects
   FOR INSERT WITH CHECK (
-    bucket_id = 'lesson-assets' AND
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = TRUE)
+    bucket_id = 'lesson-assets' AND is_admin_user()
   );
 
 CREATE POLICY "Users can upload own avatar" ON storage.objects

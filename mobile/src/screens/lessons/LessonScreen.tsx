@@ -83,7 +83,7 @@ export default function LessonScreen() {
         colors={[category?.color_hex || '#4F46E5', (category?.color_hex || '#4F46E5') + '99']}
         style={styles.header}
       >
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')} style={styles.backBtn}>
           <Text style={styles.backBtnText}>←</Text>
         </TouchableOpacity>
         <View style={styles.headerContent}>

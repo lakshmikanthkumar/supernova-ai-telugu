@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Ionicons } from '@expo/vector-icons'
 import { useAppDispatch } from '../../hooks/useStore'
 import { authService, profileService } from '../../services/api'
 import { setSession, setProfile } from '../../store/slices/authSlice'
@@ -19,10 +20,35 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLocalLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [errors, setErrors] = useState({ email: '', password: '' })
+
+  const validate = () => {
+    const newErrors = { email: '', password: '' }
+    let isValid = true
+
+    if (!email.trim()) {
+      newErrors.email = 'Email is required (ఈమెయిల్ తప్పనిసరి)'
+      isValid = false
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email.trim())) {
+        newErrors.email = 'Please enter a valid email address (సరైన ఈమెయిల్ నమోదు చేయండి)'
+        isValid = false
+      }
+    }
+
+    if (!password) {
+      newErrors.password = 'Password is required (పాస్‌వర్డ్ తప్పనిసరి)'
+      isValid = false
+    }
+
+    setErrors(newErrors)
+    return isValid
+  }
 
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Missing Fields', 'Please enter both email and password.')
+    if (!validate()) {
       return
     }
 
@@ -84,8 +110,8 @@ export default function LoginScreen() {
         streak_current: 3,
         streak_longest: 5,
         last_active_date: new Date().toISOString(),
-        is_admin: true,
-        is_premium: true,
+        is_admin: false,
+        is_premium: false,
         daily_goal_minutes: 15,
         notifications_enabled: true,
         created_at: new Date().toISOString(),
@@ -110,6 +136,7 @@ export default function LoginScreen() {
       <LinearGradient colors={['#4F46E5', '#7C3AED']} style={styles.header}>
         <Text style={styles.logoEmoji}>🎓</Text>
         <Text style={styles.appName}>EnglishMitraAI</Text>
+        <Text style={styles.poweredByMaansvi}>powered by Maansvi</Text>
         <Text style={styles.tagline}>Telugu Medium Student కి English నేర్పే AI</Text>
       </LinearGradient>
 
@@ -120,7 +147,7 @@ export default function LoginScreen() {
 
         <View style={styles.inputWrapper}>
           <Text style={styles.inputLabel}>Email (ఈమెయిల్)</Text>
-          <View style={styles.inputContainer}>
+          <View style={[styles.inputContainer, errors.email ? styles.inputErrorBorder : null]}>
             <TextInput
               style={styles.input}
               placeholder="example@gmail.com"
@@ -129,25 +156,52 @@ export default function LoginScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text)
+                if (errors.email) {
+                  setErrors(prev => ({ ...prev, email: '' }))
+                }
+              }}
             />
           </View>
+          {errors.email ? (
+            <Text style={styles.errorText}>{errors.email}</Text>
+          ) : null}
         </View>
 
         <View style={styles.inputWrapper}>
           <Text style={styles.inputLabel}>Password (పాస్‌వర్డ్)</Text>
-          <View style={styles.inputContainer}>
+          <View style={[styles.inputContainer, errors.password ? styles.inputErrorBorder : null]}>
             <TextInput
               style={styles.input}
               placeholder="••••••••"
               placeholderTextColor="#9CA3AF"
-              secureTextEntry
+              secureTextEntry={!showPassword}
               autoCapitalize="none"
               autoCorrect={false}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => {
+                setPassword(text)
+                if (errors.password) {
+                  setErrors(prev => ({ ...prev, password: '' }))
+                }
+              }}
             />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.showHideButton}
+              activeOpacity={0.7}
+            >
+              <Ionicons
+                name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                size={22}
+                color="#6B7280"
+              />
+            </TouchableOpacity>
           </View>
+          {errors.password ? (
+            <Text style={styles.errorText}>{errors.password}</Text>
+          ) : null}
         </View>
 
         <TouchableOpacity
@@ -204,6 +258,13 @@ const styles = StyleSheet.create({
   header: { paddingTop: 60, paddingBottom: 40, alignItems: 'center' },
   logoEmoji: { fontSize: 48, marginBottom: 8 },
   appName: { fontSize: 28, fontWeight: '800', color: 'white' },
+  poweredByMaansvi: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.7)',
+    fontWeight: '500',
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
   tagline: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 6, textAlign: 'center', paddingHorizontal: 20 },
   formContainer: { padding: 32, backgroundColor: 'white', flexGrow: 1 },
   welcomeText: { fontSize: 24, fontWeight: '800', color: '#111827', marginBottom: 6 },
@@ -212,10 +273,35 @@ const styles = StyleSheet.create({
   inputWrapper: { marginBottom: 16 },
   inputLabel: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6 },
   inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 2, borderColor: '#4F46E5', borderRadius: 14,
     overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
   },
-  input: { paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, color: '#111827' },
+  input: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: '#111827',
+  },
+  inputErrorBorder: {
+    borderColor: '#EF4444',
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
+    fontWeight: '500',
+  },
+  showHideButton: {
+    paddingHorizontal: 16,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   primaryButton: {
     backgroundColor: '#4F46E5', paddingVertical: 16,
     borderRadius: 14, alignItems: 'center', elevation: 3,

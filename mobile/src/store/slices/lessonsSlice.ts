@@ -79,8 +79,14 @@ const lessonsSlice = createSlice({
       .addCase(fetchLesson.fulfilled, (state, action) => {
         state.currentLesson = action.payload
       })
+      .addCase(fetchFlashcards.pending, (state) => { state.loading = true })
       .addCase(fetchFlashcards.fulfilled, (state, action) => {
         state.flashcards = action.payload
+        state.loading = false
+      })
+      .addCase(fetchFlashcards.rejected, (state, action) => {
+        state.error = action.error.message || 'Failed to fetch flashcards'
+        state.loading = false
       })
       .addCase(searchLessons.fulfilled, (state, action) => {
         state.searchResults = action.payload

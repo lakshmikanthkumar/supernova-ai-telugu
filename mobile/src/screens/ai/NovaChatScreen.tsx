@@ -41,6 +41,7 @@ export default function NovaChatScreen() {
   const [partialTranscript, setPartialTranscript] = useState('')
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [sttAvailable, setSttAvailable] = useState(true)
+  const [isMuted, setIsMuted] = useState(false)
   const flatListRef = useRef<FlatList>(null)
   const micPulse = useRef(new Animated.Value(1)).current
 
@@ -48,11 +49,37 @@ export default function NovaChatScreen() {
     initSession()
     initializeSpeechRecognition()
     checkSTT()
+    loadMuteState()
     return () => {
       destroySpeechRecognition()
       stopSpeaking()
     }
   }, [])
+
+  const loadMuteState = async () => {
+    try {
+      const val = await AsyncStorage.getItem('chat_muted')
+      if (val === 'true') {
+        setIsMuted(true)
+      }
+    } catch {}
+  }
+
+  const handleToggleMute = async () => {
+    const nextMute = !isMuted
+    setIsMuted(nextMute)
+    try {
+      await AsyncStorage.setItem('chat_muted', nextMute ? 'true' : 'false')
+    } catch {}
+    if (nextMute) {
+      await stopSpeaking()
+    } else {
+      const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant')
+      if (lastAssistantMsg) {
+        speak(lastAssistantMsg.content, { language: 'en-IN', rate: 'normal' }).catch(() => {})
+      }
+    }
+  }
 
   useEffect(() => {
     if (isListening) {
@@ -150,7 +177,9 @@ export default function NovaChatScreen() {
       }
 
       setMessages(prev => [...prev, assistantMsg])
-      speak(response.message, { language: 'en-IN', rate: 'normal' }).catch(() => {})
+      if (!isMuted) {
+        speak(response.message, { language: 'en-IN', rate: 'normal' }).catch(() => {})
+      }
     } catch {
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
@@ -303,7 +332,7 @@ export default function NovaChatScreen() {
       keyboardVerticalOffset={0}
     >
       <LinearGradient colors={['#4F46E5', '#7C3AED']} style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}>
           <Text style={styles.backBtn}>←</Text>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
@@ -315,8 +344,8 @@ export default function NovaChatScreen() {
             <Text style={styles.headerSubtitle}>AI English Tutor • Free</Text>
           </View>
         </View>
-        <TouchableOpacity onPress={stopSpeaking}>
-          <Text style={styles.muteBtn}>🔇</Text>
+        <TouchableOpacity onPress={handleToggleMute}>
+          <Text style={styles.muteBtn}>{isMuted ? '🔇' : '🔊'}</Text>
         </TouchableOpacity>
       </LinearGradient>
 
