@@ -1,16 +1,20 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
-import {
-  View, Text, StyleSheet, TouchableOpacity, Animated,
-  ActivityIndicator, Dimensions,
-} from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import * as Speech from 'expo-speech'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 import { useAppDispatch, useAppSelector } from '../../hooks/useStore'
-import { fetchFlashcards } from '../../store/slices/lessonsSlice'
 import { flashcardService, gamificationService } from '../../services/api'
 import { getDynamicFlashcards, recordContentSeen } from '../../services/personalization/contentRotationService'
-import type { Flashcard } from '../../types'
+import { fetchFlashcards } from '../../store/slices/lessonsSlice'
 
 const { width } = Dimensions.get('window')
 const CARD_WIDTH = width - 48
@@ -171,6 +175,21 @@ export default function FlashcardScreen() {
         </Text>
         <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')} style={{ marginTop: 24, padding: 12 }}>
           <Text style={{ color: '#4F46E5', fontWeight: '700', fontSize: 16 }}>← Go Back</Text>
+        </TouchableOpacity>
+      </View>
+    )
+  }
+
+  if (flashcards.length === 0) {
+    return (
+      <View style={styles.loading}>
+        <Text style={{ fontSize: 48, marginBottom: 16 }}>🃏</Text>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#374151', marginBottom: 8 }}>No Flashcards Yet</Text>
+        <Text style={{ fontSize: 14, color: '#6B7280', textAlign: 'center', paddingHorizontal: 32 }}>
+          Flashcard content is being added. Check back soon!
+        </Text>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')} style={{ marginTop: 24, padding: 12 }}>
+          <Text style={{ color: '#D97706', fontWeight: '700', fontSize: 16 }}>← Go Back</Text>
         </TouchableOpacity>
       </View>
     )

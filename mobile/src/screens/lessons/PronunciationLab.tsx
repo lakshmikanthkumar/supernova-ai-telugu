@@ -1,25 +1,33 @@
-import React, { useState, useEffect, useRef } from 'react'
-import {
-  View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  ActivityIndicator, Animated, Alert,
-} from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
-import { useSelector } from 'react-redux'
+import React, { useEffect, useRef, useState } from 'react'
 import {
-  startListening, stopListening, initializeSpeechRecognition,
-  destroySpeechRecognition, isSpeechRecognitionAvailable,
+  ActivityIndicator,
+  Alert,
+  Animated,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+import { useSelector } from 'react-redux'
+import { pronunciationService } from '../../services/api'
+import {
+  destroySpeechRecognition,
+  initializeSpeechRecognition,
+  isSpeechRecognitionAvailable,
+  startListening, stopListening,
 } from '../../services/audio/speechRecognition'
 import { speak, speakWord, stopSpeaking } from '../../services/audio/textToSpeech'
-import {
-  scorePronunciation,
-  type PronunciationScore,
-} from '../../services/pronunciation/pronunciationScorer'
-import { pronunciationService } from '../../services/api'
 import {
   getDynamicPronunciationPhrases,
   recordContentSeen,
 } from '../../services/personalization/contentRotationService'
+import {
+  scorePronunciation,
+  type PronunciationScore,
+} from '../../services/pronunciation/pronunciationScorer'
 
 const CATEGORIES = [
   { key: 'all', label: 'All' },

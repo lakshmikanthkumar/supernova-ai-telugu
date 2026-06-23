@@ -1,22 +1,28 @@
-import React, { useEffect, useCallback, useState } from 'react'
-import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity,
-  RefreshControl, Dimensions, TextInput, Alert,
-} from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import * as Speech from 'expo-speech'
-import { useAppDispatch, useAppSelector } from '../../hooks/useStore'
-import { fetchCategories } from '../../store/slices/lessonsSlice'
-import { fetchDailyChallenge, fetchLeaderboard } from '../../store/slices/gamificationSlice'
-import { fetchProfile } from '../../store/slices/authSlice'
-import { generateDailyFeed, DailyFeed, invalidateDailyFeed } from '../../services/personalization/personalizationEngine'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
-  getVocabularyOfTheDay,
+  Alert,
+  Dimensions,
+  RefreshControl,
+  ScrollView, StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+import { useAppDispatch, useAppSelector } from '../../hooks/useStore'
+import { DailyFeed, generateDailyFeed, invalidateDailyFeed } from '../../services/personalization/personalizationEngine'
+import {
   getGrammarTipOfTheDay,
-  getMotivationalQuote,
   getInterviewQuestionOfTheDay,
+  getMotivationalQuote,
+  getVocabularyOfTheDay,
 } from '../../services/randomization/contentEngine'
+import { fetchProfile } from '../../store/slices/authSlice'
+import { fetchDailyChallenge, fetchLeaderboard } from '../../store/slices/gamificationSlice'
+import { fetchCategories } from '../../store/slices/lessonsSlice'
 
 const { width } = Dimensions.get('window')
 

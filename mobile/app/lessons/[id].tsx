@@ -1,5 +1,5 @@
+import { Redirect, useLocalSearchParams } from 'expo-router'
 import React from 'react'
-import { useLocalSearchParams, Redirect } from 'expo-router'
 import CategoryScreen from '../../src/screens/lessons/CategoryScreen'
 import LessonScreen from '../../src/screens/lessons/LessonScreen'
 
