@@ -11,9 +11,11 @@ import {
 } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Ionicons } from '@expo/vector-icons'
+import { Bot } from 'lucide-react-native'
 import { useAppDispatch } from '../../hooks/useStore'
 import { authService, profileService } from '../../services/api'
 import { setSession, setProfile } from '../../store/slices/authSlice'
+import { Theme } from '../../theme'
 
 export default function LoginScreen() {
   const dispatch = useAppDispatch()
@@ -130,169 +132,202 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: 'white' }}
+      style={{ flex: 1, backgroundColor: Theme.colors.background }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <LinearGradient colors={['#4F46E5', '#7C3AED']} style={styles.header}>
-        <Text style={styles.logoEmoji}>🎓</Text>
+      <LinearGradient colors={[Theme.colors.background, Theme.colors.primary]} style={styles.header}>
+        <View style={styles.logoCircle}>
+          <Bot size={40} color={Theme.colors.secondary} />
+        </View>
         <Text style={styles.appName}>EnglishMitraAI</Text>
         <Text style={styles.poweredByMaansvi}>powered by Maansvi</Text>
         <Text style={styles.tagline}>Telugu Medium Student కి English నేర్పే AI</Text>
       </LinearGradient>
 
-      <ScrollView contentContainerStyle={styles.formContainer} keyboardShouldPersistTaps="handled">
-        <Text style={styles.welcomeText}>Login (లాగిన్) 👋</Text>
-        <Text style={styles.welcomeSubtext}>మీ ఈమెయిల్ మరియు పాస్‌వర్డ్ నమోదు చేయండి</Text>
-        <Text style={styles.welcomeSubtextEn}>Enter your email and password to continue</Text>
+      <View style={styles.formContainerWrapper}>
+        <ScrollView contentContainerStyle={styles.formContainer} keyboardShouldPersistTaps="handled">
+          <Text style={styles.welcomeText}>Welcome Back 👋</Text>
+          <Text style={styles.welcomeSubtext}>లాగిన్ చేసి నేర్చుకోవడం ప్రారంభించండి</Text>
 
-        <View style={styles.inputWrapper}>
-          <Text style={styles.inputLabel}>Email (ఈమెయిల్)</Text>
-          <View style={[styles.inputContainer, errors.email ? styles.inputErrorBorder : null]}>
-            <TextInput
-              style={styles.input}
-              placeholder="example@gmail.com"
-              placeholderTextColor="#9CA3AF"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              value={email}
-              onChangeText={(text) => {
-                setEmail(text)
-                if (errors.email) {
-                  setErrors(prev => ({ ...prev, email: '' }))
-                }
-              }}
-            />
-          </View>
-          {errors.email ? (
-            <Text style={styles.errorText}>{errors.email}</Text>
-          ) : null}
-        </View>
-
-        <View style={styles.inputWrapper}>
-          <Text style={styles.inputLabel}>Password (పాస్‌వర్డ్)</Text>
-          <View style={[styles.inputContainer, errors.password ? styles.inputErrorBorder : null]}>
-            <TextInput
-              style={styles.input}
-              placeholder="••••••••"
-              placeholderTextColor="#9CA3AF"
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              value={password}
-              onChangeText={(text) => {
-                setPassword(text)
-                if (errors.password) {
-                  setErrors(prev => ({ ...prev, password: '' }))
-                }
-              }}
-            />
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.showHideButton}
-              activeOpacity={0.7}
-            >
-              <Ionicons
-                name={showPassword ? 'eye-outline' : 'eye-off-outline'}
-                size={22}
-                color="#6B7280"
+          <View style={styles.inputWrapper}>
+            <Text style={styles.inputLabel}>Email / ఈమెయిల్</Text>
+            <View style={[styles.inputContainer, errors.email ? styles.inputErrorBorder : null]}>
+              <Ionicons name="mail-outline" size={20} color={Theme.colors.secondary} style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="example@gmail.com"
+                placeholderTextColor={Theme.colors.textSecondary}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                value={email}
+                onChangeText={(text) => {
+                  setEmail(text)
+                  if (errors.email) {
+                    setErrors(prev => ({ ...prev, email: '' }))
+                  }
+                }}
               />
-            </TouchableOpacity>
+            </View>
+            {errors.email ? (
+              <Text style={styles.errorText}>{errors.email}</Text>
+            ) : null}
           </View>
-          {errors.password ? (
-            <Text style={styles.errorText}>{errors.password}</Text>
-          ) : null}
-        </View>
 
-        <TouchableOpacity
-          style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.primaryButtonText}>Login →</Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => router.push('/signup')} style={styles.switchAuthMode}>
-          <Text style={styles.switchAuthText}>
-            Don't have an account? <Text style={styles.switchAuthLink}>Create Account</Text>
-          </Text>
-          <Text style={styles.switchAuthTextTelugu}>
-            ఖాతా లేదా? <Text style={styles.switchAuthLink}>ఖాతాను సృష్టించండి</Text>
-          </Text>
-        </TouchableOpacity>
-
-        <View style={styles.devBypassContainer}>
-          <View style={styles.dividerContainer}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>OR QUICK ACCESS</Text>
-            <View style={styles.dividerLine} />
+          <View style={styles.inputWrapper}>
+            <Text style={styles.inputLabel}>Password / పాస్‌వర్డ్</Text>
+            <View style={[styles.inputContainer, errors.password ? styles.inputErrorBorder : null]}>
+              <Ionicons name="lock-closed-outline" size={20} color={Theme.colors.secondary} style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="••••••••"
+                placeholderTextColor={Theme.colors.textSecondary}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text)
+                  if (errors.password) {
+                    setErrors(prev => ({ ...prev, password: '' }))
+                  }
+                }}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.showHideButton}
+                activeOpacity={0.7}
+              >
+                <Ionicons
+                  name={showPassword ? 'eye-outline' : 'eye-off-outline'}
+                  size={22}
+                  color={Theme.colors.secondary}
+                />
+              </TouchableOpacity>
+            </View>
+            {errors.password ? (
+              <Text style={styles.errorText}>{errors.password}</Text>
+            ) : null}
           </View>
 
           <TouchableOpacity
-            style={styles.guestButton}
-            onPress={handleGuestLogin}
+            style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
+            onPress={handleLogin}
             disabled={loading}
+            activeOpacity={0.8}
           >
-            <Text style={styles.guestButtonText}>⚡ Skip Login & Continue as Guest</Text>
+            <LinearGradient 
+              colors={loading ? [Theme.colors.surface, Theme.colors.surface] : [Theme.colors.secondary, '#0096FF']} 
+              start={{x: 0, y: 0}} end={{x: 1, y: 0}}
+              style={styles.primaryButtonGradient}
+            >
+              {loading ? (
+                <ActivityIndicator color={Theme.colors.text} />
+              ) : (
+                <Text style={styles.primaryButtonText}>Initialize Connection →</Text>
+              )}
+            </LinearGradient>
           </TouchableOpacity>
-        </View>
 
-        <View style={styles.termsContainer}>
-          <Text style={styles.termsText}>
-            By continuing, you agree to our{' '}
-            <Text style={styles.termsLink}>Terms of Service</Text>
-            {' '}and{' '}
-            <Text style={styles.termsLink}>Privacy Policy</Text>
-          </Text>
-        </View>
-      </ScrollView>
+          <TouchableOpacity onPress={() => router.push('/signup')} style={styles.switchAuthMode}>
+            <Text style={styles.switchAuthText}>
+              New user? <Text style={styles.switchAuthLink}>Create Account</Text>
+            </Text>
+            <Text style={styles.switchAuthTextTelugu}>
+              కొత్త వినియోగదారుడా? <Text style={styles.switchAuthLink}>ఖాతాను సృష్టించండి</Text>
+            </Text>
+          </TouchableOpacity>
+
+          <View style={styles.devBypassContainer}>
+            <View style={styles.dividerContainer}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>OR QUICK ACCESS</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity
+              style={styles.guestButton}
+              onPress={handleGuestLogin}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="flash-outline" size={18} color={Theme.colors.accent} style={{marginRight: 6}} />
+              <Text style={styles.guestButtonText}>Continue as Guest</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.termsContainer}>
+            <Text style={styles.termsText}>
+              By continuing, you agree to our{' '}
+              <Text style={styles.termsLink}>Terms</Text>
+              {' '}and{' '}
+              <Text style={styles.termsLink}>Privacy Policy</Text>
+            </Text>
+          </View>
+        </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   )
 }
 
 const styles = StyleSheet.create({
-  header: { paddingTop: 60, paddingBottom: 40, alignItems: 'center' },
-  logoEmoji: { fontSize: 48, marginBottom: 8 },
-  appName: { fontSize: 28, fontWeight: '800', color: 'white' },
+  header: { paddingTop: 60, paddingBottom: 60, alignItems: 'center' },
+  logoCircle: {
+    width: 80, height: 80, borderRadius: 40,
+    backgroundColor: Theme.colors.surface,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 1, borderColor: Theme.colors.secondary,
+    shadowColor: Theme.colors.secondary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 15,
+    elevation: 8,
+  },
+
+  appName: { fontSize: 28, fontWeight: '800', color: Theme.colors.text, letterSpacing: 1 },
   poweredByMaansvi: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.7)',
+    color: Theme.colors.textSecondary,
     fontWeight: '500',
     marginTop: 4,
     fontStyle: 'italic',
   },
-  tagline: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 6, textAlign: 'center', paddingHorizontal: 20 },
-  formContainer: { padding: 32, backgroundColor: 'white', flexGrow: 1 },
-  welcomeText: { fontSize: 24, fontWeight: '800', color: '#111827', marginBottom: 6 },
-  welcomeSubtext: { fontSize: 14, color: '#4B5563', marginBottom: 2 },
-  welcomeSubtextEn: { fontSize: 13, color: '#9CA3AF', marginBottom: 24 },
-  inputWrapper: { marginBottom: 16 },
-  inputLabel: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6 },
+  tagline: { fontSize: 13, color: Theme.colors.textSecondary, marginTop: 12, textAlign: 'center', paddingHorizontal: 20 },
+  formContainerWrapper: {
+    flex: 1,
+    marginTop: -30,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    backgroundColor: Theme.colors.background,
+    overflow: 'hidden',
+  },
+  formContainer: { padding: 32, flexGrow: 1 },
+  welcomeText: { fontSize: 24, fontWeight: '800', color: Theme.colors.text, marginBottom: 6 },
+  welcomeSubtext: { fontSize: 14, color: Theme.colors.textSecondary, marginBottom: 32 },
+  inputWrapper: { marginBottom: 20 },
+  inputLabel: { fontSize: 13, fontWeight: '600', color: Theme.colors.textSecondary, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 2, borderColor: '#4F46E5', borderRadius: 14,
-    overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
+    borderWidth: 1, borderColor: Theme.colors.border, borderRadius: 16,
+    backgroundColor: Theme.colors.surface,
   },
+  inputIcon: { marginLeft: 16 },
   input: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 16,
     fontSize: 16,
-    color: '#111827',
+    color: Theme.colors.text,
   },
   inputErrorBorder: {
-    borderColor: '#EF4444',
+    borderColor: Theme.colors.error,
   },
   errorText: {
-    color: '#EF4444',
+    color: Theme.colors.error,
     fontSize: 12,
-    marginTop: 4,
+    marginTop: 6,
     marginLeft: 4,
     fontWeight: '500',
   },
@@ -303,30 +338,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   primaryButton: {
-    backgroundColor: '#4F46E5', paddingVertical: 16,
-    borderRadius: 14, alignItems: 'center', elevation: 3,
-    marginTop: 8,
+    borderRadius: 16, 
+    marginTop: 12,
+    shadowColor: Theme.colors.secondary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  primaryButtonDisabled: { backgroundColor: '#9CA3AF' },
-  primaryButtonText: { color: 'white', fontSize: 17, fontWeight: '700' },
-  switchAuthMode: { marginTop: 20, alignItems: 'center' },
-  switchAuthText: { fontSize: 14, color: '#4B5563' },
-  switchAuthTextTelugu: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
-  switchAuthLink: { color: '#4F46E5', fontWeight: '700' },
-  devBypassContainer: { marginTop: 24 },
-  dividerContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: '#E5E7EB' },
-  dividerText: { fontSize: 11, fontWeight: '700', color: '#9CA3AF', marginHorizontal: 12, letterSpacing: 1 },
-  guestButton: {
-    backgroundColor: '#F3F4F6',
-    borderWidth: 2,
-    borderColor: '#E5E7EB',
-    paddingVertical: 16,
-    borderRadius: 14,
+  primaryButtonDisabled: { 
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  primaryButtonGradient: {
+    paddingVertical: 18,
+    borderRadius: 16,
     alignItems: 'center',
   },
-  guestButtonText: { color: '#4F46E5', fontSize: 16, fontWeight: '700' },
-  termsContainer: { marginTop: 24, alignItems: 'center' },
-  termsText: { fontSize: 12, color: '#9CA3AF', textAlign: 'center', lineHeight: 18 },
-  termsLink: { color: '#4F46E5' },
+  primaryButtonText: { color: '#000000', fontSize: 16, fontWeight: '800', letterSpacing: 0.5 },
+  switchAuthMode: { marginTop: 24, alignItems: 'center' },
+  switchAuthText: { fontSize: 14, color: Theme.colors.textSecondary },
+  switchAuthTextTelugu: { fontSize: 12, color: 'rgba(160, 179, 214, 0.6)', marginTop: 4 },
+  switchAuthLink: { color: Theme.colors.secondary, fontWeight: '700' },
+  devBypassContainer: { marginTop: 32 },
+  dividerContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: Theme.colors.border },
+  dividerText: { fontSize: 11, fontWeight: '700', color: Theme.colors.textSecondary, marginHorizontal: 12, letterSpacing: 1 },
+  guestButton: {
+    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Theme.colors.border,
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  guestButtonText: { color: Theme.colors.text, fontSize: 15, fontWeight: '700' },
+  termsContainer: { marginTop: 32, alignItems: 'center' },
+  termsText: { fontSize: 12, color: Theme.colors.textSecondary, textAlign: 'center', lineHeight: 18 },
+  termsLink: { color: Theme.colors.secondary },
 })

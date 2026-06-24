@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import * as Speech from 'expo-speech';
+import { Bot } from 'lucide-react-native';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -262,7 +263,10 @@ const PracticeModal: React.FC<{
 
               {/* AI Feedback */}
               <View style={styles.feedbackSection}>
-                <Text style={styles.feedbackTitle}>🤖 AI Feedback</Text>
+                <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 16}}>
+                  <Bot size={18} color="#111827" style={{marginRight: 6}} />
+                  <Text style={[styles.feedbackTitle, {marginBottom: 0}]}>AI Feedback</Text>
+                </View>
                 <View style={styles.scoreRow}>
                   <View style={styles.scoreCircle}>
                     <Text style={styles.scoreNumber}>{template.mockFeedback.score}</Text>

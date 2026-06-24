@@ -1,16 +1,37 @@
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import * as Speech from 'expo-speech'
+import {
+  Activity,
+  Bell,
+  BookOpen,
+  Bot,
+  Briefcase,
+  Building,
+  Check,
+  CheckCircle2,
+  Flame,
+  Mail,
+  MessageCircle,
+  Mic,
+  Rocket,
+  Star,
+  Target,
+  Trophy,
+  User,
+  Volume2,
+  X,
+  Zap
+} from 'lucide-react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import {
   Alert,
-  Dimensions,
   RefreshControl,
   ScrollView, StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native'
 import { useAppDispatch, useAppSelector } from '../../hooks/useStore'
 import { DailyFeed, generateDailyFeed, invalidateDailyFeed } from '../../services/personalization/personalizationEngine'
@@ -23,29 +44,27 @@ import {
 import { fetchProfile } from '../../store/slices/authSlice'
 import { fetchDailyChallenge, fetchLeaderboard } from '../../store/slices/gamificationSlice'
 import { fetchCategories } from '../../store/slices/lessonsSlice'
+import { Theme } from '../../theme'
 
-const { width } = Dimensions.get('window')
 
 const FEATURED_MODULES = [
-  { day: 0, icon: '🙏', name: 'Daily Greetings', subtitle: 'Start your week with confidence', route: '/features/daily-greetings', gradient: ['#4F46E5', '#7C3AED'] },
-  { day: 1, icon: '🎤', name: 'Self Introduction', subtitle: 'Make a great first impression', route: '/features/self-introduction', gradient: ['#0891B2', '#0E7490'] },
-  { day: 2, icon: '🏢', name: 'Office Conversations', subtitle: 'Excel at workplace English', route: '/features/office-conversations', gradient: ['#059669', '#047857'] },
-  { day: 3, icon: '📧', name: 'Email Writing', subtitle: 'Write professional emails', route: '/features/email-writing', gradient: ['#D97706', '#B45309'] },
-  { day: 4, icon: '💼', name: 'Interview Prep', subtitle: 'Ace your next interview', route: '/features/interview-training', gradient: ['#DC2626', '#B91C1C'] },
-  { day: 5, icon: '🎙️', name: 'Public Speaking', subtitle: 'Speak with authority', route: '/features/public-speaking', gradient: ['#7C3AED', '#6D28D9'] },
-  { day: 6, icon: '🤖', name: 'AI Roleplay', subtitle: 'Practice with Nova AI', route: '/ai/roleplay', gradient: ['#0891B2', '#4F46E5'] },
+  { day: 0, icon: Star, name: 'Daily Greetings', subtitle: 'Start your week with confidence', route: '/features/daily-greetings', gradient: [Theme.colors.background, Theme.colors.primary] },
+  { day: 1, icon: Mic, name: 'Self Introduction', subtitle: 'Make a great first impression', route: '/features/self-introduction', gradient: [Theme.colors.background, '#0A1F44'] },
+  { day: 2, icon: Building, name: 'Office Conversations', subtitle: 'Excel at workplace English', route: '/features/office-conversations', gradient: [Theme.colors.background, '#0D274A'] },
+  { day: 3, icon: Mail, name: 'Email Writing', subtitle: 'Write professional emails', route: '/features/email-writing', gradient: [Theme.colors.background, '#102A45'] },
+  { day: 4, icon: Briefcase, name: 'Interview Prep', subtitle: 'Ace your next interview', route: '/features/interview-training', gradient: [Theme.colors.background, '#0A1F44'] },
+  { day: 5, icon: Mic, name: 'Public Speaking', subtitle: 'Speak with authority', route: '/features/public-speaking', gradient: [Theme.colors.background, Theme.colors.primary] },
+  { day: 6, icon: Bot, name: 'AI Roleplay', subtitle: 'Practice with Nova AI', route: '/ai/roleplay', gradient: [Theme.colors.background, '#001A33'] },
 ]
 
 const QUICK_ACCESS = [
-  { icon: '💬', name: 'Daily Greetings', route: '/features/daily-greetings', difficulty: 1, isNew: false },
-  { icon: '🎤', name: 'Self Introduction', route: '/features/self-introduction', difficulty: 2, isNew: false },
-  { icon: '🏢', name: 'Office Talks', route: '/features/office-conversations', difficulty: 2, isNew: false },
-  { icon: '📧', name: 'Email Writing', route: '/features/email-writing', difficulty: 3, isNew: true },
-  { icon: '💼', name: 'Interview Prep', route: '/features/interview-training', difficulty: 3, isNew: true },
-  { icon: '🎙️', name: 'Public Speaking', route: '/features/public-speaking', difficulty: 3, isNew: true },
+  { icon: MessageCircle, name: 'Daily Greetings', route: '/features/daily-greetings', difficulty: 1, isNew: false },
+  { icon: Mic, name: 'Self Introduction', route: '/features/self-introduction', difficulty: 2, isNew: false },
+  { icon: Building, name: 'Office Talks', route: '/features/office-conversations', difficulty: 2, isNew: false },
+  { icon: Mail, name: 'Email Writing', route: '/features/email-writing', difficulty: 3, isNew: true },
+  { icon: Briefcase, name: 'Interview Prep', route: '/features/interview-training', difficulty: 3, isNew: true },
+  { icon: Mic, name: 'Public Speaking', route: '/features/public-speaking', difficulty: 3, isNew: true },
 ]
-
-const RANK_EMOJI: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 
 export default function HomeDashboard() {
   const dispatch = useAppDispatch()
@@ -60,9 +79,9 @@ export default function HomeDashboard() {
   const getGreeting = () => {
     const hour = new Date().getHours()
     const name = profile?.full_name?.split(' ')[0] || 'Learner'
-    if (hour < 12) return `Good morning, ${name}! 👋`
-    if (hour < 17) return `Good afternoon, ${name}! 👋`
-    return `Good evening, ${name}! 👋`
+    if (hour < 12) return `Good morning, ${name}!`
+    if (hour < 17) return `Good afternoon, ${name}!`
+    return `Good evening, ${name}!`
   }
 
   const loadFeed = useCallback(async () => {
@@ -112,7 +131,7 @@ export default function HomeDashboard() {
   const fallbackFeatured = FEATURED_MODULES[new Date().getDay()]
   const todayFeatured = dailyFeed?.recommendedModules?.[0]
     ? {
-        icon: dailyFeed.recommendedModules[0].icon || '📚',
+        icon: BookOpen,
         name: dailyFeed.recommendedModules[0].module,
         subtitle: dailyFeed.recommendedModules[0].reason,
         route: dailyFeed.recommendedModules[0].route,
@@ -120,11 +139,13 @@ export default function HomeDashboard() {
       }
     : fallbackFeatured
 
+  const FeaturedIcon = todayFeatured.icon
+
   // Quick access: prefer feed recommendations, fallback to static
   const quickAccessItems =
     dailyFeed?.recommendedModules && dailyFeed.recommendedModules.length >= 3
       ? dailyFeed.recommendedModules.map((m, i) => ({
-          icon: m.icon || '📚',
+          icon: BookOpen,
           name: m.module,
           route: m.route,
           difficulty: Math.min(3, Math.max(1, (i % 3) + 1)),
@@ -144,17 +165,24 @@ export default function HomeDashboard() {
   const quote = dailyFeed?.motivationalQuote
   const speakingPrompt = dailyFeed?.speakingPrompt
 
+  const getRankColor = (rank: number) => {
+    if (rank === 1) return '#FFD700'
+    if (rank === 2) return '#C0C0C0'
+    if (rank === 3) return '#CD7F32'
+    return Theme.colors.secondary
+  }
+
   const displayLeaderboard = leaderboard.length > 0
     ? leaderboard.slice(0, 3).map((e, i) => ({
         rank: i + 1,
-        name: e.full_name || 'Learner',
+        name: e.full_name || 'er',
         xp: e.xp_earned,
-        emoji: RANK_EMOJI[i + 1] || '🏅',
+        color: getRankColor(i + 1),
       }))
     : [
-        { rank: 1, name: 'Priya S.', xp: 3240, emoji: '🥇' },
-        { rank: 2, name: 'Ravi K.', xp: 2980, emoji: '🥈' },
-        { rank: 3, name: 'Anitha M.', xp: 2750, emoji: '🥉' },
+        { rank: 1, name: 'Priya S.', xp: 3240, color: '#FFD700' },
+        { rank: 2, name: 'Ravi K.', xp: 2980, color: '#C0C0C0' },
+        { rank: 3, name: 'Anitha M.', xp: 2750, color: '#CD7F32' },
       ]
 
   return (
@@ -165,34 +193,33 @@ export default function HomeDashboard() {
         <RefreshControl
           refreshing={refreshing || loading}
           onRefresh={onRefresh}
+          tintColor={Theme.colors.secondary}
         />
       }
     >
       {/* ── Header ── */}
-      <LinearGradient colors={['#4F46E5', '#7C3AED']} style={styles.header}>
+      <LinearGradient colors={[Theme.colors.background, Theme.colors.primary]} style={styles.header}>
         <View style={styles.headerTop}>
           <View style={{ flex: 1 }}>
             <Text style={styles.greeting}>{getGreeting()}</Text>
-            <Text style={styles.levelText}>Level {profile?.current_level || 1} • English Learner</Text>
+            <Text style={styles.levelText}>Level {profile?.current_level || 1} • System Ready</Text>
           </View>
           <View style={styles.headerRight}>
             <TouchableOpacity
               style={styles.notifBtn}
               onPress={() => {
                 Alert.alert(
-                  "Notifications 🔔",
-                  "• 🎯 Daily Challenge is ready!\n• 💬 Practice your Greetings today.\n• 📈 You are on a 5-day streak, keep it up!",
-                  [{ text: "Close", style: "cancel" }]
+                  "System Notifications",
+                  "• Daily Protocol is ready!\n• Practice your Greetings today.\n• You are on a 5-day streak, keep it up!",
+                  [{ text: "Acknowledge", style: "cancel" }]
                 )
               }}
             >
-              <Text style={styles.notifIcon}>🔔</Text>
+              <Bell size={20} color={Theme.colors.secondary} strokeWidth={2.5} />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push('/profile')}>
               <View style={styles.avatarCircle}>
-                <Text style={styles.avatarEmoji}>
-                  {profile?.full_name?.charAt(0).toUpperCase() || '👤'}
-                </Text>
+                <User size={22} color={Theme.colors.text} strokeWidth={2.5} />
               </View>
             </TouchableOpacity>
           </View>
@@ -201,10 +228,12 @@ export default function HomeDashboard() {
         {/* Streak + XP badges */}
         <View style={styles.badgeRow}>
           <View style={styles.badge}>
-            <Text style={styles.badgeText}>🔥 {streak} Day Streak</Text>
+            <Flame size={16} color={Theme.colors.text} strokeWidth={2.5} />
+            <Text style={styles.badgeText}>{streak} Cycle Streak</Text>
           </View>
-          <View style={[styles.badge, { backgroundColor: 'rgba(251,191,36,0.25)' }]}>
-            <Text style={styles.badgeText}>⚡ {xpTotal.toLocaleString()} XP</Text>
+          <View style={[styles.badge, { backgroundColor: 'rgba(255, 184, 0, 0.15)', borderColor: Theme.colors.accent, borderWidth: 1 }]}>
+            <Zap size={16} color={Theme.colors.accent} strokeWidth={2.5} />
+            <Text style={[styles.badgeText, { color: Theme.colors.accent }]}>{xpTotal.toLocaleString()} XP</Text>
           </View>
         </View>
       </LinearGradient>
@@ -212,24 +241,36 @@ export default function HomeDashboard() {
       {/* ── Today's Progress Card ── */}
       <View style={styles.progressCard}>
         <View style={styles.progressHeader}>
-          <Text style={styles.progressTitle}>Today's Progress</Text>
+          <Text style={styles.progressTitle}>Daily Metric</Text>
           <Text style={styles.progressXP}>{xpToday} / {dailyGoalXP} XP</Text>
         </View>
         <View style={styles.progressBarBg}>
-          <View style={[styles.progressBarFill, { width: `${progressPct}%` }]} />
+          <View style={[styles.progressBarFill, { width: `${progressPct}%` as any }]} />
         </View>
-        <Text style={styles.progressMotivation}>
-          {progressPct >= 80 ? '🎉 Almost there! You\'re crushing it!' : progressPct >= 50 ? '💪 Keep going! Almost there!' : '🚀 Great start! Keep the momentum!'}
-        </Text>
+        <View style={styles.progressMotivationRow}>
+          {progressPct >= 80 ? (
+            <CheckCircle2 size={16} color={Theme.colors.secondary} />
+          ) : progressPct >= 50 ? (
+            <Activity size={16} color={Theme.colors.secondary} />
+          ) : (
+            <Rocket size={16} color={Theme.colors.secondary} />
+          )}
+          <Text style={styles.progressMotivation}>
+            {progressPct >= 80 ? 'Optimal performance achieved!' : progressPct >= 50 ? 'Connection stable. Keep going!' : 'Initialization complete. Start ing!'}
+          </Text>
+        </View>
       </View>
 
       {/* ── Vocabulary of the Day ── */}
       {vocab && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Vocabulary of the Day</Text>
+          <Text style={styles.sectionTitle}>Vocabulary Node</Text>
           <View style={styles.vocabCard}>
             <View style={styles.vocabTopRow}>
-              <Text style={styles.vocabWord}>{vocab.word}</Text>
+              <View style={styles.vocabWordRow}>
+                <BookOpen size={20} color={Theme.colors.secondary} />
+                <Text style={styles.vocabWord}>{vocab.word}</Text>
+              </View>
               <View style={styles.difficultyBadge}>
                 <Text style={styles.difficultyBadgeText}>{vocab.category || 'General'}</Text>
               </View>
@@ -240,7 +281,8 @@ export default function HomeDashboard() {
               style={styles.hearBtn}
               onPress={() => Speech.speak(vocab.word, { language: 'en-IN', rate: 0.85 })}
             >
-              <Text style={styles.hearBtnText}>🔊 Hear it</Text>
+              <Volume2 size={16} color={Theme.colors.text} />
+              <Text style={styles.hearBtnText}>Transmit Audio</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -248,19 +290,21 @@ export default function HomeDashboard() {
 
       {/* ── Featured Module ── */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Today's Focus</Text>
+        <Text style={styles.sectionTitle}>Primary Directive</Text>
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={() => router.push(todayFeatured.route as any)}
         >
           <LinearGradient colors={todayFeatured.gradient as [string, string]} style={styles.featuredCard}>
-            <Text style={styles.featuredIcon}>{todayFeatured.icon}</Text>
+            <View style={styles.featuredIconWrap}>
+               <FeaturedIcon size={36} color={Theme.colors.text} strokeWidth={1.5} />
+            </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.featuredLabel}>TODAY'S FOCUS</Text>
+              <Text style={styles.featuredLabel}>TODAY'S DIRECTIVE</Text>
               <Text style={styles.featuredName}>{todayFeatured.name}</Text>
               <Text style={styles.featuredSubtitle}>{todayFeatured.subtitle}</Text>
             </View>
-            <Text style={styles.featuredArrow}>Start Learning →</Text>
+            <Text style={styles.featuredArrow}>Execute →</Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -270,7 +314,10 @@ export default function HomeDashboard() {
         <View style={styles.section}>
           <View style={styles.speakCard}>
             <View style={styles.speakTopRow}>
-              <Text style={styles.speakTitle}>🎤 Today's Speaking Challenge</Text>
+              <View style={styles.speakTitleRow}>
+                <Mic size={20} color={Theme.colors.text} />
+                <Text style={styles.speakTitle}>Audio Interface Challenge</Text>
+              </View>
               <View style={styles.durationBadge}>
                 <Text style={styles.durationBadgeText}>2 min</Text>
               </View>
@@ -280,7 +327,7 @@ export default function HomeDashboard() {
               style={styles.speakBtn}
               onPress={() => router.push('/features/public-speaking' as any)}
             >
-              <Text style={styles.speakBtnText}>Start Speaking →</Text>
+              <Text style={styles.speakBtnText}>Initialize Mic →</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -289,7 +336,7 @@ export default function HomeDashboard() {
       {/* ── Grammar Tip of the Day ── */}
       {grammarTip && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Grammar Tip of the Day</Text>
+          <Text style={styles.sectionTitle}>Syntax Optimization</Text>
           <View style={styles.grammarTipCard}>
             <View style={styles.grammarTipTopRow}>
               <View style={styles.grammarTopicBadge}>
@@ -299,19 +346,25 @@ export default function HomeDashboard() {
             <Text style={styles.grammarTipText}>{grammarTip.tip}</Text>
             <View style={styles.grammarExampleRow}>
               <View style={styles.grammarExampleBlock}>
-                <Text style={styles.grammarExampleLabel}>✅ Correct</Text>
-                <Text style={[styles.grammarExampleText, { color: '#059669' }]}>{grammarTip.example_correct}</Text>
+                <View style={styles.grammarExampleLabelRow}>
+                  <Check size={14} color="#00E676" strokeWidth={3} />
+                  <Text style={styles.grammarExampleLabel}>Valid Syntax</Text>
+                </View>
+                <Text style={[styles.grammarExampleText, { color: '#00E676' }]}>{grammarTip.example_correct}</Text>
               </View>
               <View style={styles.grammarExampleBlock}>
-                <Text style={styles.grammarExampleLabel}>❌ Wrong</Text>
-                <Text style={[styles.grammarExampleText, { color: '#DC2626' }]}>{grammarTip.example_wrong}</Text>
+                <View style={styles.grammarExampleLabelRow}>
+                  <X size={14} color={Theme.colors.error} strokeWidth={3} />
+                  <Text style={styles.grammarExampleLabel}>Invalid Syntax</Text>
+                </View>
+                <Text style={[styles.grammarExampleText, { color: Theme.colors.error }]}>{grammarTip.example_wrong}</Text>
               </View>
             </View>
             <TouchableOpacity
               style={styles.practiceTipBtn}
               onPress={() => router.push('/features/grammar-engine' as any)}
             >
-              <Text style={styles.practiceTipBtnText}>Practice This →</Text>
+              <Text style={styles.practiceTipBtnText}>Compile & Practice →</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -319,55 +372,62 @@ export default function HomeDashboard() {
 
       {/* ── Quick Access Grid ── */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Access</Text>
+        <Text style={styles.sectionTitle}>System Modules</Text>
         <View style={styles.quickGrid}>
-          {quickAccessItems.map((item) => (
-            <TouchableOpacity
-              key={item.name}
-              style={styles.quickCard}
-              activeOpacity={0.8}
-              onPress={() => router.push(item.route as any)}
-            >
-              {item.isNew && <View style={styles.newBadge}><Text style={styles.newBadgeText}>NEW</Text></View>}
-              <Text style={styles.quickIcon}>{item.icon}</Text>
-              <Text style={styles.quickName}>{item.name}</Text>
-              <View style={styles.difficultyRow}>
-                {[1, 2, 3].map(d => (
-                  <View key={d} style={[styles.diffDot, { backgroundColor: d <= item.difficulty ? '#4F46E5' : '#E5E7EB' }]} />
-                ))}
-              </View>
-            </TouchableOpacity>
-          ))}
+          {quickAccessItems.map((item) => {
+            const IconComp = item.icon
+            return (
+              <TouchableOpacity
+                key={item.name}
+                style={styles.quickCard}
+                activeOpacity={0.8}
+                onPress={() => router.push(item.route as any)}
+              >
+                {item.isNew && <View style={styles.newBadge}><Text style={styles.newBadgeText}>NEW</Text></View>}
+                <View style={styles.quickIconWrap}>
+                  <IconComp size={28} color={Theme.colors.secondary} strokeWidth={1.5} />
+                </View>
+                <Text style={styles.quickName}>{item.name}</Text>
+                <View style={styles.difficultyRow}>
+                  {[1, 2, 3].map(d => (
+                    <View key={d} style={[styles.diffDot, { backgroundColor: d <= item.difficulty ? Theme.colors.secondary : 'rgba(255,255,255,0.1)' }]} />
+                  ))}
+                </View>
+              </TouchableOpacity>
+            )
+          })}
         </View>
       </View>
 
       {/* ── AI Nova Section ── */}
       <View style={styles.section}>
         <TouchableOpacity activeOpacity={0.9} onPress={() => router.push('/ai/chat' as any)}>
-          <LinearGradient colors={['#1E1B4B', '#312E81']} style={styles.novaCard}>
+          <LinearGradient colors={[Theme.colors.surface, '#0F2E5C']} style={styles.novaCard}>
             <View style={styles.novaAvatarWrap}>
-              <LinearGradient colors={['#4F46E5', '#7C3AED']} style={styles.novaAvatar}>
-                <Text style={{ fontSize: 28 }}>🤖</Text>
+              <LinearGradient colors={['#00C2FF', '#4F46E5']} style={styles.novaAvatar}>
+                 <Bot size={28} color="#FFF" />
               </LinearGradient>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.novaTitle}>Chat with Nova</Text>
-              <Text style={styles.novaSubtitle}>Practice any topic with your AI tutor</Text>
+              <Text style={styles.novaTitle}>Interface with Nova</Text>
+              <Text style={styles.novaSubtitle}>Connect to your personal AI companion</Text>
             </View>
-            <Text style={styles.novaArrow}>Start Chatting →</Text>
+            <Text style={styles.novaArrow}>Connect →</Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>
 
       {/* ── Daily Challenge ── */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Daily Challenge</Text>
+        <Text style={styles.sectionTitle}>Daily Protocol</Text>
         <View style={styles.challengeCard}>
           <View style={styles.challengeHeader}>
-            <Text style={styles.challengeEmoji}>🎯</Text>
+            <View style={styles.challengeIconWrap}>
+               <Target size={32} color={Theme.colors.secondary} strokeWidth={1.5} />
+            </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.challengeTitle}>
-                {dailyChallenge?.title || 'Workplace Warrior'}
+                {dailyChallenge?.title || 'Workplace Protocol'}
               </Text>
               <Text style={styles.challengeDesc}>
                 {dailyChallenge?.description || 'Complete 3 office conversation exercises'}
@@ -378,7 +438,7 @@ export default function HomeDashboard() {
             </View>
           </View>
           <View style={styles.challengeProgress}>
-            <Text style={styles.challengeProgressText}>Progress: 0 / 3 tasks</Text>
+            <Text style={styles.challengeProgressText}>Execution: 0 / 3 tasks</Text>
             <View style={styles.challengeProgressBar}>
               <View style={[styles.challengeProgressFill, { width: '0%' }]} />
             </View>
@@ -387,7 +447,7 @@ export default function HomeDashboard() {
             style={styles.challengeBtn}
             onPress={() => router.push('/daily-challenge' as any)}
           >
-            <Text style={styles.challengeBtnText}>Accept Challenge</Text>
+            <Text style={styles.challengeBtnText}>Execute Protocol</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -395,11 +455,11 @@ export default function HomeDashboard() {
       {/* ── Interview Question of the Day ── */}
       {interviewQ && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Interview Question of the Day</Text>
+          <Text style={styles.sectionTitle}>Interview Node</Text>
           <View style={styles.interviewCard}>
             <View style={styles.interviewTopRow}>
-              <View style={[styles.categoryBadge, { backgroundColor: interviewQ.category === 'Technical' ? '#EEF2FF' : '#FEF3C7' }]}>
-                <Text style={[styles.categoryBadgeText, { color: interviewQ.category === 'Technical' ? '#4F46E5' : '#D97706' }]}>
+              <View style={[styles.categoryBadge, { backgroundColor: interviewQ.category === 'Technical' ? 'rgba(0, 194, 255, 0.1)' : 'rgba(255, 184, 0, 0.1)' }]}>
+                <Text style={[styles.categoryBadgeText, { color: interviewQ.category === 'Technical' ? Theme.colors.secondary : Theme.colors.accent }]}>
                   {interviewQ.category}
                 </Text>
               </View>
@@ -416,44 +476,44 @@ export default function HomeDashboard() {
               style={styles.answerBtn}
               onPress={() => router.push('/features/interview-training' as any)}
             >
-              <Text style={styles.answerBtnText}>Answer This →</Text>
+              <Text style={styles.answerBtnText}>Generate Response →</Text>
             </TouchableOpacity>
           </View>
         </View>
       )}
 
-      {/* ── Continue Learning ── */}
+      {/* ── Continue ing ── */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Continue Learning</Text>
+        <Text style={styles.sectionTitle}>Active Processes</Text>
         <TouchableOpacity
           style={styles.continueCard}
           activeOpacity={0.85}
           onPress={() => router.push('/lessons/office-conversations' as any)}
         >
           <View style={styles.continueLeft}>
-            <Text style={{ fontSize: 32 }}>🏢</Text>
-            <View style={{ marginLeft: 12, flex: 1 }}>
+            <Building size={32} color={Theme.colors.secondary} strokeWidth={1.5} />
+            <View style={{ marginLeft: 16, flex: 1 }}>
               <Text style={styles.continueName}>Office Conversations</Text>
-              <Text style={styles.continueProgress}>45% complete</Text>
+              <Text style={styles.continueProgress}>45% extracted</Text>
               <View style={styles.continueBarBg}>
                 <View style={[styles.continueBarFill, { width: '45%' }]} />
               </View>
             </View>
           </View>
-          <Text style={styles.continueArrow}>Continue →</Text>
+          <Text style={styles.continueArrow}>Resume →</Text>
         </TouchableOpacity>
       </View>
 
       {/* ── Grammar Check Widget ── */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Grammar Check</Text>
+        <Text style={styles.sectionTitle}>Syntax Diagnostics</Text>
         <View style={styles.grammarCard}>
-          <Text style={styles.grammarHint}>Check your grammar instantly</Text>
+          <Text style={styles.grammarHint}>Run diagnostic on your text</Text>
           <View style={styles.grammarInputRow}>
             <TextInput
               style={styles.grammarInput}
-              placeholder="Type a sentence to check..."
-              placeholderTextColor="#9CA3AF"
+              placeholder="Input query string..."
+              placeholderTextColor={Theme.colors.textSecondary}
               value={grammarText}
               onChangeText={setGrammarText}
               multiline={false}
@@ -468,7 +528,7 @@ export default function HomeDashboard() {
                 }
               }}
             >
-              <Text style={styles.grammarBtnText}>Check →</Text>
+              <Text style={styles.grammarBtnText}>Analyze →</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -490,25 +550,29 @@ export default function HomeDashboard() {
       {/* ── Leaderboard Preview ── */}
       <View style={styles.section}>
         <View style={styles.leaderHeader}>
-          <Text style={styles.sectionTitle}>This Week's Top Learners</Text>
+          <Text style={styles.sectionTitle}>Global Network Rank</Text>
           <TouchableOpacity onPress={() => router.push({ pathname: '/progress', params: { tab: 'leaderboard' } } as any)}>
-            <Text style={styles.viewAll}>View All →</Text>
+            <Text style={styles.viewAll}>View All Nodes →</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.leaderCard}>
           {displayLeaderboard.map(item => (
             <View key={item.rank} style={styles.leaderRow}>
-              <Text style={styles.leaderEmoji}>{item.emoji}</Text>
+              <View style={styles.leaderIconWrap}>
+                 <Trophy size={20} color={item.color} />
+              </View>
               <Text style={styles.leaderName}>{item.name}</Text>
-              <Text style={styles.leaderXP}>⚡ {item.xp.toLocaleString()} XP</Text>
+              <Text style={styles.leaderXP}>{item.xp.toLocaleString()} XP</Text>
             </View>
           ))}
           <View style={[styles.leaderRow, styles.leaderYouRow]}>
-            <Text style={styles.leaderEmoji}>👤</Text>
-            <Text style={[styles.leaderName, { color: '#4F46E5', fontWeight: '700' }]}>
-              {profile?.full_name?.split(' ')[0] || 'You'} (You)
+            <View style={styles.leaderIconWrap}>
+               <Bot size={20} color={Theme.colors.secondary} />
+            </View>
+            <Text style={[styles.leaderName, { color: Theme.colors.secondary, fontWeight: '700' }]}>
+              {profile?.full_name?.split(' ')[0] || 'You'} (Local)
             </Text>
-            <Text style={styles.leaderXP}>⚡ {xpTotal.toLocaleString()} XP</Text>
+            <Text style={styles.leaderXP}>{xpTotal.toLocaleString()} XP</Text>
           </View>
         </View>
       </View>
@@ -519,246 +583,270 @@ export default function HomeDashboard() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  container: { flex: 1, backgroundColor: Theme.colors.background },
 
   // Header
-  header: { padding: 24, paddingTop: 52, paddingBottom: 24 },
-  headerTop: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 16 },
-  greeting: { fontSize: 20, fontWeight: '800', color: 'white' },
-  levelText: { fontSize: 12, color: 'rgba(255,255,255,0.7)', marginTop: 3 },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  header: { padding: 24, paddingTop: 52, paddingBottom: 32 },
+  headerTop: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 20 },
+  greeting: { fontSize: 20, fontWeight: '800', color: Theme.colors.text, letterSpacing: 0.5 },
+  levelText: { fontSize: 12, color: Theme.colors.secondary, marginTop: 4, textTransform: 'uppercase', letterSpacing: 1 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   notifBtn: {
     width: 40, height: 40, borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(0,194,255,0.05)',
     alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: 'rgba(0,194,255,0.2)',
   },
-  notifIcon: { fontSize: 18 },
   avatarCircle: {
     width: 44, height: 44, borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
     alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: Theme.colors.secondary,
+    shadowColor: Theme.colors.secondary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  avatarEmoji: { fontSize: 20, color: 'white', fontWeight: '700' },
   badgeRow: { flexDirection: 'row', gap: 10 },
   badge: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8,
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)',
+    flexDirection: 'row', alignItems: 'center', gap: 6,
   },
-  badgeText: { color: 'white', fontWeight: '700', fontSize: 13 },
+  badgeText: { color: Theme.colors.text, fontWeight: '700', fontSize: 13 },
 
   // Progress card
   progressCard: {
-    margin: 16, marginTop: 16,
-    backgroundColor: 'white', borderRadius: 16, padding: 18,
-    elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08, shadowRadius: 6,
+    margin: 16, marginTop: -20,
+    backgroundColor: Theme.colors.surface, borderRadius: 16, padding: 18,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: Theme.colors.secondary, shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2, shadowRadius: 12, elevation: 8,
   },
   progressHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  progressTitle: { fontSize: 15, fontWeight: '700', color: '#111827' },
-  progressXP: { fontSize: 13, color: '#4F46E5', fontWeight: '700' },
-  progressBarBg: { height: 10, backgroundColor: '#E5E7EB', borderRadius: 5, overflow: 'hidden' },
-  progressBarFill: { height: 10, backgroundColor: '#4F46E5', borderRadius: 5 },
-  progressMotivation: { fontSize: 13, color: '#6B7280', marginTop: 8 },
+  progressTitle: { fontSize: 15, fontWeight: '700', color: Theme.colors.text, textTransform: 'uppercase', letterSpacing: 1 },
+  progressXP: { fontSize: 13, color: Theme.colors.secondary, fontWeight: '800' },
+  progressBarBg: { height: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' },
+  progressBarFill: { height: 8, backgroundColor: Theme.colors.secondary, borderRadius: 4, shadowColor: Theme.colors.secondary, shadowOpacity: 1, shadowRadius: 10, elevation: 5 },
+  progressMotivationRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 12 },
+  progressMotivation: { fontSize: 12, color: Theme.colors.textSecondary, fontStyle: 'italic' },
 
   // Section
-  section: { paddingHorizontal: 16, marginTop: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#111827', marginBottom: 12 },
+  section: { paddingHorizontal: 16, marginTop: 24 },
+  sectionTitle: { fontSize: 16, fontWeight: '800', color: Theme.colors.text, marginBottom: 14, textTransform: 'uppercase', letterSpacing: 1.5 },
 
   // Vocabulary of the Day
   vocabCard: {
-    backgroundColor: 'white', borderRadius: 16, padding: 18,
-    elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08, shadowRadius: 6,
+    backgroundColor: Theme.colors.surface, borderRadius: 16, padding: 18,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
   },
-  vocabTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
-  vocabWord: { fontSize: 26, fontWeight: '800', color: '#111827' },
-  difficultyBadge: { backgroundColor: '#EEF2FF', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4 },
-  difficultyBadgeText: { fontSize: 11, color: '#4F46E5', fontWeight: '700' },
-  vocabMeaning: { fontSize: 15, color: '#7C3AED', fontWeight: '600', marginBottom: 8 },
-  vocabExample: { fontSize: 13, color: '#6B7280', fontStyle: 'italic', marginBottom: 12 },
+  vocabTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  vocabWordRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  vocabWord: { fontSize: 26, fontWeight: '800', color: Theme.colors.text, letterSpacing: 0.5 },
+  difficultyBadge: { backgroundColor: 'rgba(0,194,255,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: 'rgba(0,194,255,0.3)' },
+  difficultyBadgeText: { fontSize: 11, color: Theme.colors.secondary, fontWeight: '800', textTransform: 'uppercase' },
+  vocabMeaning: { fontSize: 15, color: Theme.colors.secondary, fontWeight: '600', marginBottom: 8 },
+  vocabExample: { fontSize: 14, color: Theme.colors.textSecondary, fontStyle: 'italic', marginBottom: 16 },
   hearBtn: {
-    backgroundColor: '#EEF2FF', borderRadius: 10,
-    paddingVertical: 8, paddingHorizontal: 16, alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 10,
+    paddingVertical: 10, paddingHorizontal: 16, alignSelf: 'flex-start',
+    borderWidth: 1, borderColor: Theme.colors.border,
+    flexDirection: 'row', alignItems: 'center', gap: 8,
   },
-  hearBtnText: { color: '#4F46E5', fontWeight: '700', fontSize: 13 },
+  hearBtnText: { color: Theme.colors.text, fontWeight: '700', fontSize: 13 },
 
   // Speaking Prompt
   speakCard: {
-    backgroundColor: '#1E1B4B', borderRadius: 16, padding: 18,
-    elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12, shadowRadius: 6,
+    backgroundColor: '#0A1F44', borderRadius: 16, padding: 18,
+    borderWidth: 1, borderColor: Theme.colors.secondary,
+    shadowColor: Theme.colors.secondary, shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4, shadowRadius: 15, elevation: 6,
   },
-  speakTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  speakTitle: { fontSize: 14, fontWeight: '700', color: 'white', flex: 1 },
+  speakTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
+  speakTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  speakTitle: { fontSize: 14, fontWeight: '800', color: Theme.colors.text, textTransform: 'uppercase', letterSpacing: 1 },
   durationBadge: { backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 4 },
-  durationBadgeText: { fontSize: 11, color: 'white', fontWeight: '600' },
-  speakPrompt: { fontSize: 15, color: 'rgba(255,255,255,0.85)', marginBottom: 14, lineHeight: 22 },
+  durationBadgeText: { fontSize: 11, color: Theme.colors.text, fontWeight: '700' },
+  speakPrompt: { fontSize: 15, color: 'rgba(255,255,255,0.85)', marginBottom: 16, lineHeight: 22 },
   speakBtn: {
-    backgroundColor: '#4F46E5', borderRadius: 10,
-    paddingVertical: 10, alignItems: 'center',
+    backgroundColor: Theme.colors.secondary, borderRadius: 10,
+    paddingVertical: 12, alignItems: 'center',
   },
-  speakBtnText: { color: 'white', fontWeight: '700', fontSize: 14 },
+  speakBtnText: { color: '#000', fontWeight: '800', fontSize: 14 },
 
   // Grammar Tip of the Day
   grammarTipCard: {
-    backgroundColor: 'white', borderRadius: 16, padding: 18,
-    elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08, shadowRadius: 6,
+    backgroundColor: Theme.colors.surface, borderRadius: 16, padding: 18,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
   },
-  grammarTipTopRow: { marginBottom: 10 },
-  grammarTopicBadge: { backgroundColor: '#FEF3C7', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, alignSelf: 'flex-start' },
-  grammarTopicBadgeText: { fontSize: 11, color: '#D97706', fontWeight: '700' },
-  grammarTipText: { fontSize: 14, color: '#374151', marginBottom: 12, lineHeight: 21 },
-  grammarExampleRow: { flexDirection: 'row', gap: 10, marginBottom: 14 },
-  grammarExampleBlock: { flex: 1, backgroundColor: '#F9FAFB', borderRadius: 10, padding: 10 },
-  grammarExampleLabel: { fontSize: 11, fontWeight: '700', color: '#6B7280', marginBottom: 4 },
-  grammarExampleText: { fontSize: 13, fontWeight: '600' },
+  grammarTipTopRow: { marginBottom: 12 },
+  grammarTopicBadge: { backgroundColor: 'rgba(255,184,0,0.15)', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, alignSelf: 'flex-start', borderWidth: 1, borderColor: 'rgba(255,184,0,0.3)' },
+  grammarTopicBadgeText: { fontSize: 11, color: Theme.colors.accent, fontWeight: '800', textTransform: 'uppercase' },
+  grammarTipText: { fontSize: 15, color: Theme.colors.text, marginBottom: 16, lineHeight: 22 },
+  grammarExampleRow: { flexDirection: 'column', gap: 10, marginBottom: 16 },
+  grammarExampleBlock: { flex: 1, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: Theme.colors.border },
+  grammarExampleLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
+  grammarExampleLabel: { fontSize: 11, fontWeight: '800', color: Theme.colors.textSecondary, textTransform: 'uppercase' },
+  grammarExampleText: { fontSize: 14, fontWeight: '600' },
   practiceTipBtn: {
-    backgroundColor: '#FEF3C7', borderRadius: 10,
-    paddingVertical: 9, alignItems: 'center',
+    backgroundColor: 'rgba(255,184,0,0.1)', borderRadius: 10,
+    paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: Theme.colors.accent,
   },
-  practiceTipBtnText: { color: '#D97706', fontWeight: '700', fontSize: 14 },
+  practiceTipBtnText: { color: Theme.colors.accent, fontWeight: '800', fontSize: 14 },
 
   // Featured
   featuredCard: {
     borderRadius: 18, padding: 20, flexDirection: 'column',
-    elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15, shadowRadius: 8, gap: 4,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: Theme.colors.secondary, shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2, shadowRadius: 10, elevation: 6, gap: 4,
   },
-  featuredIcon: { fontSize: 40, marginBottom: 8 },
-  featuredLabel: { fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: '600', letterSpacing: 1 },
-  featuredName: { fontSize: 22, fontWeight: '800', color: 'white', marginTop: 2 },
-  featuredSubtitle: { fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4 },
-  featuredArrow: { fontSize: 14, color: 'white', fontWeight: '700', marginTop: 14, alignSelf: 'flex-start' },
+  featuredIconWrap: { marginBottom: 12 },
+  featuredLabel: { fontSize: 11, color: Theme.colors.secondary, fontWeight: '800', letterSpacing: 1.5, textTransform: 'uppercase' },
+  featuredName: { fontSize: 24, fontWeight: '800', color: Theme.colors.text, marginTop: 4, letterSpacing: 0.5 },
+  featuredSubtitle: { fontSize: 14, color: Theme.colors.textSecondary, marginTop: 6 },
+  featuredArrow: { fontSize: 14, color: Theme.colors.text, fontWeight: '800', marginTop: 16, alignSelf: 'flex-start' },
 
   // Quick Grid
-  quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  quickGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 12 },
   quickCard: {
-    width: (width - 56) / 3,
-    backgroundColor: 'white', borderRadius: 14, padding: 14,
-    alignItems: 'center', elevation: 2,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06, shadowRadius: 4, position: 'relative',
+    width: '31%',
+    backgroundColor: Theme.colors.surface, borderRadius: 14, padding: 14,
+    alignItems: 'center', elevation: 4,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2, shadowRadius: 6, position: 'relative',
   },
   newBadge: {
     position: 'absolute', top: 6, right: 6,
-    backgroundColor: '#EF4444', borderRadius: 6,
+    backgroundColor: Theme.colors.accent, borderRadius: 6,
     paddingHorizontal: 5, paddingVertical: 2,
   },
-  newBadgeText: { color: 'white', fontSize: 9, fontWeight: '800' },
-  quickIcon: { fontSize: 28, marginBottom: 6 },
-  quickName: { fontSize: 11, fontWeight: '700', color: '#111827', textAlign: 'center', marginBottom: 6 },
-  difficultyRow: { flexDirection: 'row', gap: 3 },
-  diffDot: { width: 7, height: 7, borderRadius: 4 },
+  newBadgeText: { color: '#000', fontSize: 9, fontWeight: '800' },
+  quickIconWrap: { marginBottom: 12, marginTop: 4 },
+  quickName: { fontSize: 11, fontWeight: '800', color: Theme.colors.text, textAlign: 'center', marginBottom: 8 },
+  difficultyRow: { flexDirection: 'row', gap: 4 },
+  diffDot: { width: 8, height: 8, borderRadius: 4 },
 
   // Nova
   novaCard: {
     borderRadius: 18, padding: 18, flexDirection: 'row',
     alignItems: 'center', gap: 14,
-    elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12, shadowRadius: 6,
+    borderWidth: 1, borderColor: Theme.colors.secondary,
+    shadowColor: Theme.colors.secondary, shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5, shadowRadius: 15, elevation: 6,
   },
   novaAvatarWrap: { borderRadius: 14, overflow: 'hidden' },
   novaAvatar: { width: 54, height: 54, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  novaTitle: { fontSize: 17, fontWeight: '800', color: 'white' },
-  novaSubtitle: { fontSize: 12, color: 'rgba(255,255,255,0.75)', marginTop: 3 },
-  novaArrow: { fontSize: 12, color: '#A5B4FC', fontWeight: '700' },
+  novaTitle: { fontSize: 17, fontWeight: '800', color: Theme.colors.text },
+  novaSubtitle: { fontSize: 12, color: Theme.colors.textSecondary, marginTop: 4 },
+  novaArrow: { fontSize: 12, color: Theme.colors.secondary, fontWeight: '800', textTransform: 'uppercase' },
 
   // Daily Challenge
   challengeCard: {
-    backgroundColor: 'white', borderRadius: 16, padding: 18,
-    elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08, shadowRadius: 6,
+    backgroundColor: Theme.colors.surface, borderRadius: 16, padding: 18,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
   },
-  challengeHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 14 },
-  challengeEmoji: { fontSize: 32 },
-  challengeTitle: { fontSize: 16, fontWeight: '700', color: '#111827' },
-  challengeDesc: { fontSize: 13, color: '#6B7280', marginTop: 3 },
-  xpReward: { backgroundColor: '#FEF3C7', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6 },
-  xpRewardText: { color: '#D97706', fontWeight: '800', fontSize: 13 },
-  challengeProgress: { marginBottom: 14 },
-  challengeProgressText: { fontSize: 13, color: '#6B7280', marginBottom: 6 },
-  challengeProgressBar: { height: 8, backgroundColor: '#E5E7EB', borderRadius: 4, overflow: 'hidden' },
-  challengeProgressFill: { height: 8, backgroundColor: '#4F46E5', borderRadius: 4 },
+  challengeHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 14, marginBottom: 16 },
+  challengeIconWrap: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(0,194,255,0.1)', alignItems: 'center', justifyContent: 'center' },
+  challengeTitle: { fontSize: 16, fontWeight: '800', color: Theme.colors.text, letterSpacing: 0.5 },
+  challengeDesc: { fontSize: 13, color: Theme.colors.textSecondary, marginTop: 4, lineHeight: 18 },
+  xpReward: { backgroundColor: 'rgba(255,184,0,0.15)', borderRadius: 10, paddingHorizontal: 10, paddingVertical: 6, borderWidth: 1, borderColor: 'rgba(255,184,0,0.3)' },
+  xpRewardText: { color: Theme.colors.accent, fontWeight: '800', fontSize: 13 },
+  challengeProgress: { marginBottom: 16 },
+  challengeProgressText: { fontSize: 13, color: Theme.colors.textSecondary, marginBottom: 8, fontWeight: '600' },
+  challengeProgressBar: { height: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' },
+  challengeProgressFill: { height: 8, backgroundColor: Theme.colors.secondary, borderRadius: 4, shadowColor: Theme.colors.secondary, shadowOpacity: 1, shadowRadius: 10 },
   challengeBtn: {
-    backgroundColor: '#4F46E5', borderRadius: 12,
-    paddingVertical: 13, alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12,
+    paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: Theme.colors.secondary,
   },
-  challengeBtnText: { color: 'white', fontWeight: '800', fontSize: 15 },
+  challengeBtnText: { color: Theme.colors.secondary, fontWeight: '800', fontSize: 15, textTransform: 'uppercase', letterSpacing: 1 },
 
   // Interview Question
   interviewCard: {
-    backgroundColor: 'white', borderRadius: 16, padding: 18,
-    elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08, shadowRadius: 6,
+    backgroundColor: Theme.colors.surface, borderRadius: 16, padding: 18,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
   },
-  interviewTopRow: { marginBottom: 10 },
-  categoryBadge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, alignSelf: 'flex-start' },
-  categoryBadgeText: { fontSize: 11, fontWeight: '700' },
-  interviewQuestion: { fontSize: 15, fontWeight: '600', color: '#111827', marginBottom: 12, lineHeight: 22 },
-  tipsContainer: { marginBottom: 14, gap: 4 },
-  tipText: { fontSize: 13, color: '#6B7280', lineHeight: 20 },
+  interviewTopRow: { marginBottom: 12 },
+  categoryBadge: { borderRadius: 8, paddingHorizontal: 10, paddingVertical: 4, alignSelf: 'flex-start', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  categoryBadgeText: { fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
+  interviewQuestion: { fontSize: 16, fontWeight: '700', color: Theme.colors.text, marginBottom: 14, lineHeight: 24 },
+  tipsContainer: { marginBottom: 16, gap: 6 },
+  tipText: { fontSize: 13, color: Theme.colors.textSecondary, lineHeight: 20 },
   answerBtn: {
-    backgroundColor: '#4F46E5', borderRadius: 10,
-    paddingVertical: 10, alignItems: 'center',
+    backgroundColor: Theme.colors.secondary, borderRadius: 10,
+    paddingVertical: 12, alignItems: 'center',
   },
-  answerBtnText: { color: 'white', fontWeight: '700', fontSize: 14 },
+  answerBtnText: { color: '#000', fontWeight: '800', fontSize: 14, textTransform: 'uppercase' },
 
   // Continue Learning
   continueCard: {
-    backgroundColor: 'white', borderRadius: 16, padding: 18,
+    backgroundColor: Theme.colors.surface, borderRadius: 16, padding: 18,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08, shadowRadius: 6,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
   },
   continueLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  continueName: { fontSize: 15, fontWeight: '700', color: '#111827' },
-  continueProgress: { fontSize: 12, color: '#6B7280', marginTop: 2, marginBottom: 6 },
-  continueBarBg: { height: 6, backgroundColor: '#E5E7EB', borderRadius: 3, overflow: 'hidden' },
-  continueBarFill: { height: 6, backgroundColor: '#059669', borderRadius: 3 },
-  continueArrow: { fontSize: 13, color: '#4F46E5', fontWeight: '700' },
+  continueName: { fontSize: 16, fontWeight: '800', color: Theme.colors.text },
+  continueProgress: { fontSize: 12, color: Theme.colors.textSecondary, marginTop: 4, marginBottom: 8 },
+  continueBarBg: { height: 6, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden' },
+  continueBarFill: { height: 6, backgroundColor: '#00E676', borderRadius: 3, shadowColor: '#00E676', shadowOpacity: 1, shadowRadius: 5 },
+  continueArrow: { fontSize: 13, color: Theme.colors.secondary, fontWeight: '800', textTransform: 'uppercase' },
 
   // Grammar Check
   grammarCard: {
-    backgroundColor: 'white', borderRadius: 16, padding: 18,
-    elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08, shadowRadius: 6,
+    backgroundColor: Theme.colors.surface, borderRadius: 16, padding: 18,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
   },
-  grammarHint: { fontSize: 13, color: '#6B7280', marginBottom: 12 },
-  grammarInputRow: { flexDirection: 'row', gap: 10 },
+  grammarHint: { fontSize: 13, color: Theme.colors.textSecondary, marginBottom: 14 },
+  grammarInputRow: { flexDirection: 'row', gap: 12 },
   grammarInput: {
-    flex: 1, backgroundColor: '#F9FAFB', borderRadius: 10,
-    borderWidth: 1, borderColor: '#E5E7EB',
-    paddingHorizontal: 14, paddingVertical: 10, fontSize: 14, color: '#111827',
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 10,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    paddingHorizontal: 16, paddingVertical: 12, fontSize: 14, color: Theme.colors.text,
   },
   grammarBtn: {
-    backgroundColor: '#4F46E5', borderRadius: 10,
-    paddingHorizontal: 16, justifyContent: 'center',
+    backgroundColor: Theme.colors.secondary, borderRadius: 10,
+    paddingHorizontal: 20, justifyContent: 'center',
   },
-  grammarBtnText: { color: 'white', fontWeight: '700', fontSize: 13 },
+  grammarBtnText: { color: '#000', fontWeight: '800', fontSize: 13, textTransform: 'uppercase' },
 
   // Motivational Quote
   quoteCard: {
-    backgroundColor: '#F5F3FF', borderRadius: 16, padding: 20,
-    borderLeftWidth: 4, borderLeftColor: '#7C3AED',
-    elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06, shadowRadius: 4,
+    backgroundColor: 'rgba(0,194,255,0.05)', borderRadius: 16, padding: 20,
+    borderLeftWidth: 4, borderLeftColor: Theme.colors.secondary,
+    borderWidth: 1, borderColor: Theme.colors.border,
   },
-  quoteText: { fontSize: 15, fontStyle: 'italic', color: '#374151', lineHeight: 24, marginBottom: 8 },
-  quoteAuthor: { fontSize: 13, fontWeight: '700', color: '#7C3AED' },
-  quoteTelugu: { fontSize: 12, color: '#9CA3AF', marginTop: 4, fontStyle: 'italic' },
+  quoteText: { fontSize: 16, fontStyle: 'italic', color: Theme.colors.text, lineHeight: 26, marginBottom: 10 },
+  quoteAuthor: { fontSize: 13, fontWeight: '800', color: Theme.colors.secondary, textTransform: 'uppercase' },
+  quoteTelugu: { fontSize: 12, color: Theme.colors.textSecondary, marginTop: 6, fontStyle: 'italic' },
 
   // Leaderboard
-  leaderHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  viewAll: { fontSize: 13, color: '#4F46E5', fontWeight: '700' },
+  leaderHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
+  viewAll: { fontSize: 12, color: Theme.colors.secondary, fontWeight: '800', textTransform: 'uppercase' },
   leaderCard: {
-    backgroundColor: 'white', borderRadius: 16, padding: 18,
-    elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08, shadowRadius: 6,
+    backgroundColor: Theme.colors.surface, borderRadius: 16, padding: 18,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
   },
-  leaderRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, gap: 12 },
-  leaderYouRow: { borderTopWidth: 1, borderTopColor: '#F3F4F6', marginTop: 4 },
-  leaderEmoji: { fontSize: 22, width: 32, textAlign: 'center' },
-  leaderName: { flex: 1, fontSize: 14, fontWeight: '600', color: '#111827' },
-  leaderXP: { fontSize: 13, color: '#6B7280', fontWeight: '600' },
+  leaderRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, gap: 14 },
+  leaderYouRow: { borderTopWidth: 1, borderTopColor: Theme.colors.border, marginTop: 6, paddingTop: 16 },
+  leaderIconWrap: { width: 32, alignItems: 'center' },
+  leaderName: { flex: 1, fontSize: 15, fontWeight: '700', color: Theme.colors.text },
+  leaderXP: { fontSize: 14, color: Theme.colors.secondary, fontWeight: '800' },
 })

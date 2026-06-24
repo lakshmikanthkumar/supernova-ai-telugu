@@ -14,7 +14,6 @@ import { showToast } from '../../store/slices/uiSlice'
 import TranslationToggle from '../../components/common/TranslationToggle'
 import type { VocabularyItem, DialogueLine } from '../../types'
 
-const { width } = Dimensions.get('window')
 
 export default function LessonScreen() {
   const dispatch = useAppDispatch()
@@ -258,7 +257,7 @@ const styles = StyleSheet.create({
   dialogueLineLeft: { alignItems: 'flex-start' },
   dialogueLineRight: { alignItems: 'flex-end' },
   dialogueSpeaker: { fontSize: 11, color: '#6B7280', marginBottom: 4, fontWeight: '600' },
-  dialogueBubble: { maxWidth: width * 0.72, padding: 12, borderRadius: 16 },
+  dialogueBubble: { maxWidth: '72%', padding: 12, borderRadius: 16 },
   bubbleLeft: { backgroundColor: '#EEF2FF', borderBottomLeftRadius: 4 },
   bubbleRight: { backgroundColor: '#4F46E5', borderBottomRightRadius: 4 },
   dialogueText: { fontSize: 14, lineHeight: 20, color: '#111827' },

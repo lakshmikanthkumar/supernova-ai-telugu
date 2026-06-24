@@ -14,8 +14,12 @@ import {
   Dimensions,
 } from 'react-native';
 import * as Speech from 'expo-speech';
+import { 
+  Target, Rocket, Lightbulb, Bot, Volume2, Mic, Check, BarChart2, 
+  Sparkles, FileText, Globe, Trophy, Zap, TrendingUp, CheckCircle2, 
+  ArrowRight, ArrowLeft, RefreshCw 
+} from 'lucide-react-native';
 
-const { width } = Dimensions.get('window');
 
 type Phase = 'setup' | 'active' | 'feedback' | 'complete';
 type JobRole = 'IT' | 'Finance' | 'Marketing' | 'HR' | 'Operations' | 'Teaching';
@@ -251,7 +255,7 @@ export default function InterviewTrainingScreen() {
   const renderSetupPhase = () => (
     <Animated.View style={[{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
       <View style={styles.headerCard}>
-        <Text style={styles.headerEmoji}>🎯</Text>
+        <Target size={48} color="#E0E7FF" style={{ marginBottom: 12 }} strokeWidth={1.5} />
         <Text style={styles.headerTitle}>Interview Training</Text>
         <Text style={styles.headerSubtitle}>Practice with AI Interviewer</Text>
       </View>
@@ -301,8 +305,11 @@ export default function InterviewTrainingScreen() {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.startButton} onPress={startInterview}>
-        <Text style={styles.startButtonText}>Start Interview 🚀</Text>
+      <TouchableOpacity style={styles.startButton} onPress={startInterview} activeOpacity={0.8}>
+        <View style={styles.btnRow}>
+          <Text style={styles.startButtonText}>Start Interview</Text>
+          <Rocket size={20} color="#FFFFFF" style={{ marginLeft: 8 }} />
+        </View>
       </TouchableOpacity>
 
       <View style={styles.sectionCard}>
@@ -321,13 +328,18 @@ export default function InterviewTrainingScreen() {
       </View>
 
       <View style={styles.sectionCard}>
-        <Text style={styles.sectionTitle}>💡 Interview Tips</Text>
-        {INTERVIEW_TIPS.map((tip, index) => (
-          <View key={index} style={styles.tipRow}>
-            <Text style={styles.tipNumber}>{index + 1}</Text>
-            <Text style={styles.tipText}>{tip}</Text>
-          </View>
-        ))}
+        <View style={styles.sectionTitleRow}>
+          <Lightbulb size={18} color="#F59E0B" style={{ marginRight: 8 }} />
+          <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Interview Tips</Text>
+        </View>
+        <View style={{ marginTop: 12 }}>
+          {INTERVIEW_TIPS.map((tip, index) => (
+            <View key={index} style={styles.tipRow}>
+              <Text style={styles.tipNumber}>{index + 1}</Text>
+              <Text style={styles.tipText}>{tip}</Text>
+            </View>
+          ))}
+        </View>
       </View>
     </Animated.View>
   );
@@ -337,18 +349,23 @@ export default function InterviewTrainingScreen() {
     return (
       <Animated.View style={[{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` }]} />
+          <View style={[styles.progressFill, { width: `${((currentQuestionIndex + 1) / questions.length) * 100}%` as any }]} />
         </View>
         <Text style={styles.progressText}>Question {currentQuestionIndex + 1} of {questions.length}</Text>
 
         <View style={styles.interviewerCard}>
           <View style={styles.avatarCircle}>
-            <Text style={styles.avatarEmoji}>🤖</Text>
+            <Bot size={28} color="#E0E7FF" />
           </View>
           <View style={styles.interviewerInfo}>
             <Text style={styles.interviewerName}>Priya AI Interviewer</Text>
             <Text style={styles.interviewerRole}>{selectedRole} • {selectedSessionType}</Text>
-            {isSpeaking && <Text style={styles.speakingIndicator}>🔊 Speaking...</Text>}
+            {isSpeaking && (
+              <View style={styles.speakingRow}>
+                <Volume2 size={12} color="#10B981" style={{ marginRight: 4 }} />
+                <Text style={styles.speakingIndicator}>Speaking...</Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -358,8 +375,10 @@ export default function InterviewTrainingScreen() {
           <TouchableOpacity
             style={styles.hearButton}
             onPress={() => speakQuestion(question?.text || '')}
+            activeOpacity={0.7}
           >
-            <Text style={styles.hearButtonText}>🔊 Hear Question Again</Text>
+            <Volume2 size={14} color="#A5B4FC" style={{ marginRight: 6 }} />
+            <Text style={styles.hearButtonText}>Hear Question Again</Text>
           </TouchableOpacity>
         </View>
 
@@ -377,15 +396,18 @@ export default function InterviewTrainingScreen() {
               textAlignVertical="top"
             />
             <View style={styles.answerActions}>
-              <TouchableOpacity style={styles.micButton}>
-                <Text style={styles.micButtonText}>🎤 Speak My Answer</Text>
+              <TouchableOpacity style={styles.micButton} activeOpacity={0.7}>
+                <Mic size={16} color="#818CF8" style={{ marginRight: 6 }} />
+                <Text style={styles.micButtonText}>Speak My Answer</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.submitButton, !currentAnswer.trim() && styles.submitButtonDisabled]}
                 onPress={submitAnswer}
                 disabled={!currentAnswer.trim()}
+                activeOpacity={0.8}
               >
-                <Text style={styles.submitButtonText}>Submit Answer ✓</Text>
+                <Text style={styles.submitButtonText}>Submit Answer</Text>
+                <Check size={16} color="#FFF" style={{ marginLeft: 6 }} />
               </TouchableOpacity>
             </View>
           </View>
@@ -407,18 +429,27 @@ export default function InterviewTrainingScreen() {
         </View>
 
         <View style={styles.feedbackCard}>
-          <Text style={styles.feedbackSubtitle}>📊 Overall Feedback</Text>
+          <View style={styles.sectionTitleRow}>
+            <BarChart2 size={16} color="#818CF8" style={{ marginRight: 6 }} />
+            <Text style={styles.feedbackSubtitle}>Overall Feedback</Text>
+          </View>
           <Text style={styles.feedbackText}>{feedback.text}</Text>
         </View>
 
         <View style={styles.betterAnswerCard}>
-          <Text style={styles.betterAnswerTitle}>✨ Better Answer Structure</Text>
+          <View style={styles.sectionTitleRow}>
+            <Sparkles size={16} color="#10B981" style={{ marginRight: 6 }} />
+            <Text style={styles.betterAnswerTitle}>Better Answer Structure</Text>
+          </View>
           <Text style={styles.betterAnswerText}>{feedback.betterAnswer}</Text>
         </View>
 
         {feedback.grammarCorrections.length > 0 && (
           <View style={styles.grammarCard}>
-            <Text style={styles.grammarTitle}>📝 Grammar Tips</Text>
+            <View style={styles.sectionTitleRow}>
+              <FileText size={16} color="#F59E0B" style={{ marginRight: 6 }} />
+              <Text style={styles.grammarTitle}>Grammar Tips</Text>
+            </View>
             {feedback.grammarCorrections.map((correction, index) => (
               <View key={index} style={styles.correctionRow}>
                 <Text style={styles.correctionBullet}>•</Text>
@@ -429,14 +460,24 @@ export default function InterviewTrainingScreen() {
         )}
 
         <View style={styles.teluguCard}>
-          <Text style={styles.teluguTitle}>🇮🇳 Telugu Guidance</Text>
+          <View style={styles.sectionTitleRow}>
+            <Globe size={16} color="#A5B4FC" style={{ marginRight: 6 }} />
+            <Text style={styles.teluguTitle}>Telugu Guidance</Text>
+          </View>
           <Text style={styles.teluguText}>{feedback.teluguGuidance}</Text>
         </View>
 
-        <TouchableOpacity style={styles.nextButton} onPress={nextQuestion}>
-          <Text style={styles.nextButtonText}>
-            {currentQuestionIndex + 1 >= questions.length ? 'See Results 🏆' : 'Next Question →'}
-          </Text>
+        <TouchableOpacity style={styles.nextButton} onPress={nextQuestion} activeOpacity={0.8}>
+          <View style={styles.btnRow}>
+            <Text style={styles.nextButtonText}>
+              {currentQuestionIndex + 1 >= questions.length ? 'See Results' : 'Next Question'}
+            </Text>
+            {currentQuestionIndex + 1 >= questions.length ? (
+              <Trophy size={18} color="#FFF" style={{ marginLeft: 8 }} />
+            ) : (
+              <ArrowRight size={18} color="#FFF" style={{ marginLeft: 8 }} />
+            )}
+          </View>
         </TouchableOpacity>
       </Animated.View>
     );
@@ -451,7 +492,7 @@ export default function InterviewTrainingScreen() {
     return (
       <Animated.View style={[{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
         <View style={styles.completeHeader}>
-          <Text style={styles.completeEmoji}>🏆</Text>
+          <Trophy size={64} color="#F59E0B" style={{ marginBottom: 16 }} />
           <Text style={styles.completeTitle}>Interview Complete!</Text>
           <Text style={styles.completeSubtitle}>Here's how you performed</Text>
         </View>
@@ -484,7 +525,7 @@ export default function InterviewTrainingScreen() {
               <Text style={styles.breakdownLabel}>{label}</Text>
               <View style={styles.breakdownBarBg}>
                 <View style={[styles.breakdownBarFill, {
-                  width: `${Math.min(score, 100)}%`,
+                  width: `${Math.min(score, 100)}%` as any,
                   backgroundColor: getScoreColor(score / 10),
                 }]} />
               </View>
@@ -494,31 +535,47 @@ export default function InterviewTrainingScreen() {
         </View>
 
         <View style={styles.strengthsCard}>
-          <Text style={styles.strengthsTitle}>💪 Top Strengths</Text>
-          {completionData.strengths.map((s, i) => (
-            <View key={i} style={styles.strengthRow}>
-              <Text style={styles.strengthIcon}>✅</Text>
-              <Text style={styles.strengthText}>{s}</Text>
-            </View>
-          ))}
+          <View style={styles.sectionTitleRow}>
+            <Zap size={18} color="#10B981" style={{ marginRight: 8 }} />
+            <Text style={[styles.strengthsTitle, { marginBottom: 0 }]}>Top Strengths</Text>
+          </View>
+          <View style={{ marginTop: 12 }}>
+            {completionData.strengths.map((s, i) => (
+              <View key={i} style={styles.strengthRow}>
+                <CheckCircle2 size={16} color="#10B981" style={{ marginRight: 10, marginTop: 2 }} />
+                <Text style={styles.strengthText}>{s}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
         <View style={styles.improvementsCard}>
-          <Text style={styles.improvementsTitle}>📈 Areas to Improve</Text>
-          {completionData.improvements.map((item, i) => (
-            <View key={i} style={styles.improvementRow}>
-              <Text style={styles.improvementIcon}>🎯</Text>
-              <Text style={styles.improvementText}>{item}</Text>
-            </View>
-          ))}
+          <View style={styles.sectionTitleRow}>
+            <TrendingUp size={18} color="#F59E0B" style={{ marginRight: 8 }} />
+            <Text style={[styles.improvementsTitle, { marginBottom: 0 }]}>Areas to Improve</Text>
+          </View>
+          <View style={{ marginTop: 12 }}>
+            {completionData.improvements.map((item, i) => (
+              <View key={i} style={styles.improvementRow}>
+                <Target size={16} color="#FCD34D" style={{ marginRight: 10, marginTop: 2 }} />
+                <Text style={styles.improvementText}>{item}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
         <View style={styles.completeActions}>
-          <TouchableOpacity style={styles.practiceAgainButton} onPress={resetSession}>
-            <Text style={styles.practiceAgainText}>Practice Again 🔄</Text>
+          <TouchableOpacity style={styles.practiceAgainButton} onPress={resetSession} activeOpacity={0.8}>
+            <View style={styles.btnRow}>
+              <Text style={styles.practiceAgainText}>Practice Again</Text>
+              <RefreshCw size={16} color="#FFF" style={{ marginLeft: 8 }} />
+            </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.reportButton}>
-            <Text style={styles.reportButtonText}>View Full Report 📄</Text>
+          <TouchableOpacity style={styles.reportButton} activeOpacity={0.8}>
+            <View style={styles.btnRow}>
+              <Text style={styles.reportButtonText}>View Full Report</Text>
+              <FileText size={16} color="#818CF8" style={{ marginLeft: 8 }} />
+            </View>
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -529,10 +586,15 @@ export default function InterviewTrainingScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#1E1B4B" />
       <View style={styles.topBar}>
-        {phase !== 'setup' && (
+        {phase !== 'setup' ? (
           <TouchableOpacity onPress={resetSession} style={styles.backButton}>
-            <Text style={styles.backButtonText}>← Exit</Text>
+            <View style={styles.btnRow}>
+              <ArrowLeft size={16} color="#818CF8" style={{ marginRight: 4 }} />
+              <Text style={styles.backButtonText}>Exit</Text>
+            </View>
           </TouchableOpacity>
+        ) : (
+          <View style={{ width: 60 }} />
         )}
         <Text style={styles.topBarTitle}>Interview Training</Text>
         <View style={{ width: 60 }} />
@@ -569,6 +631,8 @@ const styles = StyleSheet.create({
   backButtonText: { color: '#818CF8', fontSize: 15, fontWeight: '600' },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, paddingBottom: 40 },
+  btnRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
 
   // Header
   headerCard: {
@@ -580,7 +644,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#312E81',
   },
-  headerEmoji: { fontSize: 48, marginBottom: 8 },
   headerTitle: { fontSize: 26, fontWeight: '800', color: '#E0E7FF', marginBottom: 4 },
   headerSubtitle: { fontSize: 14, color: '#818CF8' },
 
@@ -672,11 +735,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#312E81', alignItems: 'center', justifyContent: 'center',
     marginRight: 14,
   },
-  avatarEmoji: { fontSize: 28 },
   interviewerInfo: { flex: 1 },
   interviewerName: { color: '#E0E7FF', fontSize: 16, fontWeight: '700' },
   interviewerRole: { color: '#818CF8', fontSize: 13, marginTop: 2 },
-  speakingIndicator: { color: '#10B981', fontSize: 12, marginTop: 4 },
+  speakingRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
+  speakingIndicator: { color: '#10B981', fontSize: 12 },
 
   // Question
   questionCard: {
@@ -724,20 +787,24 @@ const styles = StyleSheet.create({
   answerActions: { flexDirection: 'row', gap: 10 },
   micButton: {
     flex: 1,
+    flexDirection: 'row',
     backgroundColor: '#1E1B4B',
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#4338CA',
   },
   micButtonText: { color: '#818CF8', fontSize: 14, fontWeight: '600' },
   submitButton: {
     flex: 1,
+    flexDirection: 'row',
     backgroundColor: '#4F46E5',
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   submitButtonDisabled: { backgroundColor: '#312E81', opacity: 0.5 },
   submitButtonText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
@@ -765,7 +832,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#312E81',
   },
-  feedbackSubtitle: { color: '#818CF8', fontSize: 13, fontWeight: '700', marginBottom: 8 },
+  feedbackSubtitle: { color: '#818CF8', fontSize: 13, fontWeight: '700' },
   feedbackText: { color: '#D1D5DB', fontSize: 14, lineHeight: 22 },
   betterAnswerCard: {
     backgroundColor: '#0D1F1A',
@@ -775,7 +842,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#065F46',
   },
-  betterAnswerTitle: { color: '#10B981', fontSize: 13, fontWeight: '700', marginBottom: 8 },
+  betterAnswerTitle: { color: '#10B981', fontSize: 13, fontWeight: '700' },
   betterAnswerText: { color: '#6EE7B7', fontSize: 13, lineHeight: 21, fontStyle: 'italic' },
   grammarCard: {
     backgroundColor: '#1C1A0E',
@@ -785,7 +852,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#78350F',
   },
-  grammarTitle: { color: '#F59E0B', fontSize: 13, fontWeight: '700', marginBottom: 8 },
+  grammarTitle: { color: '#F59E0B', fontSize: 13, fontWeight: '700' },
   correctionRow: { flexDirection: 'row', marginBottom: 6 },
   correctionBullet: { color: '#F59E0B', marginRight: 8, fontSize: 16 },
   correctionText: { flex: 1, color: '#FCD34D', fontSize: 13, lineHeight: 20 },
@@ -797,7 +864,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#4338CA',
   },
-  teluguTitle: { color: '#A5B4FC', fontSize: 13, fontWeight: '700', marginBottom: 8 },
+  teluguTitle: { color: '#A5B4FC', fontSize: 13, fontWeight: '700' },
   teluguText: { color: '#C7D2FE', fontSize: 14, lineHeight: 24 },
   nextButton: {
     backgroundColor: '#4F46E5',
@@ -814,7 +881,6 @@ const styles = StyleSheet.create({
 
   // Complete
   completeHeader: { alignItems: 'center', marginBottom: 20 },
-  completeEmoji: { fontSize: 56, marginBottom: 8 },
   completeTitle: { color: '#E0E7FF', fontSize: 26, fontWeight: '800', marginBottom: 4 },
   completeSubtitle: { color: '#818CF8', fontSize: 14 },
   overallScoreCard: {
@@ -856,9 +922,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#065F46',
   },
-  strengthsTitle: { color: '#10B981', fontSize: 15, fontWeight: '700', marginBottom: 12 },
+  strengthsTitle: { color: '#10B981', fontSize: 15, fontWeight: '700' },
   strengthRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8 },
-  strengthIcon: { fontSize: 16, marginRight: 10 },
   strengthText: { flex: 1, color: '#6EE7B7', fontSize: 13, lineHeight: 20 },
   improvementsCard: {
     backgroundColor: '#1C1A0E',
@@ -868,9 +933,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#78350F',
   },
-  improvementsTitle: { color: '#F59E0B', fontSize: 15, fontWeight: '700', marginBottom: 12 },
+  improvementsTitle: { color: '#F59E0B', fontSize: 15, fontWeight: '700' },
   improvementRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 8 },
-  improvementIcon: { fontSize: 16, marginRight: 10 },
   improvementText: { flex: 1, color: '#FCD34D', fontSize: 13, lineHeight: 20 },
   completeActions: { flexDirection: 'row', gap: 12 },
   practiceAgainButton: {

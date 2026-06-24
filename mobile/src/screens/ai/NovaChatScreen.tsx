@@ -16,6 +16,10 @@ import {
   destroySpeechRecognition, isSpeechRecognitionAvailable,
 } from '../../services/audio/speechRecognition'
 import { toTelugu } from '../../services/translation/translationService'
+import { Theme } from '../../theme'
+import { 
+  Bot, Volume2, VolumeX, Mic, Square, ArrowLeft, Send, Globe, XCircle, CheckCircle2 
+} from 'lucide-react-native'
 
 interface Message {
   id: string
@@ -107,7 +111,7 @@ export default function NovaChatScreen() {
       setMessages([{
         id: 'welcome',
         role: 'assistant',
-        content: "Hello! I'm Nova, your English tutor! 😊 నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
+        content: "Hello! I'm Nova, your English tutor! నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
         timestamp: new Date(),
       }])
       return
@@ -125,7 +129,7 @@ export default function NovaChatScreen() {
         setMessages([{
           id: 'welcome',
           role: 'assistant',
-          content: "Hello! I'm Nova, your English tutor! 😊 నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
+          content: "Hello! I'm Nova, your English tutor! నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
           timestamp: new Date(),
         }])
       } else {
@@ -136,7 +140,7 @@ export default function NovaChatScreen() {
       setMessages([{
         id: 'welcome',
         role: 'assistant',
-        content: "Hello! I'm Nova, your English tutor! 😊 నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
+        content: "Hello! I'm Nova, your English tutor! నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
         timestamp: new Date(),
       }])
     }
@@ -184,7 +188,7 @@ export default function NovaChatScreen() {
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Sorry, I had trouble responding. Please check your connection and try again. నెట్‌వర్క్ సమస్య ఉంది.',
+        content: 'System error. Communication link unstable. నెట్‌వర్క్ సమస్య ఉంది.',
         timestamp: new Date(),
       }])
     } finally {
@@ -271,7 +275,7 @@ export default function NovaChatScreen() {
       <View style={[styles.messageRow, isUser ? styles.messageRowUser : styles.messageRowNova]}>
         {!isUser && (
           <View style={styles.novaAvatar}>
-            <Text style={styles.novaAvatarText}>N</Text>
+            <Bot size={20} color={Theme.colors.secondary} strokeWidth={2} />
           </View>
         )}
         <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleNova]}>
@@ -284,8 +288,9 @@ export default function NovaChatScreen() {
               style={styles.translateBtn}
               onPress={() => handleToggleTranslation(item.id, item.content)}
             >
+              <Globe size={14} color={Theme.colors.textSecondary} style={{ marginRight: 6 }} />
               <Text style={styles.translateBtnText}>
-                {item.showTranslation ? '🇺🇸 Hide Translation' : '🇮🇳 Telugu లో చూడండి'}
+                {item.showTranslation ? 'Hide Translation' : 'Telugu లో చూడండి'}
               </Text>
             </TouchableOpacity>
           )}
@@ -294,15 +299,22 @@ export default function NovaChatScreen() {
             <Text style={styles.translationText}>{item.translation}</Text>
           )}
           {item.showTranslation && !item.translation && (
-            <ActivityIndicator size="small" color="#6B7280" style={{ marginTop: 6 }} />
+            <ActivityIndicator size="small" color={Theme.colors.secondary} style={{ marginTop: 8 }} />
           )}
 
           {isUser && item.corrections && item.corrections.length > 0 && (
             <View style={styles.corrections}>
+              <Text style={styles.correctionsHeader}>Syntax Diagnostics:</Text>
               {item.corrections.map((c, i) => (
                 <View key={i} style={styles.correctionItem}>
-                  <Text style={styles.correctionOriginal}>✗ "{c.original}"</Text>
-                  <Text style={styles.correctionFixed}>✓ "{c.corrected}"</Text>
+                  <View style={styles.correctionRow}>
+                    <XCircle size={14} color={Theme.colors.error} style={{ marginRight: 4 }} />
+                    <Text style={styles.correctionOriginal}>"{c.original}"</Text>
+                  </View>
+                  <View style={styles.correctionRow}>
+                    <CheckCircle2 size={14} color="#00E676" style={{ marginRight: 4 }} />
+                    <Text style={styles.correctionFixed}>"{c.corrected}"</Text>
+                  </View>
                   <Text style={styles.correctionExplanation}>{c.explanation}</Text>
                   {c.explanation_telugu ? (
                     <Text style={styles.correctionTelugu}>{c.explanation_telugu}</Text>
@@ -317,7 +329,7 @@ export default function NovaChatScreen() {
               style={styles.speakBtn}
               onPress={() => speak(item.content, { language: 'en-IN' })}
             >
-              <Text style={styles.speakBtnText}>🔊</Text>
+              <Volume2 size={18} color={Theme.colors.secondary} strokeWidth={2.5} />
             </TouchableOpacity>
           )}
         </View>
@@ -331,21 +343,25 @@ export default function NovaChatScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={0}
     >
-      <LinearGradient colors={['#4F46E5', '#7C3AED']} style={styles.header}>
+      <LinearGradient colors={[Theme.colors.background, Theme.colors.primary]} style={styles.header}>
         <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}>
-          <Text style={styles.backBtn}>←</Text>
+          <ArrowLeft size={24} color={Theme.colors.text} strokeWidth={2.5} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <View style={styles.headerAvatar}>
-            <Text style={styles.headerAvatarText}>N</Text>
+            <Bot size={24} color={Theme.colors.secondary} strokeWidth={2} />
           </View>
           <View>
-            <Text style={styles.headerName}>Nova</Text>
-            <Text style={styles.headerSubtitle}>AI English Tutor • Free</Text>
+            <Text style={styles.headerName}>Nova AI</Text>
+            <Text style={styles.headerSubtitle}>System Interface Active</Text>
           </View>
         </View>
-        <TouchableOpacity onPress={handleToggleMute}>
-          <Text style={styles.muteBtn}>{isMuted ? '🔇' : '🔊'}</Text>
+        <TouchableOpacity onPress={handleToggleMute} style={styles.muteBtnWrap}>
+          {isMuted ? (
+            <VolumeX size={20} color={Theme.colors.textSecondary} strokeWidth={2.5} />
+          ) : (
+            <Volume2 size={20} color={Theme.colors.text} strokeWidth={2.5} />
+          )}
         </TouchableOpacity>
       </LinearGradient>
 
@@ -361,15 +377,15 @@ export default function NovaChatScreen() {
       {isListening && (
         <View style={styles.partialTranscriptBar}>
           <Text style={styles.partialText}>
-            {partialTranscript || '🎤 Listening... speak now'}
+            {partialTranscript || 'Receiving audio signal...'}
           </Text>
         </View>
       )}
 
       {sending && (
         <View style={styles.typingIndicator}>
-          <Text style={styles.typingText}>Nova is typing...</Text>
-          <ActivityIndicator size="small" color="#4F46E5" />
+          <Text style={styles.typingText}>Processing query...</Text>
+          <ActivityIndicator size="small" color={Theme.colors.secondary} />
         </View>
       )}
 
@@ -378,8 +394,8 @@ export default function NovaChatScreen() {
           style={styles.textInput}
           value={inputText}
           onChangeText={setInputText}
-          placeholder="Type in English or use mic..."
-          placeholderTextColor="#9CA3AF"
+          placeholder="Input query or initialize mic..."
+          placeholderTextColor={Theme.colors.textSecondary}
           multiline
           maxLength={500}
         />
@@ -388,7 +404,11 @@ export default function NovaChatScreen() {
             style={[styles.micBtn, isListening && styles.micBtnActive]}
             onPress={handleToggleListen}
           >
-            <Text style={styles.micBtnIcon}>{isListening ? '⏹️' : '🎤'}</Text>
+            {isListening ? (
+              <Square size={20} color={Theme.colors.error} fill={Theme.colors.error} />
+            ) : (
+              <Mic size={22} color={Theme.colors.text} strokeWidth={2.5} />
+            )}
           </TouchableOpacity>
         </Animated.View>
         <TouchableOpacity
@@ -397,8 +417,8 @@ export default function NovaChatScreen() {
           disabled={!inputText.trim() || sending}
         >
           {sending
-            ? <ActivityIndicator size="small" color="white" />
-            : <Text style={styles.sendBtnIcon}>➤</Text>
+            ? <ActivityIndicator size="small" color="#000" />
+            : <Send size={20} color="#000" strokeWidth={2.5} style={{ marginLeft: -2 }} />
           }
         </TouchableOpacity>
       </View>
@@ -407,84 +427,85 @@ export default function NovaChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  container: { flex: 1, backgroundColor: Theme.colors.background },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingTop: 52, paddingBottom: 16, paddingHorizontal: 16,
+    borderBottomWidth: 1, borderBottomColor: Theme.colors.border,
+    shadowColor: Theme.colors.secondary, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5,
   },
-  backBtn: { color: 'white', fontSize: 24 },
-  headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, marginLeft: 12 },
+  headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1, marginLeft: 16 },
   headerAvatar: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center',
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: 'rgba(0,194,255,0.15)', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: Theme.colors.secondary,
   },
-  headerAvatarText: { color: 'white', fontSize: 18, fontWeight: '800' },
-  headerName: { color: 'white', fontSize: 17, fontWeight: '700' },
-  headerSubtitle: { color: 'rgba(255,255,255,0.7)', fontSize: 11 },
-  muteBtn: { fontSize: 22 },
+  headerName: { color: Theme.colors.text, fontSize: 18, fontWeight: '800', letterSpacing: 0.5 },
+  headerSubtitle: { color: Theme.colors.secondary, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginTop: 2 },
+  muteBtnWrap: { backgroundColor: 'rgba(255,255,255,0.1)', padding: 8, borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' },
   messagesList: { padding: 16, paddingBottom: 8 },
-  messageRow: { flexDirection: 'row', marginBottom: 16, maxWidth: '85%' },
+  messageRow: { flexDirection: 'row', marginBottom: 20, maxWidth: '85%' },
   messageRowUser: { alignSelf: 'flex-end', flexDirection: 'row-reverse' },
   messageRowNova: { alignSelf: 'flex-start' },
   novaAvatar: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: '#4F46E5', alignItems: 'center', justifyContent: 'center',
-    marginRight: 8, alignSelf: 'flex-end',
+    backgroundColor: 'rgba(0,194,255,0.15)', alignItems: 'center', justifyContent: 'center',
+    marginRight: 10, alignSelf: 'flex-end', borderWidth: 1, borderColor: Theme.colors.secondary,
   },
-  novaAvatarText: { color: 'white', fontSize: 16, fontWeight: '800' },
-  bubble: { borderRadius: 20, padding: 14, maxWidth: '100%' },
-  bubbleUser: { backgroundColor: '#4F46E5', borderBottomRightRadius: 4 },
-  bubbleNova: { backgroundColor: 'white', borderBottomLeftRadius: 4, elevation: 2 },
-  bubbleText: { fontSize: 15, lineHeight: 22 },
-  bubbleTextUser: { color: 'white' },
-  bubbleTextNova: { color: '#111827' },
-  translateBtn: { marginTop: 8 },
-  translateBtnText: { fontSize: 12, color: '#6B7280', fontWeight: '600' },
+  bubble: { borderRadius: 20, padding: 16, maxWidth: '100%', borderWidth: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 4 },
+  bubbleUser: { backgroundColor: Theme.colors.surface, borderColor: Theme.colors.border, borderBottomRightRadius: 4 },
+  bubbleNova: { backgroundColor: 'rgba(0,194,255,0.05)', borderColor: Theme.colors.secondary, borderBottomLeftRadius: 4 },
+  bubbleText: { fontSize: 16, lineHeight: 24, letterSpacing: 0.3 },
+  bubbleTextUser: { color: Theme.colors.text },
+  bubbleTextNova: { color: Theme.colors.text, fontWeight: '500' },
+  translateBtn: { flexDirection: 'row', alignItems: 'center', marginTop: 12, backgroundColor: 'rgba(255,255,255,0.05)', alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: Theme.colors.border },
+  translateBtnText: { fontSize: 12, color: Theme.colors.textSecondary, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 0.5 },
   translationText: {
-    fontSize: 13, color: '#4F46E5', marginTop: 6,
-    borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 6, lineHeight: 20,
+    fontSize: 14, color: Theme.colors.secondary, marginTop: 10,
+    borderTopWidth: 1, borderTopColor: Theme.colors.border, paddingTop: 10, lineHeight: 22, fontWeight: '600',
   },
   corrections: {
-    marginTop: 8, backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 10, padding: 10,
+    marginTop: 12, backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 12, padding: 14, borderWidth: 1, borderColor: Theme.colors.border,
   },
-  correctionItem: { marginBottom: 6 },
-  correctionOriginal: { color: '#FCA5A5', fontSize: 12, fontStyle: 'italic' },
-  correctionFixed: { color: '#86EFAC', fontSize: 12, fontWeight: '600' },
-  correctionExplanation: { color: 'rgba(255,255,255,0.85)', fontSize: 11, marginTop: 2 },
-  correctionTelugu: { color: 'rgba(255,255,255,0.7)', fontSize: 11 },
-  speakBtn: { alignSelf: 'flex-end', marginTop: 6 },
-  speakBtnText: { fontSize: 16 },
+  correctionsHeader: { color: Theme.colors.accent, fontSize: 12, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 },
+  correctionItem: { marginBottom: 10 },
+  correctionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 2 },
+  correctionOriginal: { color: Theme.colors.error, fontSize: 13, fontStyle: 'italic', fontWeight: '600' },
+  correctionFixed: { color: '#00E676', fontSize: 13, fontWeight: '800' },
+  correctionExplanation: { color: Theme.colors.textSecondary, fontSize: 12, marginTop: 4, lineHeight: 18 },
+  correctionTelugu: { color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 2 },
+  speakBtn: { alignSelf: 'flex-end', marginTop: 8, backgroundColor: 'rgba(0,194,255,0.1)', padding: 8, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(0,194,255,0.3)' },
   partialTranscriptBar: {
-    backgroundColor: '#EEF2FF', paddingHorizontal: 16, paddingVertical: 10,
-    borderTopWidth: 1, borderTopColor: '#E5E7EB',
+    backgroundColor: Theme.colors.surface, paddingHorizontal: 20, paddingVertical: 14,
+    borderTopWidth: 1, borderTopColor: Theme.colors.secondary,
   },
-  partialText: { color: '#4F46E5', fontSize: 14, fontStyle: 'italic' },
+  partialText: { color: Theme.colors.secondary, fontSize: 15, fontStyle: 'italic', fontWeight: '600' },
   typingIndicator: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    paddingHorizontal: 16, paddingVertical: 8,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingHorizontal: 20, paddingVertical: 12, backgroundColor: Theme.colors.background,
   },
-  typingText: { color: '#6B7280', fontSize: 13, fontStyle: 'italic' },
+  typingText: { color: Theme.colors.secondary, fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
   inputBar: {
-    flexDirection: 'row', alignItems: 'flex-end', gap: 8,
-    padding: 12, paddingBottom: Platform.OS === 'ios' ? 28 : 12,
-    backgroundColor: 'white', borderTopWidth: 1, borderTopColor: '#E5E7EB',
+    flexDirection: 'row', alignItems: 'flex-end', gap: 10,
+    padding: 16, paddingBottom: Platform.OS === 'ios' ? 32 : 16,
+    backgroundColor: Theme.colors.background, borderTopWidth: 1, borderTopColor: Theme.colors.border,
   },
   textInput: {
-    flex: 1, backgroundColor: '#F3F4F6', borderRadius: 24,
-    paddingHorizontal: 16, paddingVertical: 10, fontSize: 15, color: '#111827',
-    maxHeight: 100,
+    flex: 1, backgroundColor: Theme.colors.surface, borderRadius: 24,
+    paddingHorizontal: 18, paddingVertical: 14, fontSize: 15, color: Theme.colors.text,
+    maxHeight: 120, borderWidth: 1, borderColor: Theme.colors.border,
   },
   micBtn: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center',
+    width: 48, height: 48, borderRadius: 24,
+    backgroundColor: Theme.colors.surface, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: Theme.colors.secondary, shadowColor: Theme.colors.secondary, shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.3, shadowRadius: 5,
   },
-  micBtnActive: { backgroundColor: '#EF4444' },
-  micBtnIcon: { fontSize: 20 },
+  micBtnActive: { backgroundColor: 'rgba(239,68,68,0.2)', borderColor: Theme.colors.error, shadowColor: Theme.colors.error },
   sendBtn: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#4F46E5', alignItems: 'center', justifyContent: 'center',
+    width: 48, height: 48, borderRadius: 24,
+    backgroundColor: Theme.colors.secondary, alignItems: 'center', justifyContent: 'center',
+    shadowColor: Theme.colors.secondary, shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.4, shadowRadius: 6, elevation: 5,
   },
-  sendBtnDisabled: { backgroundColor: '#C4B5FD' },
-  sendBtnIcon: { color: 'white', fontSize: 16 },
+  sendBtnDisabled: { backgroundColor: Theme.colors.surface, borderColor: Theme.colors.border, borderWidth: 1, shadowOpacity: 0, elevation: 0 },
 })

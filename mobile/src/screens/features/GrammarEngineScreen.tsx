@@ -13,14 +13,20 @@ import {
   StatusBar,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { 
+  Clock, Type, FileText, MapPin, Construction, RefreshCcw, 
+  MessageCircle, BookOpen, CheckCircle2, Search, XCircle, 
+  ArrowRight, Lightbulb, Pin, Target, Trophy, PartyPopper, 
+  Book, ChevronLeft
+} from 'lucide-react-native';
 
-const { width } = Dimensions.get('window');
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface GrammarTopic {
   id: string;
-  icon: string;
+  icon: any;
   name: string;
   nameTelugu: string;
   subtitle: string;
@@ -58,7 +64,7 @@ interface CheckResult {
 const GRAMMAR_TOPICS: GrammarTopic[] = [
   {
     id: 'tenses',
-    icon: '⏰',
+    icon: Clock,
     name: 'Tenses',
     nameTelugu: 'కాలాలు',
     subtitle: '12 tenses',
@@ -111,7 +117,7 @@ const GRAMMAR_TOPICS: GrammarTopic[] = [
   },
   {
     id: 'verbs',
-    icon: '🔤',
+    icon: Type,
     name: 'Verbs',
     nameTelugu: 'క్రియలు',
     subtitle: 'Regular/Irregular',
@@ -164,7 +170,7 @@ const GRAMMAR_TOPICS: GrammarTopic[] = [
   },
   {
     id: 'articles',
-    icon: '📝',
+    icon: FileText,
     name: 'Articles',
     nameTelugu: 'వ్యాకరణ చిహ్నాలు',
     subtitle: 'A, An, The',
@@ -217,7 +223,7 @@ const GRAMMAR_TOPICS: GrammarTopic[] = [
   },
   {
     id: 'prepositions',
-    icon: '📍',
+    icon: MapPin,
     name: 'Prepositions',
     nameTelugu: 'విభక్తి పదాలు',
     subtitle: 'In, On, At, etc.',
@@ -270,7 +276,7 @@ const GRAMMAR_TOPICS: GrammarTopic[] = [
   },
   {
     id: 'sentence-structure',
-    icon: '🏗️',
+    icon: Construction,
     name: 'Sentence Structure',
     nameTelugu: 'వాక్య నిర్మాణం',
     subtitle: 'Subject + Verb + Object',
@@ -323,7 +329,7 @@ const GRAMMAR_TOPICS: GrammarTopic[] = [
   },
   {
     id: 'active-passive',
-    icon: '🔄',
+    icon: RefreshCcw,
     name: 'Active/Passive Voice',
     nameTelugu: 'కర్తరి/కర్మణి వాచ్యం',
     subtitle: 'Voice transformation',
@@ -376,7 +382,7 @@ const GRAMMAR_TOPICS: GrammarTopic[] = [
   },
   {
     id: 'reported-speech',
-    icon: '💬',
+    icon: MessageCircle,
     name: 'Reported Speech',
     nameTelugu: 'పరోక్ష వచనం',
     subtitle: 'Direct to Indirect',
@@ -471,9 +477,10 @@ const MasteryBar: React.FC<{ percent: number }> = ({ percent }) => (
 
 const TopicCard: React.FC<{ topic: GrammarTopic; onPress: () => void }> = ({ topic, onPress }) => {
   const sc = STATUS_COLORS[topic.status];
+  const IconComponent = topic.icon;
   return (
     <TouchableOpacity style={styles.topicCard} onPress={onPress} activeOpacity={0.82}>
-      <Text style={styles.topicIcon}>{topic.icon}</Text>
+      <IconComponent size={28} color="#4A6CF7" style={{ marginBottom: 6 }} />
       <Text style={styles.topicName}>{topic.name}</Text>
       <Text style={styles.topicNameTelugu}>{topic.nameTelugu}</Text>
       <Text style={styles.topicSubtitle}>{topic.subtitle}</Text>
@@ -598,9 +605,12 @@ const GrammarEngineScreen: React.FC = () => {
       <View style={styles.tabBar}>
         {(['topics', 'checker'] as const).map(t => (
           <TouchableOpacity key={t} style={[styles.tab, activeTab === t && styles.tabActive]} onPress={() => setActiveTab(t)}>
-            <Text style={[styles.tabText, activeTab === t && styles.tabTextActive]}>
-              {t === 'topics' ? '📚 Topics' : '✅ Check Grammar'}
-            </Text>
+            <View style={styles.tabRow}>
+              {t === 'topics' ? <BookOpen size={14} color={activeTab === t ? '#fff' : '#666'} /> : <CheckCircle2 size={14} color={activeTab === t ? '#fff' : '#666'} />}
+              <Text style={[styles.tabText, activeTab === t && styles.tabTextActive, { marginLeft: 6 }]}>
+                {t === 'topics' ? 'Topics' : 'Check Grammar'}
+              </Text>
+            </View>
           </TouchableOpacity>
         ))}
       </View>
@@ -619,7 +629,10 @@ const GrammarEngineScreen: React.FC = () => {
 
   const renderChecker = () => (
     <View style={styles.checkerContainer}>
-      <Text style={styles.sectionTitle}>✅ Grammar Checker</Text>
+      <View style={styles.sectionTitleRow}>
+        <CheckCircle2 size={20} color="#1A1A2E" style={{ marginRight: 8 }} />
+        <Text style={styles.sectionTitle}>Grammar Checker</Text>
+      </View>
       <Text style={styles.checkerHint}>Try: "I goes to school" or "a apple"</Text>
       <TextInput
         style={styles.checkerInput}
@@ -632,7 +645,10 @@ const GrammarEngineScreen: React.FC = () => {
         textAlignVertical="top"
       />
       <TouchableOpacity style={styles.checkBtn} onPress={handleCheck} activeOpacity={0.85}>
-        <Text style={styles.checkBtnText}>{checking ? 'Checking...' : '🔍 Check Grammar'}</Text>
+        <View style={styles.btnRow}>
+          {!checking && <Search size={18} color="#fff" style={{ marginRight: 8 }} />}
+          <Text style={styles.checkBtnText}>{checking ? 'Checking...' : 'Check Grammar'}</Text>
+        </View>
       </TouchableOpacity>
 
       {checkResult && (
@@ -647,7 +663,8 @@ const GrammarEngineScreen: React.FC = () => {
 
           {checkResult.errors.length === 0 ? (
             <View style={styles.noErrorsBox}>
-              <Text style={styles.noErrorsText}>✅ Perfect! No errors found.</Text>
+              <CheckCircle2 size={32} color="#28A745" style={{ marginBottom: 8 }} />
+              <Text style={styles.noErrorsText}>Perfect! No errors found.</Text>
               <Text style={styles.noErrorsSub}>మీ వాక్యం సరైనది!</Text>
             </View>
           ) : (
@@ -657,14 +674,17 @@ const GrammarEngineScreen: React.FC = () => {
                   <View style={styles.errorBadge}><Text style={styles.errorBadgeText}>Error {i + 1}</Text></View>
                 </View>
                 <View style={styles.correctionRow}>
-                  <Text style={styles.originalText}>❌ {err.original}</Text>
-                  <Text style={styles.arrow}>→</Text>
-                  <Text style={styles.correctionText}>✅ {err.correction}</Text>
+                  <XCircle size={16} color="#DC3545" style={{ marginRight: 4 }} />
+                  <Text style={styles.originalText}>{err.original}</Text>
+                  <ArrowRight size={16} color="#666" style={{ marginHorizontal: 6 }} />
+                  <CheckCircle2 size={16} color="#28A745" style={{ marginRight: 4 }} />
+                  <Text style={styles.correctionText}>{err.correction}</Text>
                 </View>
                 <Text style={styles.errorExplain}>{err.explanation}</Text>
                 <Text style={styles.errorExplainTe}>{err.explanationTelugu}</Text>
                 <View style={styles.tipBox}>
-                  <Text style={styles.tipText}>💡 {err.tip}</Text>
+                  <Lightbulb size={14} color="#856404" style={{ marginRight: 6 }} />
+                  <Text style={styles.tipText}>{err.tip}</Text>
                 </View>
               </View>
             ))
@@ -676,21 +696,28 @@ const GrammarEngineScreen: React.FC = () => {
 
   const renderDetail = () => {
     if (!selectedTopic) return null;
+    const IconComponent = selectedTopic.icon;
     return (
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Back + Header */}
         <View style={styles.detailHeader}>
           <TouchableOpacity onPress={goHome} style={styles.backBtn}>
-            <Text style={styles.backBtnText}>← Back</Text>
+            <View style={styles.btnRow}>
+              <ChevronLeft size={20} color="rgba(255,255,255,0.9)" />
+              <Text style={styles.backBtnText}>Back</Text>
+            </View>
           </TouchableOpacity>
-          <Text style={styles.detailIcon}>{selectedTopic.icon}</Text>
+          <IconComponent size={48} color="#fff" style={{ marginBottom: 12 }} strokeWidth={1.5} />
           <Text style={styles.detailTitle}>{selectedTopic.name}</Text>
           <Text style={styles.detailTitleTe}>{selectedTopic.nameTelugu}</Text>
         </View>
 
         {/* Explanation */}
         <View style={styles.explainBox}>
-          <Text style={styles.explainTitle}>📖 Explanation</Text>
+          <View style={styles.sectionTitleRow}>
+            <BookOpen size={18} color="#1A1A2E" style={{ marginRight: 8 }} />
+            <Text style={styles.explainTitle}>Explanation</Text>
+          </View>
           <Text style={styles.explainText}>{selectedTopic.explanation}</Text>
           <View style={styles.dividerLight} />
           <Text style={styles.explainTe}>{selectedTopic.explanationTelugu}</Text>
@@ -698,19 +725,28 @@ const GrammarEngineScreen: React.FC = () => {
 
         {/* Examples */}
         <View style={styles.examplesSection}>
-          <Text style={styles.sectionTitle}>🔤 Examples</Text>
+          <View style={styles.sectionTitleRow}>
+            <Type size={20} color="#1A1A2E" style={{ marginRight: 8 }} />
+            <Text style={styles.sectionTitle}>Examples</Text>
+          </View>
           {selectedTopic.examples.map((ex, i) => (
             <View key={i} style={styles.exampleCard}>
               <Text style={styles.exampleEn}>{ex.english}</Text>
               <Text style={styles.exampleTe}>{ex.telugu}</Text>
-              <Text style={styles.exampleNote}>📌 {ex.explanation}</Text>
+              <View style={styles.exampleNoteRow}>
+                <Pin size={12} color="#888" style={{ marginRight: 6 }} />
+                <Text style={styles.exampleNote}>{ex.explanation}</Text>
+              </View>
             </View>
           ))}
         </View>
 
         {/* Take Quiz */}
         <TouchableOpacity style={styles.quizBtn} onPress={openQuiz} activeOpacity={0.85}>
-          <Text style={styles.quizBtnText}>🎯 Take Quiz  •  +50 XP</Text>
+          <View style={styles.btnRow}>
+            <Target size={20} color="#fff" style={{ marginRight: 8 }} />
+            <Text style={styles.quizBtnText}>Take Quiz  •  +50 XP</Text>
+          </View>
         </TouchableOpacity>
       </ScrollView>
     );
@@ -726,7 +762,9 @@ const GrammarEngineScreen: React.FC = () => {
       const pct = Math.round((score / total) * 100);
       return (
         <View style={styles.quizDoneContainer}>
-          <Text style={styles.quizDoneEmoji}>{pct >= 80 ? '🏆' : pct >= 60 ? '🎉' : '📚'}</Text>
+          {pct >= 80 ? <Trophy size={64} color="#FFD700" style={{ marginBottom: 16 }} /> : 
+           pct >= 60 ? <PartyPopper size={64} color="#00C2FF" style={{ marginBottom: 16 }} /> : 
+           <Book size={64} color="#666" style={{ marginBottom: 16 }} />}
           <Text style={styles.quizDoneTitle}>Quiz Complete!</Text>
           <Text style={styles.quizDoneScore}>{score}/{total} Correct</Text>
           <View style={[styles.quizScoreCircle, { backgroundColor: pct >= 80 ? '#28A745' : pct >= 60 ? '#FFC107' : '#DC3545' }]}>
@@ -734,10 +772,16 @@ const GrammarEngineScreen: React.FC = () => {
           </View>
           <Text style={styles.xpLabel}>+{xpEarned} XP Earned!</Text>
           <TouchableOpacity style={styles.quizBtn} onPress={goHome} activeOpacity={0.85}>
-            <Text style={styles.quizBtnText}>← Back to Topics</Text>
+            <View style={styles.btnRow}>
+              <ChevronLeft size={20} color="#fff" style={{ marginRight: 6 }} />
+              <Text style={styles.quizBtnText}>Back to Topics</Text>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.quizBtn, { backgroundColor: '#17A2B8', marginTop: 10 }]} onPress={openQuiz} activeOpacity={0.85}>
-            <Text style={styles.quizBtnText}>🔄 Retry Quiz</Text>
+            <View style={styles.btnRow}>
+              <RefreshCcw size={18} color="#fff" style={{ marginRight: 8 }} />
+              <Text style={styles.quizBtnText}>Retry Quiz</Text>
+            </View>
           </TouchableOpacity>
         </View>
       );
@@ -780,7 +824,10 @@ const GrammarEngineScreen: React.FC = () => {
         {/* Feedback */}
         {answered && (
           <View style={[styles.feedbackBox, { backgroundColor: selectedOption === q.correctIndex ? '#D4EDDA' : '#F8D7DA' }]}>
-            <Text style={styles.feedbackTitle}>{selectedOption === q.correctIndex ? '✅ Correct!' : '❌ Incorrect'}</Text>
+            <View style={styles.sectionTitleRow}>
+              {selectedOption === q.correctIndex ? <CheckCircle2 size={16} color="#155724" style={{ marginRight: 6 }} /> : <XCircle size={16} color="#721C24" style={{ marginRight: 6 }} />}
+              <Text style={styles.feedbackTitle}>{selectedOption === q.correctIndex ? 'Correct!' : 'Incorrect'}</Text>
+            </View>
             <Text style={styles.feedbackText}>{q.explanationEnglish}</Text>
             <Text style={styles.feedbackTe}>{q.explanationTelugu}</Text>
             {selectedOption === q.correctIndex && <Text style={styles.xpLabel}>+10 XP</Text>}
@@ -789,7 +836,10 @@ const GrammarEngineScreen: React.FC = () => {
 
         {answered && (
           <TouchableOpacity style={styles.nextBtn} onPress={handleNextQuestion} activeOpacity={0.85}>
-            <Text style={styles.nextBtnText}>{quizIndex + 1 < total ? 'Next Question →' : 'See Results 🏆'}</Text>
+            <View style={styles.btnRow}>
+              <Text style={styles.nextBtnText}>{quizIndex + 1 < total ? 'Next Question' : 'See Results'}</Text>
+              {quizIndex + 1 < total ? <ArrowRight size={18} color="#fff" style={{ marginLeft: 8 }} /> : <Trophy size={18} color="#fff" style={{ marginLeft: 8 }} />}
+            </View>
           </TouchableOpacity>
         )}
       </Animated.View>
@@ -823,13 +873,14 @@ const styles = StyleSheet.create({
   tabBar: { flexDirection: 'row', margin: 16, marginBottom: 8, backgroundColor: '#E8ECFF', borderRadius: 12, padding: 4 },
   tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 10 },
   tabActive: { backgroundColor: '#4A6CF7' },
+  tabRow: { flexDirection: 'row', alignItems: 'center' },
   tabText: { fontSize: 13, fontWeight: '600', color: '#666' },
   tabTextActive: { color: '#fff' },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
 
   // Grid
-  grid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, paddingBottom: 24 },
-  topicCard: { width: (width - 40) / 2, backgroundColor: '#fff', borderRadius: 16, margin: 6, padding: 14, shadowColor: '#4A6CF7', shadowOpacity: 0.08, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 3 },
-  topicIcon: { fontSize: 28, marginBottom: 6 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingHorizontal: 10, paddingBottom: 40 },
+  topicCard: { width: '47%', backgroundColor: '#fff', borderRadius: 16, marginVertical: 6, padding: 14, shadowColor: '#4A6CF7', shadowOpacity: 0.08, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 3 },
   topicName: { fontSize: 14, fontWeight: '700', color: '#1A1A2E' },
   topicNameTelugu: { fontSize: 11, color: '#666', marginBottom: 2 },
   topicSubtitle: { fontSize: 11, color: '#999', marginBottom: 8 },
@@ -842,11 +893,12 @@ const styles = StyleSheet.create({
 
   // Checker
   checkerContainer: { padding: 16 },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#1A1A2E', marginBottom: 8 },
+  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#1A1A2E' },
   checkerHint: { fontSize: 12, color: '#888', marginBottom: 10 },
   checkerInput: { backgroundColor: '#fff', borderRadius: 14, borderWidth: 1.5, borderColor: '#D0D9FF', padding: 14, fontSize: 15, color: '#1A1A2E', minHeight: 100, marginBottom: 12 },
   checkBtn: { backgroundColor: '#4A6CF7', borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginBottom: 16 },
   checkBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  btnRow: { flexDirection: 'row', alignItems: 'center' },
 
   // Results
   resultsPanel: { backgroundColor: '#fff', borderRadius: 16, padding: 16, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
@@ -862,23 +914,21 @@ const styles = StyleSheet.create({
   errorBadge: { backgroundColor: '#DC3545', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   errorBadgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   correctionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 6, flexWrap: 'wrap' },
-  originalText: { fontSize: 14, color: '#DC3545', fontWeight: '600', marginRight: 6 },
-  arrow: { fontSize: 14, color: '#666', marginRight: 6 },
+  originalText: { fontSize: 14, color: '#DC3545', fontWeight: '600' },
   correctionText: { fontSize: 14, color: '#28A745', fontWeight: '600' },
   errorExplain: { fontSize: 13, color: '#333', marginBottom: 3 },
   errorExplainTe: { fontSize: 12, color: '#666', marginBottom: 6 },
-  tipBox: { backgroundColor: '#FFF3CD', borderRadius: 8, padding: 8 },
-  tipText: { fontSize: 12, color: '#856404' },
+  tipBox: { backgroundColor: '#FFF3CD', borderRadius: 8, padding: 8, flexDirection: 'row', alignItems: 'flex-start' },
+  tipText: { fontSize: 12, color: '#856404', flex: 1 },
 
   // Detail
   detailHeader: { alignItems: 'center', backgroundColor: '#4A6CF7', paddingTop: 16, paddingBottom: 24, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   backBtn: { alignSelf: 'flex-start', marginLeft: 16, marginBottom: 8 },
-  backBtnText: { color: 'rgba(255,255,255,0.9)', fontSize: 15, fontWeight: '600' },
-  detailIcon: { fontSize: 48, marginBottom: 6 },
+  backBtnText: { color: 'rgba(255,255,255,0.9)', fontSize: 15, fontWeight: '600', marginLeft: 4 },
   detailTitle: { fontSize: 24, fontWeight: '800', color: '#fff' },
   detailTitleTe: { fontSize: 14, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
   explainBox: { margin: 16, backgroundColor: '#fff', borderRadius: 16, padding: 16, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 6, elevation: 2 },
-  explainTitle: { fontSize: 15, fontWeight: '700', color: '#1A1A2E', marginBottom: 8 },
+  explainTitle: { fontSize: 15, fontWeight: '700', color: '#1A1A2E' },
   explainText: { fontSize: 14, color: '#333', lineHeight: 21 },
   dividerLight: { height: 1, backgroundColor: '#EEE', marginVertical: 10 },
   explainTe: { fontSize: 13, color: '#666', lineHeight: 20 },
@@ -886,7 +936,8 @@ const styles = StyleSheet.create({
   exampleCard: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10, borderLeftWidth: 4, borderLeftColor: '#4A6CF7' },
   exampleEn: { fontSize: 14, fontWeight: '700', color: '#1A1A2E', marginBottom: 4 },
   exampleTe: { fontSize: 13, color: '#4A6CF7', marginBottom: 4 },
-  exampleNote: { fontSize: 12, color: '#888' },
+  exampleNoteRow: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 4 },
+  exampleNote: { fontSize: 12, color: '#888', flex: 1 },
 
   quizBtn: { margin: 16, backgroundColor: '#4A6CF7', borderRadius: 14, paddingVertical: 15, alignItems: 'center' },
   quizBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
@@ -903,7 +954,7 @@ const styles = StyleSheet.create({
   optionWrong: { backgroundColor: '#F8D7DA', borderColor: '#DC3545' },
   optionText: { fontSize: 14, color: '#333', fontWeight: '500' },
   feedbackBox: { borderRadius: 14, padding: 14, marginTop: 8, marginBottom: 8 },
-  feedbackTitle: { fontSize: 16, fontWeight: '800', marginBottom: 6, color: '#1A1A2E' },
+  feedbackTitle: { fontSize: 16, fontWeight: '800', color: '#1A1A2E' },
   feedbackText: { fontSize: 13, color: '#333', marginBottom: 4 },
   feedbackTe: { fontSize: 12, color: '#555' },
   xpLabel: { fontSize: 14, fontWeight: '700', color: '#4A6CF7', marginTop: 4 },
@@ -912,7 +963,6 @@ const styles = StyleSheet.create({
 
   // Quiz Done
   quizDoneContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 30 },
-  quizDoneEmoji: { fontSize: 64, marginBottom: 12 },
   quizDoneTitle: { fontSize: 26, fontWeight: '800', color: '#1A1A2E', marginBottom: 6 },
   quizDoneScore: { fontSize: 18, color: '#555', marginBottom: 16 },
   quizScoreCircle: { width: 90, height: 90, borderRadius: 45, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },

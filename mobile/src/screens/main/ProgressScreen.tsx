@@ -5,6 +5,8 @@ import { useLocalSearchParams } from 'expo-router'
 import { useAppSelector, useAppDispatch } from '../../hooks/useStore'
 import { fetchAchievements, fetchLeaderboard } from '../../store/slices/gamificationSlice'
 import type { Achievement, LeaderboardEntry } from '../../types'
+import { Theme } from '../../theme'
+import { Zap, Trophy, Flame, Medal, Lock, User } from 'lucide-react-native'
 
 export default function ProgressScreen() {
   const dispatch = useAppDispatch()
@@ -31,16 +33,19 @@ export default function ProgressScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#4F46E5', '#7C3AED']} style={styles.header}>
-        <Text style={styles.headerTitle}>📊 Your Progress</Text>
-        <Text style={styles.headerSubtitle}>మీ పురోగతి</Text>
+      <LinearGradient colors={[Theme.colors.background, Theme.colors.primary]} style={styles.header}>
+        <View style={styles.headerTitleRow}>
+          <ActivityIcon />
+          <Text style={styles.headerTitle}>System Metrics</Text>
+        </View>
+        <Text style={styles.headerSubtitle}>Performance Analysis</Text>
 
         {/* Stats */}
         <View style={styles.statsRow}>
-          <StatItem label="Total XP" value={`${profile?.xp_total || 0}`} emoji="⚡" />
-          <StatItem label="Level" value={`${profile?.current_level || 1}`} emoji="🏆" />
-          <StatItem label="Streak" value={`${profile?.streak_current || 0}d`} emoji="🔥" />
-          <StatItem label="Badges" value={`${earned.length}`} emoji="🎖️" />
+          <StatItem label="TOTAL XP" value={`${profile?.xp_total || 0}`} Icon={Zap} color={Theme.colors.accent} />
+          <StatItem label="LEVEL" value={`${profile?.current_level || 1}`} Icon={Trophy} color="#00C2FF" />
+          <StatItem label="STREAK" value={`${profile?.streak_current || 0}d`} Icon={Flame} color="#FF5722" />
+          <StatItem label="BADGES" value={`${earned.length}`} Icon={Medal} color="#00E676" />
         </View>
       </LinearGradient>
 
@@ -50,17 +55,23 @@ export default function ProgressScreen() {
           style={[styles.tab, activeTab === 'achievements' && styles.tabActive]}
           onPress={() => setActiveTab('achievements')}
         >
-          <Text style={[styles.tabText, activeTab === 'achievements' && styles.tabTextActive]}>
-            🏅 Achievements ({earned.length}/{achievements.length})
-          </Text>
+          <View style={styles.tabTextRow}>
+            <Medal size={16} color={activeTab === 'achievements' ? Theme.colors.secondary : Theme.colors.textSecondary} />
+            <Text style={[styles.tabText, activeTab === 'achievements' && styles.tabTextActive]}>
+              Badges ({earned.length}/{achievements.length})
+            </Text>
+          </View>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'leaderboard' && styles.tabActive]}
           onPress={() => setActiveTab('leaderboard')}
         >
-          <Text style={[styles.tabText, activeTab === 'leaderboard' && styles.tabTextActive]}>
-            🏆 Leaderboard
-          </Text>
+          <View style={styles.tabTextRow}>
+            <Trophy size={16} color={activeTab === 'leaderboard' ? Theme.colors.secondary : Theme.colors.textSecondary} />
+            <Text style={[styles.tabText, activeTab === 'leaderboard' && styles.tabTextActive]}>
+              Network Rank
+            </Text>
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -68,15 +79,15 @@ export default function ProgressScreen() {
         {activeTab === 'achievements' && (
           <View style={styles.tabContent}>
             {earned.length > 0 && (
-              <View>
-                <Text style={styles.sectionTitle}>Earned Badges 🎉</Text>
-                <View style={styles.badgesGrid}>
-                  {earned.map(a => <AchievementBadge key={a.id} achievement={a} earned />)}
-                </View>
-              </View>
+               <View>
+                 <Text style={styles.sectionTitle}>Acquired Badges</Text>
+                 <View style={styles.badgesGrid}>
+                   {earned.map(a => <AchievementBadge key={a.id} achievement={a} earned />)}
+                 </View>
+               </View>
             )}
             <View>
-              <Text style={styles.sectionTitle}>Locked Badges 🔒</Text>
+              <Text style={styles.sectionTitle}>Locked Badges</Text>
               <View style={styles.badgesGrid}>
                 {unearned.map(a => <AchievementBadge key={a.id} achievement={a} earned={false} />)}
               </View>
@@ -86,7 +97,7 @@ export default function ProgressScreen() {
 
         {activeTab === 'leaderboard' && (
           <View style={styles.tabContent}>
-            <Text style={styles.weekLabel}>This Week's Top Learners</Text>
+            <Text style={styles.weekLabel}>Global Network - Active Nodes</Text>
             {leaderboard.map((entry, i) => (
               <LeaderboardRow
                 key={entry.user_id}
@@ -97,8 +108,8 @@ export default function ProgressScreen() {
             ))}
             {leaderboard.length === 0 && (
               <View style={styles.emptyLeaderboard}>
-                <Text style={styles.emptyEmoji}>🏆</Text>
-                <Text style={styles.emptyText}>Be the first to top the leaderboard this week!</Text>
+                <Trophy size={48} color={Theme.colors.secondary} style={{ marginBottom: 16 }} />
+                <Text style={styles.emptyText}>Network initialization complete. Waiting for sync.</Text>
               </View>
             )}
           </View>
@@ -110,10 +121,14 @@ export default function ProgressScreen() {
   )
 }
 
-function StatItem({ label, value, emoji }: { label: string; value: string; emoji: string }) {
+function ActivityIcon() {
+  return <Trophy size={24} color={Theme.colors.text} strokeWidth={2.5} style={{ marginRight: 8 }} />
+}
+
+function StatItem({ label, value, Icon, color }: { label: string; value: string; Icon: any; color: string }) {
   return (
     <View style={styles.statItem}>
-      <Text style={styles.statEmoji}>{emoji}</Text>
+      <Icon size={20} color={color} style={{ marginBottom: 6 }} strokeWidth={2} />
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
@@ -123,16 +138,18 @@ function StatItem({ label, value, emoji }: { label: string; value: string; emoji
 function AchievementBadge({ achievement, earned }: { achievement: Achievement; earned: boolean }) {
   return (
     <View style={[styles.badge, !earned && styles.badgeLocked]}>
-      <View style={[styles.badgeCircle, { borderColor: earned ? achievement.badge_color : '#E5E7EB' }]}>
-        <Text style={[styles.badgeIcon, !earned && styles.badgeIconLocked]}>
-          {earned ? '🏅' : '🔒'}
-        </Text>
+      <View style={[styles.badgeCircle, { borderColor: earned ? Theme.colors.secondary : 'rgba(255,255,255,0.1)' }]}>
+        {earned ? (
+          <Medal size={24} color={Theme.colors.secondary} strokeWidth={1.5} />
+        ) : (
+          <Lock size={24} color={Theme.colors.textSecondary} strokeWidth={1.5} />
+        )}
       </View>
       <Text style={[styles.badgeName, !earned && styles.badgeNameLocked]} numberOfLines={2}>
         {achievement.name}
       </Text>
       {earned ? (
-        <Text style={styles.badgeEarned}>✓ Earned</Text>
+        <Text style={styles.badgeEarned}>✓ ACQUIRED</Text>
       ) : (
         <Text style={styles.badgeRequirement} numberOfLines={2}>
           {achievement.description}
@@ -145,76 +162,82 @@ function AchievementBadge({ achievement, earned }: { achievement: Achievement; e
 function LeaderboardRow({ entry, rank, isCurrentUser }: {
   entry: LeaderboardEntry; rank: number; isCurrentUser: boolean
 }) {
-  const getMedal = (r: number) => r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : null
+  const getRankColor = (r: number) => r === 1 ? '#FFD700' : r === 2 ? '#C0C0C0' : r === 3 ? '#CD7F32' : null
 
   return (
     <View style={[styles.leaderboardRow, isCurrentUser && styles.leaderboardRowHighlight]}>
       <View style={styles.rankContainer}>
-        {getMedal(rank) ? (
-          <Text style={styles.medal}>{getMedal(rank)}</Text>
+        {getRankColor(rank) ? (
+          <Trophy size={24} color={getRankColor(rank)!} strokeWidth={2} />
         ) : (
           <Text style={styles.rankNumber}>{rank}</Text>
         )}
       </View>
       <View style={styles.leaderboardAvatar}>
-        <Text style={styles.leaderboardAvatarText}>
-          {entry.full_name?.charAt(0).toUpperCase() || '👤'}
-        </Text>
+        {entry.full_name ? (
+          <Text style={styles.leaderboardAvatarText}>
+            {entry.full_name.charAt(0).toUpperCase()}
+          </Text>
+        ) : (
+          <User size={18} color={Theme.colors.text} strokeWidth={2} />
+        )}
       </View>
       <View style={styles.leaderboardInfo}>
         <Text style={[styles.leaderboardName, isCurrentUser && styles.leaderboardNameHighlight]}>
-          {entry.full_name} {isCurrentUser ? '(You)' : ''}
+          {entry.full_name || 'Learner'} {isCurrentUser ? '(Local Node)' : ''}
         </Text>
       </View>
-      <Text style={styles.leaderboardXP}>⚡ {entry.xp_earned.toLocaleString()}</Text>
+      <View style={styles.leaderboardXPRow}>
+        <Zap size={14} color={Theme.colors.accent} strokeWidth={2.5} style={{ marginRight: 4 }} />
+        <Text style={styles.leaderboardXP}>{entry.xp_earned.toLocaleString()}</Text>
+      </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  container: { flex: 1, backgroundColor: Theme.colors.background },
   header: { paddingTop: 52, paddingBottom: 24, paddingHorizontal: 16 },
-  headerTitle: { fontSize: 22, fontWeight: '800', color: 'white' },
-  headerSubtitle: { fontSize: 14, color: 'rgba(255,255,255,0.8)', marginTop: 4, marginBottom: 20 },
-  statsRow: { flexDirection: 'row', gap: 8 },
-  statItem: { flex: 1, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 12, padding: 12, alignItems: 'center' },
-  statEmoji: { fontSize: 18, marginBottom: 4 },
-  statValue: { fontSize: 18, fontWeight: '800', color: 'white' },
-  statLabel: { fontSize: 10, color: 'rgba(255,255,255,0.75)', marginTop: 2 },
-  tabRow: { flexDirection: 'row', backgroundColor: 'white', elevation: 2 },
-  tab: { flex: 1, paddingVertical: 14, alignItems: 'center' },
-  tabActive: { borderBottomWidth: 3, borderBottomColor: '#4F46E5' },
-  tabText: { fontSize: 13, color: '#6B7280', fontWeight: '600' },
-  tabTextActive: { color: '#4F46E5' },
+  headerTitleRow: { flexDirection: 'row', alignItems: 'center' },
+  headerTitle: { fontSize: 24, fontWeight: '800', color: Theme.colors.text, letterSpacing: 0.5 },
+  headerSubtitle: { fontSize: 13, color: Theme.colors.secondary, marginTop: 4, marginBottom: 24, textTransform: 'uppercase', letterSpacing: 1.5 },
+  statsRow: { flexDirection: 'row', gap: 10 },
+  statItem: { flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: 14, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  statValue: { fontSize: 18, fontWeight: '800', color: Theme.colors.text },
+  statLabel: { fontSize: 9, color: Theme.colors.textSecondary, marginTop: 4, fontWeight: '800', letterSpacing: 1 },
+  tabRow: { flexDirection: 'row', backgroundColor: Theme.colors.surface, elevation: 4, borderBottomWidth: 1, borderBottomColor: Theme.colors.border },
+  tab: { flex: 1, paddingVertical: 16, alignItems: 'center' },
+  tabActive: { borderBottomWidth: 3, borderBottomColor: Theme.colors.secondary },
+  tabTextRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  tabText: { fontSize: 13, color: Theme.colors.textSecondary, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
+  tabTextActive: { color: Theme.colors.secondary, fontWeight: '800' },
   content: { flex: 1 },
   tabContent: { padding: 16 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 12, marginTop: 8 },
-  badgesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 20 },
-  badge: { width: '30%', alignItems: 'center', backgroundColor: 'white', borderRadius: 16, padding: 14, elevation: 3 },
+  sectionTitle: { fontSize: 16, fontWeight: '800', color: Theme.colors.text, marginBottom: 16, marginTop: 8, textTransform: 'uppercase', letterSpacing: 1 },
+  badgesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, marginBottom: 24 },
+  badge: { width: '31%', alignItems: 'center', backgroundColor: Theme.colors.surface, borderRadius: 16, padding: 14, elevation: 5, borderWidth: 1, borderColor: Theme.colors.border, shadowColor: '#000', shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.3, shadowRadius: 8 },
   badgeLocked: { opacity: 0.5 },
-  badgeCircle: { width: 56, height: 56, borderRadius: 28, borderWidth: 3, alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
-  badgeIcon: { fontSize: 28 },
-  badgeIconLocked: { opacity: 0.5 },
-  badgeName: { fontSize: 12, fontWeight: '700', color: '#111827', textAlign: 'center' },
-  badgeNameLocked: { color: '#9CA3AF' },
-  badgeEarned: { fontSize: 11, color: '#059669', marginTop: 4, fontWeight: '600' },
-  badgeRequirement: { fontSize: 10, color: '#9CA3AF', textAlign: 'center', marginTop: 4, lineHeight: 14 },
-  weekLabel: { fontSize: 14, color: '#6B7280', marginBottom: 12, fontWeight: '600' },
+  badgeCircle: { width: 56, height: 56, borderRadius: 28, borderWidth: 3, alignItems: 'center', justifyContent: 'center', marginBottom: 12, backgroundColor: 'rgba(0,0,0,0.2)' },
+  badgeName: { fontSize: 12, fontWeight: '800', color: Theme.colors.text, textAlign: 'center' },
+  badgeNameLocked: { color: Theme.colors.textSecondary },
+  badgeEarned: { fontSize: 10, color: '#00E676', marginTop: 6, fontWeight: '800', textTransform: 'uppercase' },
+  badgeRequirement: { fontSize: 10, color: Theme.colors.textSecondary, textAlign: 'center', marginTop: 6, lineHeight: 14 },
+  weekLabel: { fontSize: 13, color: Theme.colors.textSecondary, marginBottom: 16, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
   leaderboardRow: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: 'white',
-    borderRadius: 14, padding: 14, marginBottom: 8, elevation: 2, gap: 12,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: Theme.colors.surface,
+    borderRadius: 14, padding: 16, marginBottom: 10, elevation: 4, gap: 14,
+    borderWidth: 1, borderColor: Theme.colors.border,
   },
-  leaderboardRowHighlight: { backgroundColor: '#EEF2FF', borderWidth: 2, borderColor: '#4F46E5' },
+  leaderboardRowHighlight: { backgroundColor: 'rgba(0,194,255,0.05)', borderWidth: 1, borderColor: Theme.colors.secondary },
   rankContainer: { width: 32, alignItems: 'center' },
-  medal: { fontSize: 22 },
-  rankNumber: { fontSize: 16, fontWeight: '700', color: '#6B7280' },
-  leaderboardAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center' },
-  leaderboardAvatarText: { fontSize: 18, fontWeight: '700', color: '#4F46E5' },
+  rankNumber: { fontSize: 16, fontWeight: '800', color: Theme.colors.textSecondary },
+  leaderboardAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: Theme.colors.border },
+  leaderboardAvatarText: { fontSize: 18, fontWeight: '800', color: Theme.colors.text },
   leaderboardInfo: { flex: 1 },
-  leaderboardName: { fontSize: 15, fontWeight: '600', color: '#111827' },
-  leaderboardNameHighlight: { color: '#4F46E5' },
-  leaderboardXP: { fontSize: 14, fontWeight: '700', color: '#F59E0B' },
+  leaderboardName: { fontSize: 15, fontWeight: '700', color: Theme.colors.text },
+  leaderboardNameHighlight: { color: Theme.colors.secondary, fontWeight: '800' },
+  leaderboardXPRow: { flexDirection: 'row', alignItems: 'center' },
+  leaderboardXP: { fontSize: 14, fontWeight: '800', color: Theme.colors.accent },
   emptyLeaderboard: { alignItems: 'center', paddingVertical: 60 },
-  emptyEmoji: { fontSize: 48, marginBottom: 16 },
-  emptyText: { fontSize: 15, color: '#6B7280', textAlign: 'center' },
+  emptyText: { fontSize: 15, color: Theme.colors.textSecondary, textAlign: 'center', fontStyle: 'italic' },
 })

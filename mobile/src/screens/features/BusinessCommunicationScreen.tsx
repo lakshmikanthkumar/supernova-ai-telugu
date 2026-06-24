@@ -8,6 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native'
 import { useRouter } from 'expo-router'
+import { Bot } from 'lucide-react-native'
 
 const PRIMARY = '#4F46E5'
 
@@ -141,7 +142,7 @@ export default function BusinessCommunicationScreen() {
             })
           }
         >
-          <Text style={styles.mentorIcon}>🤖</Text>
+          <Bot size={22} color="#fff" />
           <Text style={styles.mentorBtnText}>AI Business Mentor</Text>
         </TouchableOpacity>
       </View>
@@ -291,9 +292,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
   },
-  mentorIcon: {
-    fontSize: 20,
-  },
+
   mentorBtnText: {
     color: '#fff',
     fontSize: 16,

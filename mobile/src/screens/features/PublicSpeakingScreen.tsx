@@ -11,8 +11,8 @@ import {
   StatusBar,
   Dimensions,
 } from 'react-native';
+import { Bot } from 'lucide-react-native';
 
-const { width } = Dimensions.get('window');
 
 type Phase = 'mode' | 'topic' | 'prepare' | 'speaking' | 'results';
 type SpeakingMode = 'TED-style' | 'Debate' | 'Motivational' | 'Presentation' | 'Storytelling';
@@ -454,7 +454,10 @@ export default function PublicSpeakingScreen() {
         </View>
 
         <View style={styles.feedbackCard}>
-          <Text style={styles.feedbackTitle}>🤖 AI Coaching Feedback</Text>
+          <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
+            <Bot size={18} color="#A5B4FC" style={{marginRight: 6}} />
+            <Text style={[styles.feedbackTitle, {marginBottom: 0}]}>AI Coaching Feedback</Text>
+          </View>
           <Text style={styles.feedbackText}>{analysisResult.feedback}</Text>
         </View>
 
@@ -534,9 +537,9 @@ const styles = StyleSheet.create({
   sectionLabel: { color: '#94A3B8', fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 14 },
 
   // Modes
-  modeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
+  modeGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: 10, marginBottom: 20 },
   modeCard: {
-    width: (width - 46) / 2,
+    width: '48%',
     backgroundColor: '#0F1629',
     borderRadius: 16,
     padding: 16,

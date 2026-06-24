@@ -5,11 +5,17 @@ import {
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
+import { Theme } from '../../theme'
+import { 
+  Search, X, Mic, MessageCircle, Phone, Briefcase, 
+  Building, Mail, Handshake, BookOpen, FileText, Book, 
+  Volume2, Layers, Bot, PlaySquare, Target, Brain,
+  ChevronDown, ChevronUp
+} from 'lucide-react-native'
 
-const { width } = Dimensions.get('window')
 
 interface Module {
-  icon: string
+  icon: any
   title: string
   subtitle: string
   difficulty: 1 | 2 | 3
@@ -22,7 +28,7 @@ interface Module {
 
 interface Category {
   id: string
-  icon: string
+  icon: any
   name: string
   gradient: [string, string]
   modules: Module[]
@@ -32,69 +38,69 @@ interface Category {
 const CATEGORIES: Category[] = [
   {
     id: 'speaking',
-    icon: '🗣️',
-    name: 'Speaking Skills',
-    gradient: ['#4F46E5', '#7C3AED'],
+    icon: Mic,
+    name: 'Vocal Synthesis',
+    gradient: [Theme.colors.background, Theme.colors.primary],
     progressPct: 35,
     modules: [
-      { icon: '💬', title: 'Daily Greetings', subtitle: 'Master everyday expressions', difficulty: 1, estimatedTime: '10 min', route: '/features/daily-greetings', progress: 60 },
-      { icon: '🎤', title: 'Self Introduction', subtitle: 'Make a strong first impression', difficulty: 2, estimatedTime: '15 min', route: '/features/self-introduction', progress: 20 },
-      { icon: '🎙️', title: 'Public Speaking', subtitle: 'Speak to any audience', difficulty: 3, estimatedTime: '25 min', route: '/features/public-speaking', isNew: true },
-      { icon: '📞', title: 'Phone Simulator', subtitle: 'Practice real phone calls', difficulty: 2, estimatedTime: '20 min', route: '/features/phone-simulator', isNew: true },
+      { icon: MessageCircle, title: 'Daily Greetings', subtitle: 'Master everyday expressions', difficulty: 1, estimatedTime: '10 min', route: '/features/daily-greetings', progress: 60 },
+      { icon: Mic, title: 'Self Introduction', subtitle: 'Make a strong first impression', difficulty: 2, estimatedTime: '15 min', route: '/features/self-introduction', progress: 20 },
+      { icon: Mic, title: 'Public Speaking', subtitle: 'Speak to any audience', difficulty: 3, estimatedTime: '25 min', route: '/features/public-speaking', isNew: true },
+      { icon: Phone, title: 'Phone Simulator', subtitle: 'Practice real phone calls', difficulty: 2, estimatedTime: '20 min', route: '/features/phone-simulator', isNew: true },
     ],
   },
   {
     id: 'professional',
-    icon: '💼',
-    name: 'Professional English',
-    gradient: ['#0891B2', '#0E7490'],
+    icon: Briefcase,
+    name: 'Corporate Protocol',
+    gradient: [Theme.colors.background, '#0A1F44'],
     progressPct: 20,
     modules: [
-      { icon: '🏢', title: 'Office Conversations', subtitle: 'Excel at workplace English', difficulty: 2, estimatedTime: '20 min', route: '/features/office-conversations', progress: 45 },
-      { icon: '📧', title: 'Email Writing', subtitle: 'Write professional emails', difficulty: 3, estimatedTime: '25 min', route: '/features/email-writing', isNew: true },
-      { icon: '💼', title: 'Interview Prep', subtitle: 'Ace your next job interview', difficulty: 3, estimatedTime: '30 min', route: '/features/interview-training', isNew: true },
-      { icon: '🤝', title: 'Business Communication', subtitle: 'Communicate with confidence', difficulty: 3, estimatedTime: '25 min', route: '/features/business-communication', isNew: true },
+      { icon: Building, title: 'Office Conversations', subtitle: 'Excel at workplace English', difficulty: 2, estimatedTime: '20 min', route: '/features/office-conversations', progress: 45 },
+      { icon: Mail, title: 'Email Writing', subtitle: 'Write professional emails', difficulty: 3, estimatedTime: '25 min', route: '/features/email-writing', isNew: true },
+      { icon: Briefcase, title: 'Interview Prep', subtitle: 'Ace your next job interview', difficulty: 3, estimatedTime: '30 min', route: '/features/interview-training', isNew: true },
+      { icon: Handshake, title: 'Business Communication', subtitle: 'Communicate with confidence', difficulty: 3, estimatedTime: '25 min', route: '/features/business-communication', isNew: true },
     ],
   },
   {
     id: 'fundamentals',
-    icon: '📚',
-    name: 'Language Fundamentals',
-    gradient: ['#059669', '#047857'],
+    icon: BookOpen,
+    name: 'Core Algorithms',
+    gradient: [Theme.colors.background, '#0D274A'],
     progressPct: 50,
     modules: [
-      { icon: '📝', title: 'Grammar Engine', subtitle: 'Master English grammar rules', difficulty: 2, estimatedTime: '15 min', route: '/features/grammar-engine', isNew: true },
-      { icon: '📖', title: 'Vocabulary Builder', subtitle: '500+ essential words', difficulty: 1, estimatedTime: '10 min', route: '/lessons/flashcards', progress: 70 },
-      { icon: '🔊', title: 'Pronunciation Lab', subtitle: 'Perfect your accent', difficulty: 2, estimatedTime: '20 min', route: '/lessons/pronunciation', progress: 40 },
-      { icon: '🃏', title: 'Flashcards', subtitle: 'Spaced repetition learning', difficulty: 1, estimatedTime: '10 min', route: '/lessons/flashcards', progress: 80 },
+      { icon: FileText, title: 'Syntax Engine', subtitle: 'Master English grammar rules', difficulty: 2, estimatedTime: '15 min', route: '/features/grammar-engine', isNew: true },
+      { icon: Book, title: 'Data Lexicon', subtitle: '500+ essential words', difficulty: 1, estimatedTime: '10 min', route: '/lessons/flashcards', progress: 70 },
+      { icon: Volume2, title: 'Phonetics Lab', subtitle: 'Perfect your accent', difficulty: 2, estimatedTime: '20 min', route: '/lessons/pronunciation', progress: 40 },
+      { icon: Layers, title: 'Memory Cards', subtitle: 'Spaced repetition learning', difficulty: 1, estimatedTime: '10 min', route: '/lessons/flashcards', progress: 80 },
     ],
   },
   {
     id: 'ai',
-    icon: '🤖',
-    name: 'AI Practice',
-    gradient: ['#7C3AED', '#6D28D9'],
+    icon: Bot,
+    name: 'AI Simulation',
+    gradient: [Theme.colors.background, '#102A45'],
     progressPct: 15,
     modules: [
-      { icon: '🤖', title: 'Nova Chat', subtitle: 'Chat freely with your AI tutor', difficulty: 1, estimatedTime: 'Open-ended', route: '/ai/chat', isNew: true },
-      { icon: '🎭', title: 'Roleplay Scenarios', subtitle: 'Practice real-life situations', difficulty: 2, estimatedTime: '20 min', route: '/ai/roleplay' },
-      { icon: '🎯', title: 'Daily Challenges', subtitle: 'Complete daily tasks for XP', difficulty: 2, estimatedTime: '15 min', route: '/daily-challenge' },
-      { icon: '🧠', title: 'Quizzes', subtitle: 'Test your knowledge', difficulty: 2, estimatedTime: '10 min', route: '/lessons/quiz' },
+      { icon: Bot, title: 'Nova Interface', subtitle: 'Chat freely with your AI tutor', difficulty: 1, estimatedTime: 'Open-ended', route: '/ai/chat', isNew: true },
+      { icon: PlaySquare, title: 'Scenario Holodeck', subtitle: 'Practice real-life situations', difficulty: 2, estimatedTime: '20 min', route: '/ai/roleplay' },
+      { icon: Target, title: 'Daily Tasks', subtitle: 'Complete daily tasks for XP', difficulty: 2, estimatedTime: '15 min', route: '/daily-challenge' },
+      { icon: Brain, title: 'Knowledge Tests', subtitle: 'Test your knowledge', difficulty: 2, estimatedTime: '10 min', route: '/lessons/quiz' },
     ],
   },
 ]
 
 const RECENTLY_COMPLETED = [
-  { icon: '💬', title: 'Daily Greetings — Lesson 3', xp: 30, time: '2h ago' },
-  { icon: '🃏', title: 'Vocabulary Flashcards', xp: 20, time: 'Yesterday' },
-  { icon: '🎭', title: 'Office Roleplay', xp: 40, time: '2 days ago' },
+  { icon: MessageCircle, title: 'Daily Greetings — Node 3', xp: 30, time: '2h ago' },
+  { icon: Layers, title: 'Data Lexicon Module', xp: 20, time: 'Yesterday' },
+  { icon: PlaySquare, title: 'Corporate Simulation', xp: 40, time: '2 days ago' },
 ]
 
 function DifficultyDots({ level }: { level: 1 | 2 | 3 }) {
   return (
     <View style={styles.diffRow}>
       {[1, 2, 3].map(d => (
-        <View key={d} style={[styles.diffDot, { backgroundColor: d <= level ? '#4F46E5' : '#E5E7EB' }]} />
+        <View key={d} style={[styles.diffDot, { backgroundColor: d <= level ? Theme.colors.secondary : 'rgba(255,255,255,0.1)' }]} />
       ))}
     </View>
   )
@@ -102,6 +108,7 @@ function DifficultyDots({ level }: { level: 1 | 2 | 3 }) {
 
 function ModuleCard({ module }: { module: Module }) {
   const hasProgress = typeof module.progress === 'number'
+  const IconComp = module.icon
   return (
     <TouchableOpacity
       style={styles.moduleCard}
@@ -109,7 +116,9 @@ function ModuleCard({ module }: { module: Module }) {
       onPress={() => router.push(module.route as any)}
     >
       <View style={styles.moduleLeft}>
-        <Text style={styles.moduleIcon}>{module.icon}</Text>
+        <View style={styles.moduleIconWrap}>
+          <IconComp size={24} color={Theme.colors.secondary} strokeWidth={1.5} />
+        </View>
         <View style={styles.moduleInfo}>
           <View style={styles.moduleTitleRow}>
             <Text style={styles.moduleTitle}>{module.title}</Text>
@@ -119,8 +128,8 @@ function ModuleCard({ module }: { module: Module }) {
               </View>
             )}
             {module.completed && (
-              <View style={[styles.newBadge, { backgroundColor: '#D1FAE5' }]}>
-                <Text style={[styles.newBadgeText, { color: '#059669' }]}>✓ DONE</Text>
+              <View style={[styles.newBadge, { backgroundColor: 'rgba(0,230,118,0.15)', borderColor: '#00E676', borderWidth: 1 }]}>
+                <Text style={[styles.newBadgeText, { color: '#00E676' }]}>✓ VERIFIED</Text>
               </View>
             )}
           </View>
@@ -140,8 +149,8 @@ function ModuleCard({ module }: { module: Module }) {
         style={[styles.moduleBtn, hasProgress ? styles.moduleBtnContinue : styles.moduleBtnStart]}
         onPress={() => router.push(module.route as any)}
       >
-        <Text style={[styles.moduleBtnText, hasProgress ? { color: '#4F46E5' } : { color: 'white' }]}>
-          {hasProgress ? 'Continue' : 'Start'}
+        <Text style={[styles.moduleBtnText, hasProgress ? { color: Theme.colors.secondary } : { color: '#000' }]}>
+          {hasProgress ? 'Resume' : 'Execute'}
         </Text>
       </TouchableOpacity>
     </TouchableOpacity>
@@ -170,25 +179,25 @@ export default function LearnHubScreen() {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       {/* ── Header ── */}
-      <LinearGradient colors={['#1E1B4B', '#312E81']} style={styles.header}>
-        <Text style={styles.headerTitle}>Learn English</Text>
-        <Text style={styles.headerSubtitle}>Your complete learning journey</Text>
+      <LinearGradient colors={[Theme.colors.background, Theme.colors.primary]} style={styles.header}>
+        <Text style={styles.headerTitle}>Learning Hub</Text>
+        <Text style={styles.headerSubtitle}>Central Knowledge Directory</Text>
       </LinearGradient>
 
       {/* ── Search Bar ── */}
       <View style={styles.searchWrap}>
         <View style={styles.searchBar}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Search size={18} color={Theme.colors.textSecondary} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search topics, scenarios..."
-            placeholderTextColor="#9CA3AF"
+            placeholder="Search queries, nodes..."
+            placeholderTextColor={Theme.colors.textSecondary}
             value={search}
             onChangeText={setSearch}
           />
           {search.length > 0 && (
-            <TouchableOpacity onPress={() => setSearch('')}>
-              <Text style={styles.searchClear}>✕</Text>
+            <TouchableOpacity onPress={() => setSearch('')} style={styles.searchClear}>
+              <X size={18} color={Theme.colors.textSecondary} />
             </TouchableOpacity>
           )}
         </View>
@@ -198,18 +207,21 @@ export default function LearnHubScreen() {
       {search.trim() === '' && (
         <View style={styles.section}>
           <TouchableOpacity activeOpacity={0.9} onPress={() => router.push('/features/office-conversations' as any)}>
-            <LinearGradient colors={['#4F46E5', '#7C3AED']} style={styles.pathCard}>
+            <LinearGradient colors={[Theme.colors.background, Theme.colors.primary]} style={styles.pathCard}>
               <View>
-                <Text style={styles.pathLabel}>YOUR PERSONALIZED PATH</Text>
-                <Text style={styles.pathTitle}>Next Recommended</Text>
-                <Text style={styles.pathModule}>🏢 Office Conversations</Text>
-                <Text style={styles.pathDesc}>Based on your progress, this module will boost your workplace English by 40%</Text>
+                <Text style={styles.pathLabel}>OPTIMAL PATH</Text>
+                <Text style={styles.pathTitle}>Next Recommended Node</Text>
+                <View style={styles.pathModuleRow}>
+                  <Building size={20} color={Theme.colors.text} />
+                  <Text style={styles.pathModule}>Office Conversations</Text>
+                </View>
+                <Text style={styles.pathDesc}>Based on your metrics, this module will boost your workplace syntax by 40%</Text>
               </View>
               <TouchableOpacity
                 style={styles.pathBtn}
                 onPress={() => router.push('/features/office-conversations' as any)}
               >
-                <Text style={styles.pathBtnText}>Continue Path →</Text>
+                <Text style={styles.pathBtnText}>Execute Path →</Text>
               </TouchableOpacity>
             </LinearGradient>
           </TouchableOpacity>
@@ -217,53 +229,65 @@ export default function LearnHubScreen() {
       )}
 
       {/* ── Module Categories ── */}
-      {filteredCategories.map(cat => (
-        <View key={cat.id} style={styles.section}>
-          <TouchableOpacity
-            style={styles.categoryHeader}
-            activeOpacity={0.8}
-            onPress={() => toggleCategory(cat.id)}
-          >
-            <LinearGradient colors={cat.gradient} style={styles.catIconWrap}>
-              <Text style={styles.catIcon}>{cat.icon}</Text>
-            </LinearGradient>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.catName}>{cat.name}</Text>
-              <View style={styles.catProgressRow}>
-                <View style={styles.catProgressBg}>
-                  <View style={[styles.catProgressFill, { width: `${cat.progressPct ?? 0}%` as `${number}%`, backgroundColor: cat.gradient[0] }]} />
+      {filteredCategories.map(cat => {
+        const CatIcon = cat.icon
+        return (
+          <View key={cat.id} style={styles.section}>
+            <TouchableOpacity
+              style={styles.categoryHeader}
+              activeOpacity={0.8}
+              onPress={() => toggleCategory(cat.id)}
+            >
+              <LinearGradient colors={cat.gradient} style={styles.catIconWrap}>
+                <CatIcon size={24} color={Theme.colors.text} />
+              </LinearGradient>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.catName}>{cat.name}</Text>
+                <View style={styles.catProgressRow}>
+                  <View style={styles.catProgressBg}>
+                    <View style={[styles.catProgressFill, { width: `${cat.progressPct ?? 0}%` as `${number}%`, backgroundColor: Theme.colors.secondary }]} />
+                  </View>
+                  <Text style={styles.catProgressPct}>{cat.progressPct}%</Text>
                 </View>
-                <Text style={styles.catProgressPct}>{cat.progressPct}%</Text>
               </View>
-            </View>
-            <Text style={styles.expandArrow}>{expanded.includes(cat.id) ? '▲' : '▼'}</Text>
-          </TouchableOpacity>
+              {expanded.includes(cat.id) ? (
+                <ChevronUp size={20} color={Theme.colors.textSecondary} />
+              ) : (
+                <ChevronDown size={20} color={Theme.colors.textSecondary} />
+              )}
+            </TouchableOpacity>
 
-          {expanded.includes(cat.id) && (
-            <View style={styles.moduleList}>
-              {cat.modules.map(m => (
-                <ModuleCard key={m.title} module={m} />
-              ))}
-            </View>
-          )}
-        </View>
-      ))}
+            {expanded.includes(cat.id) && (
+              <View style={styles.moduleList}>
+                {cat.modules.map(m => (
+                  <ModuleCard key={m.title} module={m} />
+                ))}
+              </View>
+            )}
+          </View>
+        )
+      })}
 
       {/* ── Progress Summary ── */}
       {search.trim() === '' && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Overall Progress</Text>
+          <Text style={styles.sectionTitle}>System Metrics</Text>
           <View style={styles.progressSummaryCard}>
-            {CATEGORIES.map(cat => (
-              <View key={cat.id} style={styles.progressSummaryRow}>
-                <Text style={styles.progressSumIcon}>{cat.icon}</Text>
-                <Text style={styles.progressSumName}>{cat.name}</Text>
-                <View style={styles.progressSumBarBg}>
-                  <View style={[styles.progressSumBarFill, { width: `${cat.progressPct ?? 0}%` as `${number}%`, backgroundColor: cat.gradient[0] }]} />
+            {CATEGORIES.map(cat => {
+              const CatIcon = cat.icon
+              return (
+                <View key={cat.id} style={styles.progressSummaryRow}>
+                  <View style={styles.progressSumIconWrap}>
+                    <CatIcon size={18} color={Theme.colors.secondary} />
+                  </View>
+                  <Text style={styles.progressSumName}>{cat.name}</Text>
+                  <View style={styles.progressSumBarBg}>
+                    <View style={[styles.progressSumBarFill, { width: `${cat.progressPct ?? 0}%` as `${number}%`, backgroundColor: Theme.colors.secondary }]} />
+                  </View>
+                  <Text style={styles.progressSumPct}>{cat.progressPct}%</Text>
                 </View>
-                <Text style={styles.progressSumPct}>{cat.progressPct}%</Text>
-              </View>
-            ))}
+              )
+            })}
           </View>
         </View>
       )}
@@ -271,20 +295,25 @@ export default function LearnHubScreen() {
       {/* ── Recently Completed ── */}
       {search.trim() === '' && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recently Completed</Text>
+          <Text style={styles.sectionTitle}>Recent Logs</Text>
           <View style={styles.recentCard}>
-            {RECENTLY_COMPLETED.map((item, idx) => (
-              <View key={idx} style={[styles.recentRow, idx < RECENTLY_COMPLETED.length - 1 && styles.recentRowBorder]}>
-                <Text style={styles.recentIcon}>{item.icon}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.recentTitle}>{item.title}</Text>
-                  <Text style={styles.recentTime}>{item.time}</Text>
+            {RECENTLY_COMPLETED.map((item, idx) => {
+              const RecentIcon = item.icon
+              return (
+                <View key={idx} style={[styles.recentRow, idx < RECENTLY_COMPLETED.length - 1 && styles.recentRowBorder]}>
+                  <View style={styles.recentIconWrap}>
+                     <RecentIcon size={24} color={Theme.colors.secondary} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.recentTitle}>{item.title}</Text>
+                    <Text style={styles.recentTime}>{item.time}</Text>
+                  </View>
+                  <View style={styles.recentXP}>
+                    <Text style={styles.recentXPText}>+{item.xp} XP</Text>
+                  </View>
                 </View>
-                <View style={styles.recentXP}>
-                  <Text style={styles.recentXPText}>+{item.xp} XP</Text>
-                </View>
-              </View>
-            ))}
+              )
+            })}
           </View>
         </View>
       )}
@@ -295,119 +324,123 @@ export default function LearnHubScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  container: { flex: 1, backgroundColor: Theme.colors.background },
 
   // Header
-  header: { padding: 24, paddingTop: 52, paddingBottom: 28 },
-  headerTitle: { fontSize: 28, fontWeight: '800', color: 'white' },
-  headerSubtitle: { fontSize: 14, color: 'rgba(255,255,255,0.75)', marginTop: 4 },
+  header: { padding: 24, paddingTop: 52, paddingBottom: 40 },
+  headerTitle: { fontSize: 28, fontWeight: '800', color: Theme.colors.text, letterSpacing: 1 },
+  headerSubtitle: { fontSize: 14, color: Theme.colors.secondary, marginTop: 6, textTransform: 'uppercase', letterSpacing: 1.5 },
 
   // Search
-  searchWrap: { paddingHorizontal: 16, marginTop: -18 },
+  searchWrap: { paddingHorizontal: 16, marginTop: -24 },
   searchBar: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: 'white', borderRadius: 14, paddingHorizontal: 14,
-    elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1, shadowRadius: 6,
+    backgroundColor: Theme.colors.surface, borderRadius: 16, paddingHorizontal: 16,
+    borderWidth: 1, borderColor: Theme.colors.secondary,
+    shadowColor: Theme.colors.secondary, shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4, shadowRadius: 10, elevation: 6, gap: 10
   },
-  searchIcon: { fontSize: 16, marginRight: 8 },
-  searchInput: { flex: 1, paddingVertical: 14, fontSize: 14, color: '#111827' },
-  searchClear: { fontSize: 14, color: '#9CA3AF', paddingLeft: 8 },
+  searchInput: { flex: 1, paddingVertical: 16, fontSize: 15, color: Theme.colors.text },
+  searchClear: { padding: 4 },
 
   // Section
-  section: { paddingHorizontal: 16, marginTop: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: '700', color: '#111827', marginBottom: 12 },
+  section: { paddingHorizontal: 16, marginTop: 24 },
+  sectionTitle: { fontSize: 16, fontWeight: '800', color: Theme.colors.text, marginBottom: 14, textTransform: 'uppercase', letterSpacing: 1.5 },
 
   // Personalized Path
   pathCard: {
     borderRadius: 18, padding: 20,
-    elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15, shadowRadius: 8,
+    borderWidth: 1, borderColor: Theme.colors.secondary,
+    shadowColor: Theme.colors.secondary, shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 10, elevation: 6,
   },
-  pathLabel: { fontSize: 10, color: 'rgba(255,255,255,0.7)', fontWeight: '700', letterSpacing: 1.2 },
-  pathTitle: { fontSize: 14, color: 'rgba(255,255,255,0.85)', marginTop: 4 },
-  pathModule: { fontSize: 22, fontWeight: '800', color: 'white', marginTop: 4 },
-  pathDesc: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 6, lineHeight: 18 },
+  pathLabel: { fontSize: 11, color: Theme.colors.secondary, fontWeight: '800', letterSpacing: 1.5, textTransform: 'uppercase' },
+  pathTitle: { fontSize: 14, color: Theme.colors.textSecondary, marginTop: 6 },
+  pathModuleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
+  pathModule: { fontSize: 24, fontWeight: '800', color: Theme.colors.text, letterSpacing: 0.5 },
+  pathDesc: { fontSize: 14, color: Theme.colors.textSecondary, marginTop: 8, lineHeight: 20 },
   pathBtn: {
-    marginTop: 16, backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 10, paddingVertical: 11, paddingHorizontal: 18,
-    alignSelf: 'flex-start',
+    marginTop: 20, backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12, paddingVertical: 12, paddingHorizontal: 20,
+    alignSelf: 'flex-start', borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)'
   },
-  pathBtnText: { color: 'white', fontWeight: '700', fontSize: 14 },
+  pathBtnText: { color: Theme.colors.text, fontWeight: '800', fontSize: 14, letterSpacing: 0.5 },
 
   // Category
   categoryHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: 'white', borderRadius: 14, padding: 14,
-    elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06, shadowRadius: 4,
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    backgroundColor: Theme.colors.surface, borderRadius: 16, padding: 16,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
   },
-  catIconWrap: { width: 46, height: 46, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  catIcon: { fontSize: 22 },
-  catName: { fontSize: 16, fontWeight: '700', color: '#111827' },
-  catProgressRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 5 },
-  catProgressBg: { flex: 1, height: 6, backgroundColor: '#E5E7EB', borderRadius: 3, overflow: 'hidden' },
-  catProgressFill: { height: 6, borderRadius: 3 },
-  catProgressPct: { fontSize: 12, color: '#6B7280', fontWeight: '600', width: 32 },
-  expandArrow: { fontSize: 12, color: '#9CA3AF' },
+  catIconWrap: { width: 48, height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  catName: { fontSize: 16, fontWeight: '800', color: Theme.colors.text, letterSpacing: 0.5 },
+  catProgressRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6 },
+  catProgressBg: { flex: 1, height: 6, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden' },
+  catProgressFill: { height: 6, borderRadius: 3, shadowColor: Theme.colors.secondary, shadowOpacity: 1, shadowRadius: 5 },
+  catProgressPct: { fontSize: 12, color: Theme.colors.textSecondary, fontWeight: '700', width: 36 },
 
   // Module list
-  moduleList: { marginTop: 8, gap: 10 },
+  moduleList: { marginTop: 12, gap: 12 },
   moduleCard: {
-    backgroundColor: 'white', borderRadius: 14, padding: 14,
+    backgroundColor: Theme.colors.surface, borderRadius: 16, padding: 16,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05, shadowRadius: 4,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2, shadowRadius: 6, elevation: 3,
   },
-  moduleLeft: { flexDirection: 'row', alignItems: 'flex-start', flex: 1, gap: 12 },
-  moduleIcon: { fontSize: 28, marginTop: 2 },
+  moduleLeft: { flexDirection: 'row', alignItems: 'flex-start', flex: 1, gap: 14 },
+  moduleIconWrap: { marginTop: 2, width: 36, alignItems: 'center' },
   moduleInfo: { flex: 1 },
-  moduleTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
-  moduleTitle: { fontSize: 14, fontWeight: '700', color: '#111827' },
+  moduleTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' },
+  moduleTitle: { fontSize: 15, fontWeight: '800', color: Theme.colors.text },
   newBadge: {
-    backgroundColor: '#FEE2E2', borderRadius: 6,
-    paddingHorizontal: 5, paddingVertical: 2,
+    backgroundColor: Theme.colors.accent, borderRadius: 6,
+    paddingHorizontal: 6, paddingVertical: 2,
   },
-  newBadgeText: { color: '#EF4444', fontSize: 9, fontWeight: '800' },
-  moduleSubtitle: { fontSize: 12, color: '#6B7280', marginTop: 2 },
-  moduleMeta: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6 },
-  diffRow: { flexDirection: 'row', gap: 3 },
-  diffDot: { width: 7, height: 7, borderRadius: 4 },
-  moduleTime: { fontSize: 11, color: '#9CA3AF' },
-  moduleProgressBg: { height: 5, backgroundColor: '#E5E7EB', borderRadius: 3, overflow: 'hidden', marginTop: 6 },
-  moduleProgressFill: { height: 5, backgroundColor: '#4F46E5', borderRadius: 3 },
+  newBadgeText: { color: '#000', fontSize: 9, fontWeight: '800' },
+  moduleSubtitle: { fontSize: 13, color: Theme.colors.textSecondary, marginTop: 4 },
+  moduleMeta: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 8 },
+  diffRow: { flexDirection: 'row', gap: 4 },
+  diffDot: { width: 8, height: 8, borderRadius: 4 },
+  moduleTime: { fontSize: 12, color: Theme.colors.textSecondary, fontWeight: '600' },
+  moduleProgressBg: { height: 6, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 3, overflow: 'hidden', marginTop: 8 },
+  moduleProgressFill: { height: 6, backgroundColor: Theme.colors.secondary, borderRadius: 3, shadowColor: Theme.colors.secondary, shadowOpacity: 1, shadowRadius: 5 },
   moduleBtn: {
-    borderRadius: 10, paddingHorizontal: 14, paddingVertical: 9,
-    marginLeft: 10, alignItems: 'center', justifyContent: 'center',
+    borderRadius: 12, paddingHorizontal: 16, paddingVertical: 10,
+    marginLeft: 12, alignItems: 'center', justifyContent: 'center',
   },
-  moduleBtnStart: { backgroundColor: '#4F46E5' },
-  moduleBtnContinue: { backgroundColor: '#EEF2FF', borderWidth: 1, borderColor: '#C7D2FE' },
-  moduleBtnText: { fontSize: 13, fontWeight: '700' },
+  moduleBtnStart: { backgroundColor: Theme.colors.secondary, shadowColor: Theme.colors.secondary, shadowOpacity: 0.4, shadowOffset: {width: 0, height: 2}, shadowRadius: 6, elevation: 4 },
+  moduleBtnContinue: { backgroundColor: 'rgba(0,194,255,0.1)', borderWidth: 1, borderColor: Theme.colors.secondary },
+  moduleBtnText: { fontSize: 14, fontWeight: '800', textTransform: 'uppercase' },
 
   // Progress Summary
   progressSummaryCard: {
-    backgroundColor: 'white', borderRadius: 16, padding: 18,
-    elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08, shadowRadius: 6, gap: 14,
+    backgroundColor: Theme.colors.surface, borderRadius: 16, padding: 20,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 5, gap: 16,
   },
-  progressSummaryRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  progressSumIcon: { fontSize: 18, width: 26, textAlign: 'center' },
-  progressSumName: { fontSize: 13, color: '#374151', fontWeight: '600', width: 130 },
-  progressSumBarBg: { flex: 1, height: 8, backgroundColor: '#E5E7EB', borderRadius: 4, overflow: 'hidden' },
-  progressSumBarFill: { height: 8, borderRadius: 4 },
-  progressSumPct: { fontSize: 12, color: '#6B7280', fontWeight: '700', width: 36, textAlign: 'right' },
+  progressSummaryRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  progressSumIconWrap: { width: 30, alignItems: 'center' },
+  progressSumName: { fontSize: 14, color: Theme.colors.text, fontWeight: '700', width: 140 },
+  progressSumBarBg: { flex: 1, height: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' },
+  progressSumBarFill: { height: 8, borderRadius: 4, shadowColor: Theme.colors.secondary, shadowOpacity: 1, shadowRadius: 5 },
+  progressSumPct: { fontSize: 13, color: Theme.colors.secondary, fontWeight: '800', width: 40, textAlign: 'right' },
 
   // Recently Completed
   recentCard: {
-    backgroundColor: 'white', borderRadius: 16, padding: 18,
-    elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08, shadowRadius: 6,
+    backgroundColor: Theme.colors.surface, borderRadius: 16, padding: 20,
+    borderWidth: 1, borderColor: Theme.colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3, shadowRadius: 8, elevation: 5,
   },
-  recentRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, gap: 12 },
-  recentRowBorder: { borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
-  recentIcon: { fontSize: 24 },
-  recentTitle: { fontSize: 14, fontWeight: '600', color: '#111827' },
-  recentTime: { fontSize: 12, color: '#9CA3AF', marginTop: 2 },
-  recentXP: { backgroundColor: '#ECFDF5', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5 },
-  recentXPText: { color: '#059669', fontWeight: '700', fontSize: 12 },
+  recentRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 14 },
+  recentRowBorder: { borderBottomWidth: 1, borderBottomColor: Theme.colors.border },
+  recentIconWrap: { width: 36, alignItems: 'center' },
+  recentTitle: { fontSize: 15, fontWeight: '700', color: Theme.colors.text },
+  recentTime: { fontSize: 13, color: Theme.colors.textSecondary, marginTop: 4 },
+  recentXP: { backgroundColor: 'rgba(0,230,118,0.1)', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: 'rgba(0,230,118,0.3)' },
+  recentXPText: { color: '#00E676', fontWeight: '800', fontSize: 13 },
 })

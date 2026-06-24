@@ -1,33 +1,44 @@
 import React, { useEffect, useRef } from 'react'
-import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, Animated, useWindowDimensions } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { supabase } from '../../services/supabase'
 import { useAppDispatch } from '../../hooks/useStore'
 import { setSession, fetchProfile, setProfile, setOnboarded } from '../../store/slices/authSlice'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Theme } from '../../theme'
 
-const { width } = Dimensions.get('window')
+import { Bot } from 'lucide-react-native'
 
 export default function SplashScreen() {
   const dispatch = useAppDispatch()
-  const logoScale = useRef(new Animated.Value(0)).current
+  const { width } = useWindowDimensions()
+  const logoScale = useRef(new Animated.Value(0.8)).current
   const logoOpacity = useRef(new Animated.Value(0)).current
   const taglineOpacity = useRef(new Animated.Value(0)).current
+  const glowOpacity = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
+    // Futuristic pulse animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowOpacity, { toValue: 1, duration: 1500, useNativeDriver: true }),
+        Animated.timing(glowOpacity, { toValue: 0.4, duration: 1500, useNativeDriver: true })
+      ])
+    ).start()
+
     // Animate logo in
     Animated.sequence([
       Animated.parallel([
-        Animated.spring(logoScale, { toValue: 1, friction: 5, useNativeDriver: true }),
-        Animated.timing(logoOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
+        Animated.spring(logoScale, { toValue: 1, friction: 6, tension: 40, useNativeDriver: true }),
+        Animated.timing(logoOpacity, { toValue: 1, duration: 800, useNativeDriver: true }),
       ]),
-      Animated.timing(taglineOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+      Animated.timing(taglineOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
     ]).start()
 
     // Determine routing after minimum splash duration
     const checkAuth = async () => {
-      await new Promise(r => setTimeout(r, 2000)) // Minimum splash duration
+      await new Promise(r => setTimeout(r, 2500)) // Minimum splash duration
 
       const isGuest = await AsyncStorage.getItem('is_guest_mode')
       if (isGuest === 'true') {
@@ -105,10 +116,11 @@ export default function SplashScreen() {
   }, [])
 
   return (
-    <LinearGradient colors={['#4F46E5', '#7C3AED', '#2563EB']} style={styles.container}>
+    <LinearGradient colors={[Theme.colors.background, '#051024', Theme.colors.primary]} style={styles.container}>
+      <Animated.View style={[styles.glowCircle, { width: width * 0.8, height: width * 0.8, borderRadius: width * 0.4, opacity: glowOpacity, transform: [{ scale: logoScale }] }]} />
       <Animated.View style={[styles.logoContainer, { transform: [{ scale: logoScale }], opacity: logoOpacity }]}>
         <View style={styles.logoCircle}>
-          <Text style={styles.logoEmoji}>🎓</Text>
+          <Bot size={56} color={Theme.colors.secondary} />
         </View>
         <Text style={styles.appName}>EnglishMitra</Text>
         <Text style={styles.appNameAI}>AI</Text>
@@ -121,6 +133,7 @@ export default function SplashScreen() {
       </Animated.View>
 
       <View style={styles.poweredBy}>
+        <View style={styles.aiGlowLine} />
         <Text style={styles.poweredByText}>Powered by GPT-4o & Whisper AI</Text>
       </View>
     </LinearGradient>
@@ -129,33 +142,53 @@ export default function SplashScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  logoContainer: { alignItems: 'center', marginBottom: 40 },
+  glowCircle: {
+    position: 'absolute',
+    backgroundColor: Theme.colors.secondary,
+    opacity: 0.15,
+    top: '30%',
+    filter: 'blur(40px)', // web
+    ...Theme.shadows.neon,
+  },
+  logoContainer: { alignItems: 'center', marginBottom: 40, zIndex: 10 },
   logoCircle: {
     width: 120, height: 120, borderRadius: 60,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: Theme.colors.surface,
     alignItems: 'center', justifyContent: 'center',
     marginBottom: 20,
-    borderWidth: 2, borderColor: 'rgba(255,255,255,0.4)',
+    borderWidth: 2, borderColor: Theme.colors.secondary,
+    ...Theme.shadows.neon,
   },
-  logoEmoji: { fontSize: 56 },
-  appName: { fontSize: 42, fontWeight: '800', color: 'white', letterSpacing: 1 },
+
+  appName: { fontSize: 42, fontWeight: '800', color: Theme.colors.text, letterSpacing: 1 },
   appNameAI: {
-    fontSize: 18, fontWeight: '700', color: '#FCD34D',
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12,
-    marginTop: 4,
+    fontSize: 18, fontWeight: '800', color: Theme.colors.accent,
+    backgroundColor: 'rgba(255, 184, 0, 0.15)',
+    paddingHorizontal: 16, paddingVertical: 6, borderRadius: 16,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 184, 0, 0.4)',
+    overflow: 'hidden',
   },
   poweredByMaansvi: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.7)',
+    color: Theme.colors.textSecondary,
     fontWeight: '500',
-    marginTop: 8,
+    marginTop: 12,
     fontStyle: 'italic',
     letterSpacing: 0.5,
   },
-  taglineContainer: { alignItems: 'center', paddingHorizontal: 32 },
-  tagline: { fontSize: 16, color: 'rgba(255,255,255,0.9)', textAlign: 'center', marginBottom: 6 },
-  taglineEn: { fontSize: 14, color: 'rgba(255,255,255,0.7)', textAlign: 'center' },
-  poweredBy: { position: 'absolute', bottom: 40 },
-  poweredByText: { color: 'rgba(255,255,255,0.5)', fontSize: 12 },
+  taglineContainer: { alignItems: 'center', paddingHorizontal: 32, zIndex: 10 },
+  tagline: { fontSize: 16, color: Theme.colors.text, textAlign: 'center', marginBottom: 8, fontWeight: '600' },
+  taglineEn: { fontSize: 14, color: Theme.colors.textSecondary, textAlign: 'center', fontWeight: '500' },
+  poweredBy: { position: 'absolute', bottom: 40, alignItems: 'center' },
+  aiGlowLine: {
+    width: 40,
+    height: 3,
+    backgroundColor: Theme.colors.secondary,
+    borderRadius: 2,
+    marginBottom: 12,
+    ...Theme.shadows.neon,
+  },
+  poweredByText: { color: Theme.colors.textSecondary, fontSize: 12, fontWeight: '600', letterSpacing: 1 },
 })
