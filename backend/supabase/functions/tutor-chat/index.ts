@@ -1,7 +1,7 @@
 // ============================================================
 // EnglishMitraAi - AI Tutor Chat Edge Function (FREE STACK)
 // Replaces: OpenAI GPT-4 (paid)
-// Uses: Groq API with llama-3.3-70b-versatile (FREE)
+// Uses: Groq API with multi-model failover
 // Free tier: 14,400 req/day, 500,000 tokens/day
 // ============================================================
 
@@ -13,8 +13,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
-const GROQ_MODEL = 'llama-3.3-70b-versatile'
 const MAX_TOKENS = 512 // Keep token usage low for free tier
 const MAX_HISTORY_MESSAGES = 8 // Limit context to save tokens
 
@@ -25,6 +23,7 @@ interface ChatRequest {
   scenario_id?: string
   include_correction?: boolean
   include_translation?: boolean
+  system_prompt?: string  // custom system prompt for roleplay scenarios (e.g. PhoneSimulatorScreen)
 }
 
 interface GroqMessage {
@@ -39,46 +38,7 @@ interface GrammarCorrection {
   explanation_telugu: string
 }
 
-// ============================================================
-// GROQ API CALLER
-// ============================================================
-
-async function callGroq(
-  messages: GroqMessage[],
-  maxTokens: number = MAX_TOKENS,
-  temperature: number = 0.7,
-  jsonMode: boolean = false
-): Promise<string> {
-  const groqApiKey = Deno.env.get('GROQ_API_KEY')
-  if (!groqApiKey) throw new Error('GROQ_API_KEY not set in Edge Function secrets')
-
-  const response = await fetch(GROQ_API_URL, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${groqApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: GROQ_MODEL,
-      messages,
-      max_tokens: maxTokens,
-      temperature,
-      ...(jsonMode ? { response_format: { type: 'json_object' } } : {}),
-    }),
-  })
-
-  if (!response.ok) {
-    const err = await response.text()
-    // Handle Groq rate limiting gracefully
-    if (response.status === 429) {
-      throw new Error('Rate limit reached. Please wait a moment and try again.')
-    }
-    throw new Error(`Groq API error ${response.status}: ${err}`)
-  }
-
-  const data = await response.json()
-  return data.choices[0].message.content || ''
-}
+import { callAIWithFallback } from '../_shared/ai.ts'
 
 // ============================================================
 // SYSTEM PROMPTS
@@ -128,7 +88,7 @@ serve(async (req) => {
     }
 
     const body: ChatRequest = await req.json()
-    const { session_id, message, session_type, scenario_id, include_correction, include_translation } = body
+    const { session_id, message, session_type, scenario_id, include_correction, include_translation, system_prompt } = body
 
     // Fetch recent conversation history (limit to save tokens)
     const { data: history } = await supabase
@@ -140,9 +100,12 @@ serve(async (req) => {
 
     const recentHistory = (history || []).reverse()
 
-    // Get scenario system prompt for roleplay
+    // Resolve system prompt: custom > DB scenario > default Nova
     let systemPrompt = NOVA_SYSTEM_PROMPT
-    if (session_type === 'roleplay' && scenario_id) {
+    if (system_prompt) {
+      // Caller-supplied prompt takes highest priority (e.g. PhoneSimulatorScreen, OfficeConversationsScreen)
+      systemPrompt = system_prompt
+    } else if (session_type === 'roleplay' && scenario_id) {
       const { data: scenario } = await supabase
         .from('roleplay_scenarios')
         .select('system_prompt')
@@ -160,8 +123,9 @@ serve(async (req) => {
       { role: 'user', content: message },
     ]
 
-    // Call Groq for main response
-    const assistantMessage = await callGroq(messages, MAX_TOKENS, 0.8)
+    // Call Groq with failover for main response
+    const mainResult = await callAIWithFallback(messages, { maxTokens: MAX_TOKENS, temperature: 0.8 })
+    const assistantMessage = mainResult.content
 
     // Grammar correction (only if requested and message is substantial)
     let corrections: GrammarCorrection[] = []
@@ -171,8 +135,8 @@ serve(async (req) => {
           { role: 'system', content: GRAMMAR_CHECK_PROMPT },
           { role: 'user', content: `Check: "${message}"` },
         ]
-        const grammarRaw = await callGroq(grammarMessages, 300, 0.1, true)
-        const parsed = JSON.parse(grammarRaw)
+        const grammarResult = await callAIWithFallback(grammarMessages, { maxTokens: 300, temperature: 0.1, jsonMode: true })
+        const parsed = JSON.parse(grammarResult.content)
         corrections = parsed.corrections || []
       } catch { /* grammar check failure is non-fatal */ }
     }
@@ -187,7 +151,8 @@ serve(async (req) => {
           { role: 'system', content: 'Translate to Telugu. Return only the Telugu translation, nothing else.' },
           { role: 'user', content: assistantMessage.slice(0, 200) }, // Limit for token savings
         ]
-        translation = await callGroq(transMessages, 200, 0.1)
+        const transResult = await callAIWithFallback(transMessages, { maxTokens: 200, temperature: 0.1 })
+        translation = transResult.content
       } catch { /* translation failure is non-fatal */ }
     }
 
@@ -232,7 +197,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ message: assistantMessage, corrections, translation }),
+      JSON.stringify({ message: assistantMessage, corrections, translation, model_used: mainResult.model }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {

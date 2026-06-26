@@ -2,9 +2,11 @@
 // EnglishMitraAi - Text to Speech Service (FREE — expo-speech)
 // Replaces: ElevenLabs / Azure TTS (both paid)
 // Uses: Device-native TTS engine (completely free)
+// Fallback: Web SpeechSynthesis API (window.speechSynthesis)
 // ============================================================
 
 import * as ExpoSpeech from 'expo-speech'
+import { Platform } from 'react-native'
 
 // ============================================================
 // Types
@@ -59,6 +61,35 @@ export async function speak(
   // Clean text — remove markdown, emoji for cleaner speech
   const cleanText = cleanTextForSpeech(text)
   if (!cleanText.trim()) return
+
+  if (Platform.OS === 'web') {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return
+
+    return new Promise((resolve) => {
+      isSpeaking = true
+      onStart?.()
+
+      const utterance = new SpeechSynthesisUtterance(cleanText)
+      utterance.lang = language
+      // Map rate appropriately for Web Speech API (0.1 to 10, default is 1)
+      utterance.rate = rate === 'slow' ? 0.8 : rate === 'fast' ? 1.2 : 1.0
+      utterance.pitch = pitch
+
+      utterance.onend = () => {
+        isSpeaking = false
+        onDone?.()
+        resolve()
+      }
+
+      utterance.onerror = (err) => {
+        isSpeaking = false
+        onError?.(err.error || 'Speech error')
+        resolve()
+      }
+
+      window.speechSynthesis.speak(utterance)
+    })
+  }
 
   return new Promise((resolve) => {
     isSpeaking = true
@@ -149,6 +180,16 @@ export async function speakPhonetic(
 // ============================================================
 
 export async function stopSpeaking(): Promise<void> {
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      try {
+        window.speechSynthesis.cancel()
+      } catch {}
+      isSpeaking = false
+    }
+    return
+  }
+
   try {
     const speaking = await ExpoSpeech.isSpeakingAsync()
     if (speaking) {
@@ -163,6 +204,10 @@ export async function stopSpeaking(): Promise<void> {
 // ============================================================
 
 export async function checkIsSpeaking(): Promise<boolean> {
+  if (Platform.OS === 'web') {
+    return typeof window !== 'undefined' && !!window.speechSynthesis && window.speechSynthesis.speaking
+  }
+
   try {
     return await ExpoSpeech.isSpeakingAsync()
   } catch {
@@ -175,7 +220,14 @@ export async function checkIsSpeaking(): Promise<boolean> {
 // Returns list of available voices on the device
 // ============================================================
 
-export async function getAvailableVoices(): Promise<ExpoSpeech.Voice[]> {
+export async function getAvailableVoices(): Promise<any[]> {
+  if (Platform.OS === 'web') {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      return window.speechSynthesis.getVoices()
+    }
+    return []
+  }
+
   try {
     return await ExpoSpeech.getAvailableVoicesAsync()
   } catch {

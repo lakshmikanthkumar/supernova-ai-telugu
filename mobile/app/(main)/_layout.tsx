@@ -1,10 +1,14 @@
 import { Tabs } from 'expo-router'
 import { View, Text, StyleSheet, Platform } from 'react-native'
+import { Colors } from '../../src/constants/theme'
+import { Home, BookOpen, Bot, BarChart2, User } from 'lucide-react-native'
 
-function TabIcon({ emoji, label, focused }: { emoji: string; label: string; focused: boolean }) {
+function TabIcon({ Icon, label, focused }: { Icon: any; label: string; focused: boolean }) {
   return (
     <View style={[styles.tabItem, focused && styles.tabItemFocused]}>
-      <Text style={styles.tabEmoji}>{emoji}</Text>
+      <View style={[styles.tabEmojiWrap, focused && styles.tabEmojiWrapFocused]}>
+        <Icon size={20} color={focused ? Colors.primary : "#9CA3AF"} />
+      </View>
       <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>{label}</Text>
     </View>
   )
@@ -15,6 +19,9 @@ export default function MainLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        headerStyle: { backgroundColor: '#FFFFFF' },
+        headerTintColor: '#fff',
+        headerTitleStyle: { fontWeight: 'bold', color: '#fff' },
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
       }}
@@ -22,31 +29,37 @@ export default function MainLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" label="Home" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon Icon={Home} label="Home" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="lessons"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📚" label="Learn" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon Icon={BookOpen} label="Learn" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="nova"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🤖" label="Nova" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon Icon={Bot} label="Nova" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="progress"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📊" label="Progress" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon Icon={BarChart2} label="Progress" focused={focused} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon emoji="👤" label="Profile" focused={focused} />,
+          tabBarIcon: ({ focused }) => <TabIcon Icon={User} label="Profile" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="daily-challenge"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
@@ -55,20 +68,27 @@ export default function MainLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-    height: Platform.OS === 'ios' ? 80 : 64,
+    borderTopColor: '#E8E0D8',
+    height: Platform.OS === 'ios' ? 82 : 66,
     paddingBottom: Platform.OS === 'ios' ? 20 : 8,
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    elevation: 12,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
   },
-  tabItem: { alignItems: 'center', paddingTop: 8, width: 56 },
+  tabItem: { alignItems: 'center', paddingTop: 6, width: 58 },
   tabItemFocused: {},
-  tabEmoji: { fontSize: 22 },
+  tabEmojiWrap: {
+    width: 36, height: 28, borderRadius: 10,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  tabEmojiWrapFocused: {
+    backgroundColor: '#FFF0E8',
+  },
+  tabEmoji: { fontSize: 20 },
   tabLabel: { fontSize: 10, color: '#9CA3AF', marginTop: 2, fontWeight: '600' },
-  tabLabelFocused: { color: '#4F46E5' },
+  tabLabelFocused: { color: Colors.primary },
 })

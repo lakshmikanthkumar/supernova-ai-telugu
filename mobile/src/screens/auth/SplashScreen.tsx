@@ -6,6 +6,7 @@ import { supabase } from '../../services/supabase'
 import { useAppDispatch } from '../../hooks/useStore'
 import { setSession, fetchProfile, setProfile, setOnboarded } from '../../store/slices/authSlice'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Colors } from '../../constants/theme'
 
 const { width } = Dimensions.get('window')
 
@@ -14,6 +15,7 @@ export default function SplashScreen() {
   const logoScale = useRef(new Animated.Value(0)).current
   const logoOpacity = useRef(new Animated.Value(0)).current
   const taglineOpacity = useRef(new Animated.Value(0)).current
+  const shimmerAnim = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
     // Animate logo in
@@ -25,16 +27,25 @@ export default function SplashScreen() {
       Animated.timing(taglineOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
     ]).start()
 
-    // Check auth state
+    // Shimmer loop on the badge
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnim, { toValue: 1, duration: 1200, useNativeDriver: true }),
+        Animated.timing(shimmerAnim, { toValue: 0, duration: 1200, useNativeDriver: true }),
+      ])
+    ).start()
+
+    // Determine routing after minimum splash duration
     const checkAuth = async () => {
       await new Promise(r => setTimeout(r, 2000)) // Minimum splash duration
 
       const isGuest = await AsyncStorage.getItem('is_guest_mode')
       if (isGuest === 'true') {
+        const guestUserId = 'guest-user-id-1234-5678'
         const MOCK_USER = {
-          id: 'guest-user-id-1234-5678',
+          id: guestUserId,
           email: 'guest@englishmitra.ai',
-          phone: '+919999999999',
+          phone: null,
           aud: 'authenticated',
           role: 'authenticated',
           created_at: new Date().toISOString(),
@@ -49,42 +60,59 @@ export default function SplashScreen() {
           user: MOCK_USER,
           expires_at: Math.floor(Date.now() / 1000) + 3600,
         }
-        const MOCK_PROFILE = {
-          id: 'guest-user-id-1234-5678',
-          phone_number: '+919999999999',
-          full_name: 'Guest Learner',
-          avatar_url: null,
-          native_language: 'telugu',
-          current_level: 1,
-          xp_total: 120,
-          xp_today: 0,
-          streak_current: 3,
-          streak_longest: 5,
-          last_active_date: new Date().toISOString(),
-          is_admin: true,
-          is_premium: true,
-          daily_goal_minutes: 15,
-          notifications_enabled: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+        let profileToSet = null
+        try {
+          const cachedProfile = await AsyncStorage.getItem('@englishmitra:profile_v2')
+          if (cachedProfile) {
+            profileToSet = JSON.parse(cachedProfile)
+          }
+        } catch (e) { console.warn(e) }
+
+        if (!profileToSet) {
+          profileToSet = {
+            id: guestUserId,
+            phone_number: null,
+            full_name: 'Guest Learner',
+            avatar_url: null,
+            native_language: 'telugu',
+            current_level: 1,
+            xp_total: 120,
+            xp_today: 0,
+            streak_current: 3,
+            streak_longest: 5,
+            last_active_date: new Date().toISOString(),
+            is_admin: false,
+            is_premium: false,
+            daily_goal_minutes: 15,
+            notifications_enabled: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }
+          await AsyncStorage.setItem('@englishmitra:profile_v2', JSON.stringify(profileToSet))
         }
 
         dispatch(setSession({ session: MOCK_SESSION as any, user: MOCK_USER as any }))
-        dispatch(setProfile(MOCK_PROFILE as any))
+        dispatch(setProfile(profileToSet as any))
+        console.log('[SplashScreen] guest mode — routing to home')
         router.replace('/home')
         return
       }
 
       try {
         const { data: { session } } = await supabase.auth.getSession()
+        console.log('[SplashScreen] session check | userId:', session?.user?.id ?? 'none')
 
         if (session?.user) {
+          // Set session in Redux — useAuth's onAuthStateChange also handles fetchProfile
           dispatch(setSession({ session, user: session.user }))
+          // Fetch profile here too (belt-and-suspenders for the SplashScreen path)
           await dispatch(fetchProfile(session.user.id))
           router.replace('/home')
           return
         }
-      } catch { /* ignore and route to login */ }
+      } catch (err) {
+        console.warn('[SplashScreen] getSession error:', err)
+      }
 
       const onboarded = await AsyncStorage.getItem('onboarded')
       if (onboarded) {
@@ -97,19 +125,47 @@ export default function SplashScreen() {
     checkAuth()
   }, [])
 
+  const shimmerOpacity = shimmerAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.6, 1],
+  })
+
   return (
-    <LinearGradient colors={['#4F46E5', '#7C3AED', '#2563EB']} style={styles.container}>
+    <LinearGradient colors={['#7B61FF', '#5A42F5', '#9D84FF']} style={styles.container}>
+      {/* Decorative circles for depth */}
+      <View style={styles.bgCircle1} />
+      <View style={styles.bgCircle2} />
+
       <Animated.View style={[styles.logoContainer, { transform: [{ scale: logoScale }], opacity: logoOpacity }]}>
-        <View style={styles.logoCircle}>
-          <Text style={styles.logoEmoji}>🎓</Text>
+        {/* Premium logo circle with inner glow */}
+        <View style={styles.logoRing}>
+          <View style={styles.logoCircle}>
+            <Text style={styles.logoEmoji}>🎓</Text>
+          </View>
         </View>
-        <Text style={styles.appName}>EnglishMitra</Text>
-        <Text style={styles.appNameAI}>AI</Text>
+
+        {/* App name block */}
+        <View style={styles.appNameRow}>
+          <Text style={styles.appName}>EnglishMitra</Text>
+          <Animated.View style={[styles.aiBadge, { opacity: shimmerOpacity }]}>
+            <Text style={styles.aiBadgeText}>AI</Text>
+          </Animated.View>
+        </View>
+
+        <Text style={styles.poweredByMaansvi}>powered by Maansvi</Text>
       </Animated.View>
 
       <Animated.View style={[styles.taglineContainer, { opacity: taglineOpacity }]}>
-        <Text style={styles.tagline}>మీ ఇంగ్లీష్ నైపుణ్యాన్ని మెరుగుపరచుకోండి</Text>
-        <Text style={styles.taglineEn}>Improve Your English Skills</Text>
+        {/* Telugu subtitle — the requested text */}
+        <Text style={styles.taglineTelugu}>తెలుగులో ఇంగ్లీష్ నేర్చుకోండి</Text>
+        <Text style={styles.taglineEn}>Learn English in Telugu</Text>
+
+        {/* Decorative divider dots */}
+        <View style={styles.dotsRow}>
+          <View style={[styles.dot, styles.dotActive]} />
+          <View style={styles.dot} />
+          <View style={styles.dot} />
+        </View>
       </Animated.View>
 
       <View style={styles.poweredBy}>
@@ -121,25 +177,135 @@ export default function SplashScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  logoContainer: { alignItems: 'center', marginBottom: 40 },
-  logoCircle: {
-    width: 120, height: 120, borderRadius: 60,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: 20,
-    borderWidth: 2, borderColor: 'rgba(255,255,255,0.4)',
+
+  // Background decorative circles
+  bgCircle1: {
+    position: 'absolute',
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    top: -80,
+    right: -80,
   },
-  logoEmoji: { fontSize: 56 },
-  appName: { fontSize: 42, fontWeight: '800', color: 'white', letterSpacing: 1 },
-  appNameAI: {
-    fontSize: 18, fontWeight: '700', color: '#FCD34D',
+  bgCircle2: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    bottom: 60,
+    left: -60,
+  },
+
+  // Logo
+  logoContainer: { alignItems: 'center', marginBottom: 44 },
+
+  logoRing: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
     backgroundColor: 'rgba(255,255,255,0.15)',
-    paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12,
-    marginTop: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 22,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.35)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 10,
   },
+  logoCircle: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.5)',
+  },
+  logoEmoji: { fontSize: 52 },
+
+  // App name
+  appNameRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  appName: {
+    fontSize: 40,
+    fontWeight: '800',
+    color: 'white',
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0,0,0,0.15)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  aiBadge: {
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginTop: 6,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.6)',
+  },
+  aiBadgeText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFF8F0',
+    letterSpacing: 1,
+  },
+  poweredByMaansvi: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.75)',
+    fontWeight: '500',
+    marginTop: 10,
+    fontStyle: 'italic',
+    letterSpacing: 0.5,
+  },
+
+  // Tagline
   taglineContainer: { alignItems: 'center', paddingHorizontal: 32 },
-  tagline: { fontSize: 16, color: 'rgba(255,255,255,0.9)', textAlign: 'center', marginBottom: 6 },
-  taglineEn: { fontSize: 14, color: 'rgba(255,255,255,0.7)', textAlign: 'center' },
+  taglineTelugu: {
+    fontSize: 18,
+    color: 'rgba(255,255,255,0.95)',
+    textAlign: 'center',
+    marginBottom: 6,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+    textShadowColor: 'rgba(0,0,0,0.1)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  taglineEn: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.75)',
+    textAlign: 'center',
+    letterSpacing: 0.5,
+  },
+
+  // Decorative dots
+  dotsRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 20,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.35)',
+  },
+  dotActive: {
+    width: 18,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+  },
+
+  // Bottom
   poweredBy: { position: 'absolute', bottom: 40 },
-  poweredByText: { color: 'rgba(255,255,255,0.5)', fontSize: 12 },
+  poweredByText: { color: 'rgba(255,255,255,0.55)', fontSize: 12, letterSpacing: 0.3 },
 })

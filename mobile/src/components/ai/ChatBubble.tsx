@@ -90,7 +90,7 @@ function CorrectionItem({ correction }: { correction: GrammarCorrection }) {
 const styles = StyleSheet.create({
   userContainer: { alignItems: 'flex-end', marginBottom: 12 },
   userBubble: {
-    backgroundColor: '#4F46E5', maxWidth: '78%',
+    backgroundColor: '#7B61FF', maxWidth: '78%',
     paddingHorizontal: 16, paddingVertical: 12,
     borderRadius: 20, borderBottomRightRadius: 4,
   },
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   correctionItem: { marginBottom: 10 },
   correctionOriginal: { fontSize: 13, color: '#EF4444', marginBottom: 2 },
   correctionArrow: { fontSize: 13, color: '#6B7280' },
-  correctionFixed: { fontSize: 13, color: '#059669', fontWeight: '600', marginBottom: 2 },
+  correctionFixed: { fontSize: 13, color: '#00D26A', fontWeight: '600', marginBottom: 2 },
   correctionExplanation: { fontSize: 12, color: '#374151', marginTop: 2, lineHeight: 18 },
   correctionTelugu: { fontSize: 11, color: '#6B7280', marginTop: 2 },
   assistantContainer: { flexDirection: 'row', alignItems: 'flex-end', marginBottom: 16, gap: 8 },
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEF2FF', borderRadius: 12, padding: 10,
     marginTop: 6, maxWidth: '85%',
   },
-  translationLabel: { fontSize: 11, color: '#4F46E5', fontWeight: '700', marginBottom: 2 },
+  translationLabel: { fontSize: 11, color: '#7B61FF', fontWeight: '700', marginBottom: 2 },
   translationText: { fontSize: 13, color: '#374151' },
   timestamp: { fontSize: 11, color: '#9CA3AF', marginTop: 4, marginLeft: 4 },
 })

@@ -12,6 +12,11 @@ interface GamificationState {
   loading: boolean
 }
 
+// Only the fields we want to persist (no loading/error/transient UI state)
+export interface PersistedGamificationState {
+  achievements: Achievement[]
+}
+
 const initialState: GamificationState = {
   achievements: [],
   leaderboard: [],
@@ -56,6 +61,12 @@ const gamificationSlice = createSlice({
     clearNewAchievements(state) {
       state.newAchievements = []
     },
+    rehydrate(state, action: PayloadAction<PersistedGamificationState>) {
+      // Merge only the persisted fields; leave transient state at defaults
+      if (action.payload.achievements?.length) {
+        state.achievements = action.payload.achievements
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -71,5 +82,5 @@ const gamificationSlice = createSlice({
   },
 })
 
-export const { showXPGain, clearXPGain, setLevelUp, addNewAchievement, clearNewAchievements } = gamificationSlice.actions
+export const { showXPGain, clearXPGain, setLevelUp, addNewAchievement, clearNewAchievements, rehydrate: rehydrateGamification } = gamificationSlice.actions
 export default gamificationSlice.reducer

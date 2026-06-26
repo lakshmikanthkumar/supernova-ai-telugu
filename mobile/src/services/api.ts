@@ -18,6 +18,113 @@ import {
   MOCK_DAILY_CHALLENGE, MOCK_SCENARIOS
 } from './mockData'
 
+function shuffleArray<T>(array: T[]): T[] {
+  const arr = [...array]
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr
+}
+
+const MOCK_DAILY_CHALLENGES: DailyChallenge[] = [
+  {
+    id: 'challenge-today-1',
+    title: 'Word of the Day: Appreciate',
+    title_telugu: 'నేటి పదం: అభినందించడం',
+    description: 'Learn the meaning of "Appreciate" and practice the sentence!',
+    challenge_type: 'vocabulary',
+    content: {
+      word: 'Appreciate',
+      meaning_telugu: 'అభినందించడం / కృతజ్ఞతలు చెప్పడం',
+      sentence: 'I appreciate your help.',
+      sentence_telugu: 'నేను మీ సహాయాన్ని అభినందిస్తున్నాను.',
+    },
+    xp_reward: 15,
+    valid_date: '',
+    completed: false,
+  },
+  {
+    id: 'challenge-today-2',
+    title: 'Word of the Day: Collaboration',
+    title_telugu: 'నేటి పదం: సహకారం',
+    description: 'Learn the meaning of "Collaboration" and practice the sentence!',
+    challenge_type: 'vocabulary',
+    content: {
+      word: 'Collaboration',
+      meaning_telugu: 'సహకారం / కలిసి పనిచేయడం',
+      sentence: 'Collaboration is key to team success.',
+      sentence_telugu: 'సహకారం అనేది జట్టు విజయానికి కీలకం.',
+    },
+    xp_reward: 15,
+    valid_date: '',
+    completed: false,
+  },
+  {
+    id: 'challenge-today-3',
+    title: 'Word of the Day: Proactive',
+    title_telugu: 'నేటి పదం: క్రియాశీలక',
+    description: 'Learn the meaning of "Proactive" and practice the sentence!',
+    challenge_type: 'vocabulary',
+    content: {
+      word: 'Proactive',
+      meaning_telugu: 'ముందుగా స్పందించే / క్రియాశీలక',
+      sentence: 'We must take proactive measures to solve this.',
+      sentence_telugu: 'దీన్ని పరిష్కరించడానికి మనం క్రియాశీలక చర్యలు తీసుకోవాలి.',
+    },
+    xp_reward: 15,
+    valid_date: '',
+    completed: false,
+  },
+  {
+    id: 'challenge-today-4',
+    title: 'Word of the Day: Opportunity',
+    title_telugu: 'నేటి పదం: అవకాశం',
+    description: 'Learn the meaning of "Opportunity" and practice the sentence!',
+    challenge_type: 'vocabulary',
+    content: {
+      word: 'Opportunity',
+      meaning_telugu: 'అవకాశం',
+      sentence: 'This project is a great opportunity to learn.',
+      sentence_telugu: 'ఈ ప్రాజెక్ట్ నేర్చుకోవడానికి ఒక గొప్ప అవకాశం.',
+    },
+    xp_reward: 15,
+    valid_date: '',
+    completed: false,
+  },
+  {
+    id: 'challenge-today-5',
+    title: 'Word of the Day: Feedback',
+    title_telugu: 'నేటి పదం: అభిప్రాయం',
+    description: 'Learn the meaning of "Feedback" and practice the sentence!',
+    challenge_type: 'vocabulary',
+    content: {
+      word: 'Feedback',
+      meaning_telugu: 'అభిప్రాయం / ఫీడ్‌బ్యాక్',
+      sentence: 'Constructive feedback helps us improve.',
+      sentence_telugu: 'నిర్మాణాత్మక అభిప్రాయం మనల్ని మెరుగుపరుచుకోవడానికి సహాయపడుతుంది.',
+    },
+    xp_reward: 15,
+    valid_date: '',
+    completed: false,
+  }
+]
+
+const MOCK_PRONUNCIATION_PHRASES = [
+  { id: 'ph-1', phrase: 'Hello, how are you today?', phrase_telugu: 'హలో, ఈ రోజు మీరు ఎలా ఉన్నారు?', difficulty: 1, translation: 'హలో, ఈ రోజు మీరు ఎలా ఉన్నారు?' },
+  { id: 'ph-2', phrase: 'Learning English is fun and easy.', phrase_telugu: 'ఇంగ్లీష్ నేర్చుకోవడం సరదాగా మరియు సులభంగా ఉంటుంది.', difficulty: 2, translation: 'ఇంగ్లీష్ నేర్చుకోవడం సరదాగా మరియు సులభంగా ఉంటుంది.' },
+  { id: 'ph-3', phrase: 'Practice makes perfect.', phrase_telugu: 'సాధన చేస్తే అనుకున్నది సాధించవచ్చు.', difficulty: 2, translation: 'సాధన చేస్తే అనుకున్నది సాధించవచ్చు.' },
+  { id: 'ph-4', phrase: 'Can you help me with this project?', phrase_telugu: 'ఈ ప్రాజెక్ట్‌లో మీరు నాకు సహాయం చేయగలరా?', difficulty: 2, translation: 'ఈ ప్రాజెక్ట్‌లో మీరు నాకు సహాయం చేయగలరా?' },
+  { id: 'ph-5', phrase: 'I would like to schedule a quick meeting.', phrase_telugu: 'నేను ఒక చిన్న సమావేశాన్ని షెడ్యూల్ చేయాలనుకుంటున్నాను.', difficulty: 3, translation: 'నేను ఒక చిన్న సమావేశాన్ని షెడ్యూల్ చేయాలనుకుంటున్నాను.' },
+  { id: 'ph-6', phrase: 'Please send me the report before five PM.', phrase_telugu: 'దయచేసి సాయంత్రం ఐదు గంటల లోపు నాకు నివేదికను పంపండి.', difficulty: 2, translation: 'దయచేసి సాయంత్రం ఐదు గంటల లోపు నాకు నివేదికను పంపండి.' },
+  { id: 'ph-7', phrase: 'Thank you for your valuable feedback.', phrase_telugu: 'మీ విలువైన అభిప్రాయానికి ధన్యవాదాలు.', difficulty: 2, translation: 'మీ విలువైన అభిప్రాయానికి ధన్యవాదాలు.' },
+  { id: 'ph-8', phrase: 'We need to collaborate to finish this task.', phrase_telugu: 'ఈ పనిని పూర్తి చేయడానికి మనం కలిసి పనిచేయాలి.', difficulty: 3, translation: 'ఈ పనిని పూర్తి చేయడానికి మనం కలిసి పనిచేయాలి.' },
+  { id: 'ph-9', phrase: 'I appreciate your help in resolving this issue.', phrase_telugu: 'ఈ సమస్యను పరిష్కరించడంలో మీ సహాయాన్ని నేను అభినందిస్తున్నాను.', difficulty: 3, translation: 'ఈ సమస్యను పరిష్కరించడంలో మీ సహాయాన్ని నేను అభినందిస్తున్నాను.' },
+  { id: 'ph-10', phrase: 'Let us follow up on this tomorrow morning.', phrase_telugu: 'రేపు ఉదయం దీని గురించి మరింత మాట్లాడదాం.', difficulty: 2, translation: 'రేపు ఉదయం దీని గురించి మరింత మాట్లాడదాం.' },
+  { id: 'ph-11', phrase: 'He is very articulate and speaks confidently.', phrase_telugu: 'అతను చాలా స్పష్టంగా మరియు నమ్మకంగా మాట్లాడతాడు.', difficulty: 3, translation: 'అతను చాలా స్పష్టంగా మరియు నమ్మకంగా మాట్లాడతాడు.' },
+  { id: 'ph-12', phrase: 'What are your primary career goals?', phrase_telugu: 'మీ ప్రధాన వృత్తిపరమైన లక్ష్యాలు ఏమిటి?', difficulty: 2, translation: 'మీ ప్రధాన వృత్తిపరమైన లక్ష్యాలు ఏమిటి?' }
+]
+
 export const checkIsGuest = async (): Promise<boolean> => {
   try {
     const val = await AsyncStorage.getItem('is_guest_mode')
@@ -75,21 +182,26 @@ export const authService = {
       return { session: MOCK_SESSION as any, user: MOCK_USER as any, profile: MOCK_PROFILE }
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    if (error) throw error
+    console.log('[signInWithEmail] signing in:', email)
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      console.error('[signInWithEmail] error:', error.message)
+      throw error
+    }
+    console.log('[signInWithEmail] success | userId:', data.user?.id, '| session:', data.session ? 'active' : 'none')
     return data
   },
 
   async signUpWithEmail(email: string, password: string, fullName: string) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-    if (error) throw error
+    console.log('[signUpWithEmail] creating account for:', email)
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    if (error) {
+      console.error('[signUpWithEmail] auth error:', error.message)
+      throw error
+    }
     if (!data.user) throw new Error('Signup failed: No user returned.')
+
+    console.log('[signUpWithEmail] user created:', data.user.id, '| session:', data.session ? 'yes' : 'no (email confirmation needed)')
 
     const defaultProfile: Profile = {
       id: data.user.id,
@@ -112,14 +224,18 @@ export const authService = {
     }
 
     try {
+      // Use upsert so it works whether or not the row already exists
       const { error: profileError } = await supabase
         .from('profiles')
-        .insert(defaultProfile)
+        .upsert(defaultProfile)
       if (profileError) {
-        console.warn('Profile insert error: ', profileError)
+        console.warn('[signUpWithEmail] profile upsert error:', profileError.code, profileError.message)
+        // Non-fatal: profile will be auto-created by getProfile on next fetch
+      } else {
+        console.log('[signUpWithEmail] profile row created successfully')
       }
     } catch (err) {
-      console.warn('Failed to insert default profile: ', err)
+      console.warn('[signUpWithEmail] profile creation exception:', err)
     }
 
     return { session: data.session, user: data.user, profile: defaultProfile }
@@ -156,9 +272,10 @@ export const authService = {
 export const profileService = {
   async getProfile(userId: string): Promise<Profile> {
     if (await checkIsGuest() || userId.startsWith('guest-') || userId.startsWith('dev-')) {
+      console.log('[getProfile] guest/dev mode, returning mock profile for:', userId)
       return {
         id: userId,
-        phone_number: '+919999999999',
+        phone_number: null,
         full_name: userId.startsWith('dev-') ? 'Developer Learner' : 'Guest Learner',
         avatar_url: null,
         native_language: 'telugu',
@@ -168,54 +285,117 @@ export const profileService = {
         streak_current: userId.startsWith('dev-') ? 12 : 3,
         streak_longest: userId.startsWith('dev-') ? 24 : 5,
         last_active_date: new Date().toISOString(),
-        is_admin: true,
-        is_premium: true,
+        is_admin: false,
+        is_premium: false,
         daily_goal_minutes: 15,
         notifications_enabled: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }
     }
+
+    console.log('[getProfile] fetching from Supabase for userId:', userId)
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single()
-      if (error) throw error
+        .maybeSingle()
+
+      if (error) {
+        console.error('[getProfile] Supabase error:', error.code, error.message)
+        throw error
+      }
+
+      if (!data) {
+        console.log('[getProfile] No profile row, auto-creating default...')
+        const defaultProfile: Profile = {
+          id: userId,
+          phone_number: null,
+          full_name: 'English Learner',
+          avatar_url: null,
+          native_language: 'telugu',
+          current_level: 1,
+          xp_total: 100,
+          xp_today: 0,
+          streak_current: 1,
+          streak_longest: 1,
+          last_active_date: new Date().toISOString(),
+          is_admin: false,
+          is_premium: false,
+          daily_goal_minutes: 15,
+          notifications_enabled: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+        const { data: created, error: createErr } = await supabase
+          .from('profiles')
+          .upsert(defaultProfile)
+          .select()
+          .maybeSingle()
+        if (createErr) {
+          console.error('[getProfile] auto-create failed:', createErr.message)
+        } else {
+          console.log('[getProfile] default profile auto-created')
+        }
+        return created || defaultProfile
+      }
+
+      console.log('[getProfile] success:', data.full_name, '| level:', data.current_level, '| xp:', data.xp_total)
       return data
     } catch (err) {
-      return {
-        id: userId,
-        phone_number: null,
-        full_name: 'Offline Learner',
-        avatar_url: null,
-        native_language: 'telugu',
-        current_level: 1,
-        xp_total: 100,
-        xp_today: 0,
-        streak_current: 1,
-        streak_longest: 1,
-        last_active_date: null,
-        is_admin: false,
-        is_premium: false,
-        daily_goal_minutes: 15,
-        notifications_enabled: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }
+      console.error('[getProfile] catch block:', err)
+      throw err
     }
   },
 
-  async updateProfile(userId: string, updates: Partial<Profile>) {
-    if (await checkIsGuest()) return
+  async updateProfile(userId: string, updates: Partial<Profile>): Promise<Partial<Profile>> {
+    if (await checkIsGuest()) {
+      console.log('[updateProfile] guest mode — skipping Supabase write, returning updates locally')
+      return updates
+    }
+
+    console.log('[updateProfile] writing to Supabase | userId:', userId, '| fields:', Object.keys(updates).join(', '))
+
     try {
-      const { error } = await supabase
+      const payload = { ...updates, updated_at: new Date().toISOString() }
+
+      // Use UPDATE (not upsert) + SELECT to get confirmed data back from DB
+      const { data, error } = await supabase
         .from('profiles')
-        .update(updates)
+        .update(payload)
         .eq('id', userId)
-      if (error) throw error
-    } catch { /* ignore for offline */ }
+        .select()
+        .single()
+
+      if (error) {
+        console.error('[updateProfile] Supabase UPDATE error:', error.code, error.message)
+
+        // If row doesn't exist yet, fall back to upsert
+        if (error.code === 'PGRST116') {
+          console.log('[updateProfile] Row not found, falling back to upsert...')
+          const { data: upserted, error: upsertErr } = await supabase
+            .from('profiles')
+            .upsert({ id: userId, ...payload })
+            .select()
+            .single()
+          if (upsertErr) {
+            console.error('[updateProfile] Upsert also failed:', upsertErr.message)
+            throw upsertErr
+          }
+          console.log('[updateProfile] upsert success:', upserted?.full_name)
+          return upserted || updates
+        }
+
+        throw error
+      }
+
+      console.log('[updateProfile] Supabase confirmed update | full_name:', data?.full_name, '| level:', data?.current_level)
+      return data || updates
+    } catch (err) {
+      console.error('[updateProfile] catch block:', err)
+      throw err
+    }
   },
 
   async uploadAvatar(userId: string, fileUri: string): Promise<string> {
@@ -357,7 +537,7 @@ export const flashcardService = {
         let filtered = MOCK_FLASHCARDS
         if (lessonId) filtered = filtered.filter(f => f.lesson_id === lessonId)
         if (categoryId) filtered = filtered.filter(f => f.category_id === categoryId)
-        return filtered
+        return shuffleArray(filtered)
       }
       let query = supabase
         .from('flashcards')
@@ -373,15 +553,26 @@ export const flashcardService = {
       const { data, error } = await query.limit(50)
       if (error) throw error
 
-      return (data || []).map(fc => ({
+      const results = (data || []).map(fc => ({
         ...fc,
         user_progress: fc.user_flashcard_progress?.[0] || null,
       }))
+
+      // Fall back to mock data if the flashcards table has no seed data yet
+      if (results.length === 0) {
+        console.log('[getFlashcards] no data in Supabase, using mock flashcards')
+        let filtered = MOCK_FLASHCARDS
+        if (lessonId) filtered = filtered.filter(f => f.lesson_id === lessonId)
+        if (categoryId) filtered = filtered.filter(f => f.category_id === categoryId)
+        return shuffleArray(filtered)
+      }
+
+      return shuffleArray(results)
     } catch {
       let filtered = MOCK_FLASHCARDS
       if (lessonId) filtered = filtered.filter(f => f.lesson_id === lessonId)
       if (categoryId) filtered = filtered.filter(f => f.category_id === categoryId)
-      return filtered
+      return shuffleArray(filtered)
     }
   },
 
@@ -706,11 +897,7 @@ export const pronunciationService = {
   async getPhrases() {
     try {
       if (await checkIsGuest()) {
-        return [
-          { id: 'ph-1', phrase: 'Hello, how are you today?', phrase_telugu: 'హలో, ఈ రోజు మీరు ఎలా ఉన్నారు?', difficulty: 1, translation: 'హలో, ఈ రోజు మీరు ఎలా ఉన్నారు?' },
-          { id: 'ph-2', phrase: 'Learning English is fun and easy.', phrase_telugu: 'ఇంగ్లీష్ నేర్చుకోవడం సరదాగా మరియు సులభంగా ఉంటుంది.', difficulty: 2, translation: 'ఇంగ్లీష్ నేర్చుకోవడం సరదాగా మరియు సులభంగా ఉంటుంది.' },
-          { id: 'ph-3', phrase: 'Practice makes perfect.', phrase_telugu: 'సాధన చేస్తే అనుకున్నది సాధించవచ్చు.', difficulty: 2, translation: 'సాధన చేస్తే అనుకున్నది సాధించవచ్చు.' }
-        ]
+        return shuffleArray(MOCK_PRONUNCIATION_PHRASES).slice(0, 10)
       }
       const { data, error } = await supabase
         .from('pronunciation_phrases')
@@ -718,13 +905,9 @@ export const pronunciationService = {
         .order('difficulty')
         .limit(30)
       if (error) throw error
-      return data || []
+      return data && data.length > 0 ? shuffleArray(data) : shuffleArray(MOCK_PRONUNCIATION_PHRASES).slice(0, 10)
     } catch {
-      return [
-        { id: 'ph-1', phrase: 'Hello, how are you today?', phrase_telugu: 'హలో, ఈ రోజు మీరు ఎలా ఉన్నారు?', difficulty: 1, translation: 'హలో, ఈ రోజు మీరు ఎలా ఉన్నారు?' },
-        { id: 'ph-2', phrase: 'Learning English is fun and easy.', phrase_telugu: 'ఇంగ్లీష్ నేర్చుకోవడం సరదాగా మరియు సులభంగా ఉంటుంది.', difficulty: 2, translation: 'ఇంగ్లీష్ నేర్చుకోవడం సరదాగా మరియు సులభంగా ఉంటుంది.' },
-        { id: 'ph-3', phrase: 'Practice makes perfect.', phrase_telugu: 'సాధన చేస్తే అనుకున్నది సాధించవచ్చు.', difficulty: 2, translation: 'సాధన చేస్తే అనుకున్నది సాధించవచ్చు.' }
-      ]
+      return shuffleArray(MOCK_PRONUNCIATION_PHRASES).slice(0, 10)
     }
   },
 
@@ -818,45 +1001,105 @@ export const gamificationService = {
 
   async getDailyChallenge(): Promise<DailyChallenge | null> {
     try {
-      if (await checkIsGuest()) return MOCK_DAILY_CHALLENGE
+      if (await checkIsGuest()) {
+        const randomIndex = Math.floor(Math.random() * MOCK_DAILY_CHALLENGES.length)
+        return {
+          ...MOCK_DAILY_CHALLENGES[randomIndex],
+          valid_date: new Date().toISOString().split('T')[0],
+          completed: false,
+        }
+      }
       const today = new Date().toISOString().split('T')[0]
       const { data, error } = await supabase
         .from('daily_challenges')
         .select(`*, user_daily_challenges!left(completed, score)`)
         .eq('valid_date', today)
         .eq('is_active', true)
-        .single()
-      if (error) return MOCK_DAILY_CHALLENGE
+        .maybeSingle()
+      if (error || !data) {
+        const randomIndex = Math.floor(Math.random() * MOCK_DAILY_CHALLENGES.length)
+        return {
+          ...MOCK_DAILY_CHALLENGES[randomIndex],
+          valid_date: new Date().toISOString().split('T')[0],
+          completed: false,
+        }
+      }
       return {
         ...data,
         completed: data.user_daily_challenges?.[0]?.completed || false,
       }
     } catch {
-      return MOCK_DAILY_CHALLENGE
+      const randomIndex = Math.floor(Math.random() * MOCK_DAILY_CHALLENGES.length)
+      return {
+        ...MOCK_DAILY_CHALLENGES[randomIndex],
+        valid_date: new Date().toISOString().split('T')[0],
+        completed: false,
+      }
     }
   },
 
   async updateProgress(action: string, lessonId?: string, xpAmount?: number) {
-    if (await checkIsGuest()) return { success: true, xpEarned: xpAmount || 10 }
+    let xpEarned = xpAmount || 10
+    
+    // For guest mode, we don't have a real DB. 
+    // We should rely on Redux + AsyncStorage for local persistence.
+    if (await checkIsGuest()) {
+      return { success: true, xp_earned: xpEarned }
+    }
+    
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('Not authenticated')
 
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/update-progress`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ action, lesson_id: lessonId, xp_amount: xpAmount }),
+      // First try Edge Function if it exists
+      try {
+        const response = await fetch(
+          `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/update-progress`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({ action, lesson_id: lessonId, xp_amount: xpAmount }),
+          }
+        )
+        if (response.ok) return await response.json()
+      } catch (e) {
+        console.warn('[updateProgress] Edge function failed, falling back to direct DB update', e)
+      }
+
+      // Fallback: update profile XP directly in Supabase DB
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('xp_total, current_level')
+        .eq('id', session.user.id)
+        .single()
+        
+      if (profile) {
+        const newTotal = (profile.xp_total || 0) + xpEarned
+        let newLevel = profile.current_level || 1
+        let levelUp = false
+        
+        // Simple level calculation: 1 level per 500 XP
+        const expectedLevel = Math.floor(newTotal / 500) + 1
+        if (expectedLevel > newLevel) {
+          newLevel = expectedLevel
+          levelUp = true
         }
-      )
-      if (!response.ok) throw new Error('Failed to update progress')
-      return response.json()
-    } catch {
-      return { success: true, xpEarned: xpAmount || 10 }
+
+        await supabase
+          .from('profiles')
+          .update({ xp_total: newTotal, current_level: newLevel, updated_at: new Date().toISOString() })
+          .eq('id', session.user.id)
+          
+        return { success: true, xp_earned: xpEarned, new_xp_total: newTotal, new_level: newLevel, level_up: levelUp }
+      }
+      
+      return { success: true, xp_earned: xpEarned }
+    } catch (e) {
+      console.warn('[updateProgress] Failed entirely', e)
+      return { success: true, xp_earned: xpEarned }
     }
   },
 }

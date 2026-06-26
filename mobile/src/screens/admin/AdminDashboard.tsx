@@ -59,7 +59,7 @@ export default function AdminDashboard() {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#1F2937', '#374151']} style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}>
           <Text style={styles.backBtn}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>⚙️ Admin Dashboard</Text>
@@ -83,17 +83,17 @@ export default function AdminDashboard() {
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4F46E5" />
+          <ActivityIndicator size="large" color="#7B61FF" />
         </View>
       ) : (
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
           {activeTab === 'stats' && stats && (
             <View style={styles.tabContent}>
               <View style={styles.statsGrid}>
-                <AdminStatCard label="Total Users" value={stats.totalUsers} emoji="👥" color="#4F46E5" />
-                <AdminStatCard label="Total Lessons" value={stats.totalLessons} emoji="📚" color="#059669" />
+                <AdminStatCard label="Total Users" value={stats.totalUsers} emoji="👥" color="#7B61FF" />
+                <AdminStatCard label="Total Lessons" value={stats.totalLessons} emoji="📚" color="#00D26A" />
                 <AdminStatCard label="Chat Sessions" value={stats.totalChatSessions} emoji="💬" color="#D97706" />
-                <AdminStatCard label="Active Today" value={0} emoji="⚡" color="#0891B2" />
+                <AdminStatCard label="Active Today" value={0} emoji="⚡" color="#00D26A" />
               </View>
 
               <Text style={styles.sectionTitle}>Quick Actions</Text>
@@ -196,9 +196,9 @@ const styles = StyleSheet.create({
   headerSubtitle: { fontSize: 14, color: 'rgba(255,255,255,0.7)', marginTop: 4 },
   tabRow: { flexDirection: 'row', backgroundColor: 'white', elevation: 2 },
   tab: { flex: 1, paddingVertical: 14, alignItems: 'center' },
-  tabActive: { borderBottomWidth: 3, borderBottomColor: '#4F46E5' },
+  tabActive: { borderBottomWidth: 3, borderBottomColor: '#7B61FF' },
   tabText: { fontSize: 13, color: '#6B7280', fontWeight: '600' },
-  tabTextActive: { color: '#4F46E5' },
+  tabTextActive: { color: '#7B61FF' },
   loadingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { flex: 1 },
   tabContent: { padding: 16 },
@@ -215,15 +215,15 @@ const styles = StyleSheet.create({
   actionButtonArrow: { fontSize: 18, color: '#9CA3AF' },
   userCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', borderRadius: 14, padding: 14, marginBottom: 8, gap: 12, elevation: 2 },
   userAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center' },
-  userAvatarText: { fontSize: 20, fontWeight: '700', color: '#4F46E5' },
+  userAvatarText: { fontSize: 20, fontWeight: '700', color: '#7B61FF' },
   userInfo: { flex: 1 },
   userName: { fontSize: 15, fontWeight: '700', color: '#111827' },
   userPhone: { fontSize: 13, color: '#6B7280', marginTop: 2 },
   userStats: { fontSize: 12, color: '#9CA3AF', marginTop: 4 },
   adminBadge: { backgroundColor: '#EEF2FF', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-  adminBadgeText: { fontSize: 11, color: '#4F46E5', fontWeight: '700' },
+  adminBadgeText: { fontSize: 11, color: '#7B61FF', fontWeight: '700' },
   addLessonRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  addBtn: { backgroundColor: '#4F46E5', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10 },
+  addBtn: { backgroundColor: '#7B61FF', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 10 },
   addBtnText: { color: 'white', fontWeight: '700', fontSize: 13 },
   lessonAdminCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', borderRadius: 14, padding: 14, marginBottom: 8, gap: 12, elevation: 2 },
   lessonAdminInfo: { flex: 1 },
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   lessonAdminMeta: { fontSize: 12, color: '#6B7280', marginTop: 4 },
   lessonAdminActions: { flexDirection: 'row', gap: 8 },
   editBtn: { backgroundColor: '#EEF2FF', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
-  editBtnText: { color: '#4F46E5', fontWeight: '600', fontSize: 12 },
+  editBtnText: { color: '#7B61FF', fontWeight: '600', fontSize: 12 },
   deleteBtn: { backgroundColor: '#FEE2E2', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
   deleteBtnText: { color: '#EF4444', fontWeight: '600', fontSize: 12 },
 })

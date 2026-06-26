@@ -5,6 +5,7 @@ import {
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router, useLocalSearchParams } from 'expo-router'
+import { Colors } from '../../constants/theme'
 import * as Speech from 'expo-speech'
 import { useAppDispatch, useAppSelector } from '../../hooks/useStore'
 import { fetchLesson } from '../../store/slices/lessonsSlice'
@@ -68,7 +69,7 @@ export default function LessonScreen() {
   if (!currentLesson) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4F46E5" />
+        <ActivityIndicator size="large" color={Colors.primary} />
         <Text style={styles.loadingText}>Loading lesson...</Text>
       </View>
     )
@@ -80,10 +81,10 @@ export default function LessonScreen() {
     <View style={styles.container}>
       {/* Header */}
       <LinearGradient
-        colors={[category?.color_hex || '#4F46E5', (category?.color_hex || '#4F46E5') + '99']}
+        colors={[category?.color_hex || Colors.primary, (category?.color_hex || Colors.primary) + '99']}
         style={styles.header}
       >
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')} style={styles.backBtn}>
           <Text style={styles.backBtnText}>←</Text>
         </TouchableOpacity>
         <View style={styles.headerContent}>
@@ -234,9 +235,9 @@ const styles = StyleSheet.create({
   metaText: { fontSize: 13, color: 'rgba(255,255,255,0.9)', fontWeight: '600' },
   tabRow: { flexDirection: 'row', backgroundColor: 'white', elevation: 2 },
   tab: { flex: 1, paddingVertical: 14, alignItems: 'center' },
-  tabActive: { borderBottomWidth: 3, borderBottomColor: '#4F46E5' },
+  tabActive: { borderBottomWidth: 3, borderBottomColor: Colors.primary },
   tabText: { fontSize: 13, color: '#6B7280', fontWeight: '600' },
-  tabTextActive: { color: '#4F46E5' },
+  tabTextActive: { color: Colors.primary },
   content: { flex: 1 },
   tabContent: { padding: 16, gap: 12 },
   vocabCard: {
@@ -246,21 +247,21 @@ const styles = StyleSheet.create({
   vocabHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   vocabWord: { fontSize: 22, fontWeight: '800', color: '#111827' },
   vocabPhonetic: { fontSize: 13, color: '#6B7280', marginTop: 2 },
-  vocabTelugu: { fontSize: 16, color: '#4F46E5', fontWeight: '600', marginTop: 8 },
-  speakBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center' },
-  speakBtnActive: { backgroundColor: '#4F46E5' },
+  vocabTelugu: { fontSize: 16, color: Colors.primary, fontWeight: '600', marginTop: 8 },
+  speakBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#FFF0E8', alignItems: 'center', justifyContent: 'center' },
+  speakBtnActive: { backgroundColor: Colors.primary },
   speakBtnText: { fontSize: 20 },
   exampleBubble: { backgroundColor: '#F3F4F6', borderRadius: 10, padding: 12, marginTop: 10 },
   exampleText: { fontSize: 14, color: '#374151', fontStyle: 'italic', lineHeight: 20 },
   dialogueBlock: { backgroundColor: 'white', borderRadius: 16, padding: 16, elevation: 2 },
-  dialogueTitle: { fontSize: 16, fontWeight: '700', color: '#4F46E5', marginBottom: 16, textAlign: 'center' },
+  dialogueTitle: { fontSize: 16, fontWeight: '700', color: Colors.primary, marginBottom: 16, textAlign: 'center' },
   dialogueLine: { marginBottom: 12 },
   dialogueLineLeft: { alignItems: 'flex-start' },
   dialogueLineRight: { alignItems: 'flex-end' },
   dialogueSpeaker: { fontSize: 11, color: '#6B7280', marginBottom: 4, fontWeight: '600' },
   dialogueBubble: { maxWidth: width * 0.72, padding: 12, borderRadius: 16 },
-  bubbleLeft: { backgroundColor: '#EEF2FF', borderBottomLeftRadius: 4 },
-  bubbleRight: { backgroundColor: '#4F46E5', borderBottomRightRadius: 4 },
+  bubbleLeft: { backgroundColor: '#FFF0E8', borderBottomLeftRadius: 4 },
+  bubbleRight: { backgroundColor: Colors.primary, borderBottomRightRadius: 4 },
   dialogueText: { fontSize: 14, lineHeight: 20, color: '#111827' },
   dialogueTeluguText: { fontSize: 13, color: '#6B7280', marginTop: 4, lineHeight: 18 },
   tipCard: { flexDirection: 'row', backgroundColor: 'white', borderRadius: 14, padding: 16, gap: 12, elevation: 2 },
@@ -273,7 +274,7 @@ const styles = StyleSheet.create({
     padding: 16, paddingBottom: 32, backgroundColor: 'white',
     borderTopWidth: 1, borderTopColor: '#E5E7EB', elevation: 10,
   },
-  completeBtn: { backgroundColor: '#4F46E5', paddingVertical: 16, borderRadius: 14, alignItems: 'center', elevation: 3 },
+  completeBtn: { backgroundColor: Colors.primary, paddingVertical: 16, borderRadius: 14, alignItems: 'center', elevation: 3 },
   completeBtnDisabled: { backgroundColor: '#9CA3AF' },
   completeBtnText: { color: 'white', fontSize: 16, fontWeight: '700' },
 })

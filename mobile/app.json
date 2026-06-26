@@ -9,14 +9,14 @@
     "splash": {
       "image": "./src/assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#4F46E5"
+      "backgroundColor": "#7B61FF"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.techdoquest.englishmitraai",
+      "bundleIdentifier": "com.englishmitraai",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "We need microphone access to practice your English pronunciation.",
         "NSSpeechRecognitionUsageDescription": "We use speech recognition to help improve your pronunciation.",
@@ -26,9 +26,9 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/adaptive-icon.png",
-        "backgroundColor": "#4F46E5"
+        "backgroundColor": "#7B61FF"
       },
-      "package": "com.techdoquest.englishmitraai",
+      "package": "com.englishmitraai",
       "permissions": [
         "RECORD_AUDIO",
         "READ_EXTERNAL_STORAGE",
@@ -47,7 +47,7 @@
         "expo-notifications",
         {
           "icon": "./src/assets/images/notification-icon.png",
-          "color": "#4F46E5"
+          "color": "#7B61FF"
         }
       ],
       [

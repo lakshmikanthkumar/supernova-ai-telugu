@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { roleplayService } from '../../src/services/api'
 import type { RoleplayScenario } from '../../src/types'
+import { Colors } from '../../src/constants/theme'
 
 const SCENARIO_ICONS: Record<string, string> = {
   interview: '💼', shopping: '🛒', travel: '✈️',
@@ -25,12 +26,12 @@ export default function RoleplayScreen() {
     router.push({ pathname: '/ai/chat', params: { scenarioId: scenario.id, mode: 'roleplay' } })
   }
 
-  if (loading) return <View style={styles.loading}><ActivityIndicator size="large" color="#0891B2" /></View>
+  if (loading) return <View style={styles.loading}><ActivityIndicator size="large" color="#7B61FF" /></View>
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#0891B2', '#0E7490']} style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+      <LinearGradient colors={['#7B61FF', '#5A42F5']} style={styles.header}>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}>
           <Text style={styles.backBtn}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>🎭 AI Roleplay</Text>
@@ -72,8 +73,8 @@ export default function RoleplayScreen() {
 
 function getColor(type: string) {
   const colors: Record<string, string> = {
-    interview: '#4F46E5', shopping: '#059669', travel: '#DC2626',
-    office: '#0891B2', medical: '#DB2777', restaurant: '#D97706',
+    interview: '#7B61FF', shopping: '#00D26A', travel: '#DC2626',
+    office: '#7B61FF', medical: '#DB2777', restaurant: '#D97706',
   }
   return colors[type] || '#6B7280'
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import {
   View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity,
   KeyboardAvoidingView, Platform, ActivityIndicator, Animated, Alert,
+  ScrollView,
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
@@ -16,6 +17,9 @@ import {
   destroySpeechRecognition, isSpeechRecognitionAvailable,
 } from '../../services/audio/speechRecognition'
 import { toTelugu } from '../../services/translation/translationService'
+import { Colors } from '../../constants/theme'
+import { GraduationCap, Volume2, VolumeX, ArrowLeft, Mic, Square, Send, Languages, Globe } from 'lucide-react-native'
+import XPToast from '../../components/gamification/XPToast'
 
 interface Message {
   id: string
@@ -32,6 +36,13 @@ interface Message {
   timestamp: Date
 }
 
+const SUGGESTED_PROMPTS = [
+  'Tell me about yourself in English',
+  'Describe your daily routine',
+  'Talk about your job',
+  'Practice a greeting',
+]
+
 export default function NovaChatScreen() {
   const user = useSelector((state: RootState) => state.auth.user)
   const [messages, setMessages] = useState<Message[]>([])
@@ -41,18 +52,65 @@ export default function NovaChatScreen() {
   const [partialTranscript, setPartialTranscript] = useState('')
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [sttAvailable, setSttAvailable] = useState(true)
+  const [isMuted, setIsMuted] = useState(false)
+  const [grammarMode, setGrammarMode] = useState(false)
+  const [xpToastVisible, setXpToastVisible] = useState(false)
+  const [xpEarned, setXpEarned] = useState(0)
   const flatListRef = useRef<FlatList>(null)
   const micPulse = useRef(new Animated.Value(1)).current
+
+  // True when chat has only the welcome message (or is empty)
+  const showSuggestedPrompts = messages.length <= 1
 
   useEffect(() => {
     initSession()
     initializeSpeechRecognition()
     checkSTT()
+    loadMuteState()
+    loadGrammarMode()
     return () => {
       destroySpeechRecognition()
       stopSpeaking()
     }
   }, [])
+
+  const loadMuteState = async () => {
+    try {
+      const val = await AsyncStorage.getItem('chat_muted')
+      if (val === 'true') setIsMuted(true)
+    } catch {}
+  }
+
+  const loadGrammarMode = async () => {
+    try {
+      const val = await AsyncStorage.getItem('chat_grammar_mode')
+      if (val === 'true') setGrammarMode(true)
+    } catch {}
+  }
+
+  const handleToggleMute = async () => {
+    const nextMute = !isMuted
+    setIsMuted(nextMute)
+    try {
+      await AsyncStorage.setItem('chat_muted', nextMute ? 'true' : 'false')
+    } catch {}
+    if (nextMute) {
+      await stopSpeaking()
+    } else {
+      const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant')
+      if (lastAssistantMsg) {
+        speak(lastAssistantMsg.content, { language: 'en-IN', rate: 'normal' }).catch(() => {})
+      }
+    }
+  }
+
+  const handleToggleGrammarMode = async () => {
+    const next = !grammarMode
+    setGrammarMode(next)
+    try {
+      await AsyncStorage.setItem('chat_grammar_mode', next ? 'true' : 'false')
+    } catch {}
+  }
 
   useEffect(() => {
     if (isListening) {
@@ -80,7 +138,7 @@ export default function NovaChatScreen() {
       setMessages([{
         id: 'welcome',
         role: 'assistant',
-        content: "Hello! I'm Nova, your English tutor! 😊 నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
+        content: "Hello! I'm Nova, your English tutor! నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
         timestamp: new Date(),
       }])
       return
@@ -98,7 +156,7 @@ export default function NovaChatScreen() {
         setMessages([{
           id: 'welcome',
           role: 'assistant',
-          content: "Hello! I'm Nova, your English tutor! 😊 నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
+          content: "Hello! I'm Nova, your English tutor! నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
           timestamp: new Date(),
         }])
       } else {
@@ -109,7 +167,7 @@ export default function NovaChatScreen() {
       setMessages([{
         id: 'welcome',
         role: 'assistant',
-        content: "Hello! I'm Nova, your English tutor! 😊 నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
+        content: "Hello! I'm Nova, your English tutor! నేను మీకు English నేర్పటానికి ఇక్కడ ఉన్నాను. Let's start speaking English together!",
         timestamp: new Date(),
       }])
     }
@@ -118,6 +176,11 @@ export default function NovaChatScreen() {
   const sendMessage = async (text?: string) => {
     const messageText = (text || inputText).trim()
     if (!messageText || !sessionId || sending) return
+
+    // If Grammar Mode is on, append a grammar-correction request suffix
+    const promptText = grammarMode
+      ? `${messageText}\n\n[Please also correct any grammar mistakes in my message above and explain them.]`
+      : messageText
 
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -131,7 +194,7 @@ export default function NovaChatScreen() {
     setSending(true)
 
     try {
-      const response = await chatWithNova(sessionId, messageText)
+      const response = await chatWithNova(sessionId, promptText)
 
       let corrections: Message['corrections'] = []
       if (messageText.length > 5) {
@@ -150,7 +213,13 @@ export default function NovaChatScreen() {
       }
 
       setMessages(prev => [...prev, assistantMsg])
-      speak(response.message, { language: 'en-IN', rate: 'normal' }).catch(() => {})
+      if (!isMuted) {
+        speak(response.message, { language: 'en-IN', rate: 'normal' }).catch(() => {})
+      }
+
+      // Award 5 XP per successful message exchange and show toast
+      setXpEarned(5)
+      setXpToastVisible(true)
     } catch {
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
@@ -255,9 +324,7 @@ export default function NovaChatScreen() {
               style={styles.translateBtn}
               onPress={() => handleToggleTranslation(item.id, item.content)}
             >
-              <Text style={styles.translateBtnText}>
-                {item.showTranslation ? '🇺🇸 Hide Translation' : '🇮🇳 Telugu లో చూడండి'}
-              </Text>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}><Globe size={14} color='#6B7280' style={{marginRight: 4}} /><Text style={styles.translateBtnText}>{item.showTranslation ? 'Hide Translation' : 'Telugu లో చూడండి'}</Text></View>
             </TouchableOpacity>
           )}
 
@@ -288,7 +355,7 @@ export default function NovaChatScreen() {
               style={styles.speakBtn}
               onPress={() => speak(item.content, { language: 'en-IN' })}
             >
-              <Text style={styles.speakBtnText}>🔊</Text>
+              <Volume2 size={16} color='#9CA3AF' />
             </TouchableOpacity>
           )}
         </View>
@@ -296,15 +363,34 @@ export default function NovaChatScreen() {
     )
   }
 
+  const renderSuggestedPrompts = () => (
+    <View style={styles.suggestedContainer}>
+      <Text style={styles.suggestedLabel}>Quick start — tap a prompt:</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestedRow}>
+        {SUGGESTED_PROMPTS.map((prompt) => (
+          <TouchableOpacity
+            key={prompt}
+            style={styles.suggestedChip}
+            onPress={() => sendMessage(prompt)}
+            disabled={sending}
+          >
+            <Text style={styles.suggestedChipText}>{prompt}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  )
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={0}
     >
-      <LinearGradient colors={['#4F46E5', '#7C3AED']} style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backBtn}>←</Text>
+      {/* Header */}
+      <LinearGradient colors={['#7B61FF', '#5A42F5']} style={styles.header}>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}>
+          <ArrowLeft size={24} color='white' />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <View style={styles.headerAvatar}>
@@ -315,10 +401,27 @@ export default function NovaChatScreen() {
             <Text style={styles.headerSubtitle}>AI English Tutor • Free</Text>
           </View>
         </View>
-        <TouchableOpacity onPress={stopSpeaking}>
-          <Text style={styles.muteBtn}>🔇</Text>
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          {/* Grammar Mode toggle */}
+          <TouchableOpacity
+            style={[styles.grammarModeBtn, grammarMode && styles.grammarModeBtnActive]}
+            onPress={handleToggleGrammarMode}
+          >
+            <GraduationCap size={18} color='white' />
+            {grammarMode && <Text style={styles.grammarModeBtnLabel}>ON</Text>}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleToggleMute}>
+            {isMuted ? <VolumeX size={22} color='white' /> : <Volume2 size={22} color='white' />}
+          </TouchableOpacity>
+        </View>
       </LinearGradient>
+
+      {/* Grammar mode indicator bar */}
+      {grammarMode && (
+        <View style={styles.grammarModeBanner}>
+          <Text style={styles.grammarModeBannerText}>Grammar Mode ON — Nova will correct every message</Text>
+        </View>
+      )}
 
       <FlatList
         ref={flatListRef}
@@ -327,12 +430,13 @@ export default function NovaChatScreen() {
         renderItem={renderMessage}
         contentContainerStyle={styles.messagesList}
         onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
+        ListFooterComponent={showSuggestedPrompts ? renderSuggestedPrompts : null}
       />
 
       {isListening && (
         <View style={styles.partialTranscriptBar}>
           <Text style={styles.partialText}>
-            {partialTranscript || '🎤 Listening... speak now'}
+            {partialTranscript || 'Listening... speak now'}
           </Text>
         </View>
       )}
@@ -340,7 +444,7 @@ export default function NovaChatScreen() {
       {sending && (
         <View style={styles.typingIndicator}>
           <Text style={styles.typingText}>Nova is typing...</Text>
-          <ActivityIndicator size="small" color="#4F46E5" />
+          <ActivityIndicator size="small" color={Colors.primary} />
         </View>
       )}
 
@@ -359,7 +463,7 @@ export default function NovaChatScreen() {
             style={[styles.micBtn, isListening && styles.micBtnActive]}
             onPress={handleToggleListen}
           >
-            <Text style={styles.micBtnIcon}>{isListening ? '⏹️' : '🎤'}</Text>
+            {isListening ? <Square size={20} color='white' fill='white' /> : <Mic size={20} color='#7B61FF' />}
           </TouchableOpacity>
         </Animated.View>
         <TouchableOpacity
@@ -369,10 +473,16 @@ export default function NovaChatScreen() {
         >
           {sending
             ? <ActivityIndicator size="small" color="white" />
-            : <Text style={styles.sendBtnIcon}>➤</Text>
+            : <Send size={18} color='white' />
           }
         </TouchableOpacity>
       </View>
+
+      <XPToast
+        xp={xpEarned}
+        visible={xpToastVisible}
+        onHide={() => setXpToastVisible(false)}
+      />
     </KeyboardAvoidingView>
   )
 }
@@ -392,19 +502,33 @@ const styles = StyleSheet.create({
   headerAvatarText: { color: 'white', fontSize: 18, fontWeight: '800' },
   headerName: { color: 'white', fontSize: 17, fontWeight: '700' },
   headerSubtitle: { color: 'rgba(255,255,255,0.7)', fontSize: 11 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  grammarModeBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 2,
+    backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 16,
+    paddingHorizontal: 8, paddingVertical: 4,
+  },
+  grammarModeBtnActive: { backgroundColor: 'rgba(255,255,255,0.4)' },
+  grammarModeBtnIcon: { fontSize: 18 },
+  grammarModeBtnLabel: { color: 'white', fontSize: 10, fontWeight: '800' },
   muteBtn: { fontSize: 22 },
+  grammarModeBanner: {
+    backgroundColor: '#FFF3E0', paddingHorizontal: 16, paddingVertical: 7,
+    borderBottomWidth: 1, borderBottomColor: '#FFD0A8',
+  },
+  grammarModeBannerText: { color: Colors.primaryDark, fontSize: 12, fontWeight: '600', textAlign: 'center' },
   messagesList: { padding: 16, paddingBottom: 8 },
   messageRow: { flexDirection: 'row', marginBottom: 16, maxWidth: '85%' },
   messageRowUser: { alignSelf: 'flex-end', flexDirection: 'row-reverse' },
   messageRowNova: { alignSelf: 'flex-start' },
   novaAvatar: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: '#4F46E5', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#7B61FF', alignItems: 'center', justifyContent: 'center',
     marginRight: 8, alignSelf: 'flex-end',
   },
   novaAvatarText: { color: 'white', fontSize: 16, fontWeight: '800' },
   bubble: { borderRadius: 20, padding: 14, maxWidth: '100%' },
-  bubbleUser: { backgroundColor: '#4F46E5', borderBottomRightRadius: 4 },
+  bubbleUser: { backgroundColor: '#7B61FF', borderBottomRightRadius: 4 },
   bubbleNova: { backgroundColor: 'white', borderBottomLeftRadius: 4, elevation: 2 },
   bubbleText: { fontSize: 15, lineHeight: 22 },
   bubbleTextUser: { color: 'white' },
@@ -412,7 +536,7 @@ const styles = StyleSheet.create({
   translateBtn: { marginTop: 8 },
   translateBtnText: { fontSize: 12, color: '#6B7280', fontWeight: '600' },
   translationText: {
-    fontSize: 13, color: '#4F46E5', marginTop: 6,
+    fontSize: 13, color: Colors.primary, marginTop: 6,
     borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 6, lineHeight: 20,
   },
   corrections: {
@@ -426,11 +550,22 @@ const styles = StyleSheet.create({
   correctionTelugu: { color: 'rgba(255,255,255,0.7)', fontSize: 11 },
   speakBtn: { alignSelf: 'flex-end', marginTop: 6 },
   speakBtnText: { fontSize: 16 },
-  partialTranscriptBar: {
-    backgroundColor: '#EEF2FF', paddingHorizontal: 16, paddingVertical: 10,
-    borderTopWidth: 1, borderTopColor: '#E5E7EB',
+  // Suggested prompts
+  suggestedContainer: { marginTop: 12, marginBottom: 8 },
+  suggestedLabel: { fontSize: 12, color: '#9CA3AF', fontWeight: '600', marginBottom: 8, paddingHorizontal: 4 },
+  suggestedRow: { gap: 8, paddingRight: 8 },
+  suggestedChip: {
+    backgroundColor: 'white', borderWidth: 1.5, borderColor: Colors.primary,
+    borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8,
+    elevation: 1,
   },
-  partialText: { color: '#4F46E5', fontSize: 14, fontStyle: 'italic' },
+  suggestedChipText: { color: Colors.primary, fontSize: 13, fontWeight: '600' },
+  // Partial transcript bar
+  partialTranscriptBar: {
+    backgroundColor: '#FFF3E0', paddingHorizontal: 16, paddingVertical: 10,
+    borderTopWidth: 1, borderTopColor: '#FFD0A8',
+  },
+  partialText: { color: '#7B61FF', fontSize: 14, fontStyle: 'italic' },
   typingIndicator: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingHorizontal: 16, paddingVertical: 8,
@@ -448,14 +583,14 @@ const styles = StyleSheet.create({
   },
   micBtn: {
     width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#FFF3E0', alignItems: 'center', justifyContent: 'center',
   },
-  micBtnActive: { backgroundColor: '#EF4444' },
+  micBtnActive: { backgroundColor: Colors.error },
   micBtnIcon: { fontSize: 20 },
   sendBtn: {
     width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#4F46E5', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#7B61FF', alignItems: 'center', justifyContent: 'center',
   },
-  sendBtnDisabled: { backgroundColor: '#C4B5FD' },
+  sendBtnDisabled: { backgroundColor: '#FFB899' },
   sendBtnIcon: { color: 'white', fontSize: 16 },
 })

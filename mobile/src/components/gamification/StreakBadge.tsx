@@ -5,7 +5,7 @@ interface Props { streak: number }
 
 export default function StreakBadge({ streak }: Props) {
   const getFlameColor = () => {
-    if (streak >= 30) return ['#FF6B35', '#FF4500']
+    if (streak >= 30) return ['#7B61FF', '#FF4500']
     if (streak >= 7) return ['#FCD34D', '#F59E0B']
     return ['#FDE68A', '#D97706']
   }

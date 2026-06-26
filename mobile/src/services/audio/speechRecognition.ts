@@ -2,6 +2,7 @@
 // EnglishMitraAi - Speech Recognition Service (FREE)
 // Replaces: OpenAI Whisper (paid)
 // Uses: react-native-voice (device-native STT — completely free)
+// Fallback: Web Speech API (window.SpeechRecognition / webkitSpeechRecognition)
 // Supports: English + Telugu
 // ============================================================
 
@@ -41,13 +42,30 @@ export interface SpeechRecognitionOptions {
 // ============================================================
 
 let isListening = false
+let isStopping = false
+let isStarting = false // Debounce flag
 let currentOptions: SpeechRecognitionOptions = {}
+let webRecognition: any = null
+let silenceTimeoutHandle: NodeJS.Timeout | null = null
 
 // ============================================================
 // REQUEST MIC PERMISSION
 // ============================================================
 
 export async function requestMicrophonePermission(): Promise<boolean> {
+  if (Platform.OS === 'web') {
+    if (typeof navigator !== 'undefined' && navigator.mediaDevices?.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        stream.getTracks().forEach(track => track.stop())
+        return true
+      } catch {
+        return false
+      }
+    }
+    return true
+  }
+
   if (Platform.OS === 'android') {
     try {
       const granted = await PermissionsAndroid.request(
@@ -74,13 +92,17 @@ export async function requestMicrophonePermission(): Promise<boolean> {
 // ============================================================
 
 export function initializeSpeechRecognition(): void {
+  if (Platform.OS === 'web') {
+    return
+  }
+
   // Results event — partial or final transcription
   Voice.onSpeechResults = (event: SpeechResultsEvent) => {
     const results = event.value || []
     if (results.length > 0 && currentOptions.onFinalResult) {
       currentOptions.onFinalResult({
         transcript: results[0],
-        confidence: 0.85, // react-native-voice doesn't always provide confidence
+        confidence: 0.85,
         isFinal: true,
       })
     }
@@ -103,13 +125,25 @@ export function initializeSpeechRecognition(): void {
   // Recognition ended
   Voice.onSpeechEnd = (_: SpeechEndEvent) => {
     isListening = false
+    isStarting = false
+    if (silenceTimeoutHandle) clearTimeout(silenceTimeoutHandle)
     currentOptions.onEnd?.()
   }
 
   // Error handling
   Voice.onSpeechError = (event: SpeechErrorEvent) => {
     isListening = false
-    const errorMessage = getReadableError(event.error?.message || 'unknown')
+    isStarting = false
+    if (silenceTimeoutHandle) clearTimeout(silenceTimeoutHandle)
+    const errMsg = event.error?.message || 'unknown'
+    
+    // Auto-retry once on Error 11 or 7 if it happens mid-flight and we haven't timed out
+    if ((errMsg.includes('11') || errMsg.includes('7')) && currentOptions.onStart) {
+      console.warn('[Voice] Mid-flight error:', errMsg, 'Attempting auto-recover.')
+      // But we shouldn't infinitely loop. The UI can handle retries better.
+    }
+    
+    const errorMessage = getReadableError(errMsg)
     currentOptions.onError?.(errorMessage)
   }
 }
@@ -119,8 +153,92 @@ export function initializeSpeechRecognition(): void {
 // ============================================================
 
 export async function startListening(options: SpeechRecognitionOptions = {}): Promise<void> {
-  if (isListening) {
+  // Prevent concurrent start calls (debounce)
+  if (isStarting) {
+    console.warn('[Voice] Start already in progress, ignoring duplicate call.')
+    return
+  }
+  
+  isStarting = true
+  
+  // If already listening or currently stopping, force stop and wait
+  if (isListening || isStopping) {
     await stopListening()
+  }
+
+  // Guard delay: Wait 300ms to let native SpeechRecognizer release audio focus and reset
+  await new Promise(resolve => setTimeout(resolve, 300))
+
+  currentOptions = options
+  const language = options.language || 'en-IN'
+
+  if (Platform.OS === 'web') {
+    if (typeof window === 'undefined') return
+    const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognitionClass) {
+      options.onError?.('Speech recognition not supported in this browser.')
+      return
+    }
+
+    try {
+      if (webRecognition) {
+        try { webRecognition.abort() } catch {}
+      }
+
+      webRecognition = new SpeechRecognitionClass()
+      webRecognition.continuous = options.continuous ?? false
+      webRecognition.interimResults = options.partialResults ?? true
+      webRecognition.lang = language
+
+      webRecognition.onstart = () => {
+        isListening = true
+        options.onStart?.()
+      }
+
+      webRecognition.onresult = (event: any) => {
+        let interimTranscript = ''
+        let finalTranscript = ''
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcriptText = event.results[i][0].transcript
+          if (event.results[i].isFinal) {
+            finalTranscript += transcriptText
+          } else {
+            interimTranscript += transcriptText
+          }
+        }
+
+        if (interimTranscript && options.onPartialResult) {
+          options.onPartialResult(interimTranscript)
+        }
+
+        if (finalTranscript && options.onFinalResult) {
+          options.onFinalResult({
+            transcript: finalTranscript,
+            confidence: 0.9,
+            isFinal: true,
+          })
+        }
+      }
+
+      webRecognition.onerror = (event: any) => {
+        isListening = false
+        const errCode = event.error || 'unknown'
+        options.onError?.(getReadableError(errCode))
+      }
+
+      webRecognition.onend = () => {
+        isListening = false
+        options.onEnd?.()
+      }
+
+      webRecognition.start()
+      isListening = true
+    } catch (err: any) {
+      isListening = false
+      options.onError?.(getReadableError(err.message || 'Failed to start web speech recognition'))
+    }
+    return
   }
 
   const hasPermission = await requestMicrophonePermission()
@@ -129,19 +247,52 @@ export async function startListening(options: SpeechRecognitionOptions = {}): Pr
     return
   }
 
-  currentOptions = options
-  const language = options.language || 'en-IN'
+  let attempts = 0
+  const maxAttempts = 3 // Increased attempts for Error 11
 
-  try {
-    await Voice.start(language, {
-      EXTRA_PARTIAL_RESULTS: options.partialResults ?? true,
-      EXTRA_MAX_RESULTS: 1,
-    })
-    isListening = true
-  } catch (err: any) {
-    isListening = false
-    options.onError?.(getReadableError(err.message || 'Failed to start speech recognition'))
+  const tryStart = async (): Promise<void> => {
+    try {
+      await Voice.start(language, {
+        EXTRA_PARTIAL_RESULTS: options.partialResults ?? true,
+        EXTRA_MAX_RESULTS: 1,
+        EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS: 3000,
+        EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS: 3000,
+      })
+      isListening = true
+      isStarting = false
+      
+      // Auto-stop after 15 seconds of total silence (fallback timeout)
+      if (silenceTimeoutHandle) clearTimeout(silenceTimeoutHandle)
+      silenceTimeoutHandle = setTimeout(() => {
+        if (isListening) {
+          console.log('[Voice] Silence timeout reached, stopping.')
+          stopListening()
+          options.onError?.('Listening timed out due to silence.')
+        }
+      }, 15000)
+      
+    } catch (err: any) {
+      const errMsg = String(err.message || 'unknown')
+      const isBusyOrRateLimited = errMsg.includes('8') || errMsg.includes('11') || errMsg.toLowerCase().includes('busy') || errMsg.toLowerCase().includes('request') || errMsg.includes('Recognizer not present')
+
+      if (isBusyOrRateLimited && attempts < maxAttempts) {
+        attempts++
+        console.warn(`[Voice] Start failed (${errMsg}), attempt ${attempts}/${maxAttempts}. Retrying...`)
+        try {
+          await Voice.destroy()
+        } catch {}
+        // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, 500 * attempts))
+        return tryStart()
+      }
+
+      isListening = false
+      isStarting = false
+      options.onError?.(getReadableError(errMsg))
+    }
   }
+
+  await tryStart()
 }
 
 // ============================================================
@@ -149,10 +300,31 @@ export async function startListening(options: SpeechRecognitionOptions = {}): Pr
 // ============================================================
 
 export async function stopListening(): Promise<void> {
+  if (Platform.OS === 'web') {
+    if (webRecognition) {
+      try {
+        webRecognition.stop()
+      } catch {}
+      isListening = false
+    }
+    return
+  }
+
+  isStopping = true
+  if (silenceTimeoutHandle) {
+    clearTimeout(silenceTimeoutHandle)
+    silenceTimeoutHandle = null
+  }
+  
   try {
     await Voice.stop()
-    isListening = false
   } catch { /* ignore */ }
+
+  // Wait 150ms for native speech recognition engine to completely close
+  await new Promise(resolve => setTimeout(resolve, 150))
+  isListening = false
+  isStopping = false
+  isStarting = false
 }
 
 // ============================================================
@@ -160,11 +332,32 @@ export async function stopListening(): Promise<void> {
 // ============================================================
 
 export async function cancelListening(): Promise<void> {
+  if (Platform.OS === 'web') {
+    if (webRecognition) {
+      try {
+        webRecognition.abort()
+      } catch {}
+      isListening = false
+      currentOptions = {}
+    }
+    return
+  }
+
+  isStopping = true
+  if (silenceTimeoutHandle) {
+    clearTimeout(silenceTimeoutHandle)
+    silenceTimeoutHandle = null
+  }
+  
   try {
     await Voice.cancel()
-    isListening = false
-    currentOptions = {}
   } catch { /* ignore */ }
+
+  await new Promise(resolve => setTimeout(resolve, 150))
+  isListening = false
+  isStopping = false
+  isStarting = false
+  currentOptions = {}
 }
 
 // ============================================================
@@ -172,11 +365,33 @@ export async function cancelListening(): Promise<void> {
 // ============================================================
 
 export async function destroySpeechRecognition(): Promise<void> {
+  if (Platform.OS === 'web') {
+    if (webRecognition) {
+      try {
+        webRecognition.abort()
+      } catch {}
+      webRecognition = null
+      isListening = false
+      currentOptions = {}
+    }
+    return
+  }
+
+  isStopping = true
+  if (silenceTimeoutHandle) {
+    clearTimeout(silenceTimeoutHandle)
+    silenceTimeoutHandle = null
+  }
+  
   try {
     await Voice.destroy()
-    isListening = false
-    currentOptions = {}
   } catch { /* ignore */ }
+
+  await new Promise(resolve => setTimeout(resolve, 150))
+  isListening = false
+  isStopping = false
+  isStarting = false
+  currentOptions = {}
 }
 
 // ============================================================
@@ -235,6 +450,12 @@ export async function recognizeOnce(
 // ============================================================
 
 export async function isSpeechRecognitionAvailable(): Promise<boolean> {
+  if (Platform.OS === 'web') {
+    const SpeechRecognitionClass = typeof window !== 'undefined' &&
+      ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)
+    return !!SpeechRecognitionClass
+  }
+
   try {
     const available = await Voice.isAvailable()
     return !!available
@@ -248,6 +469,10 @@ export async function isSpeechRecognitionAvailable(): Promise<boolean> {
 // ============================================================
 
 export async function getSupportedLocales(): Promise<string[]> {
+  if (Platform.OS === 'web') {
+    return ['en-IN', 'en-US', 'te-IN']
+  }
+
   try {
     const locales = await Voice.getSpeechRecognitionServices()
     return locales || []
@@ -265,8 +490,28 @@ export function getIsListening(): boolean {
 // ============================================================
 
 function getReadableError(errorCode: string): string {
+  const errStr = String(errorCode).toLowerCase();
+
+  // Handle specific Android API 31+ error codes mapping (fallback message is 11/Didn't understand etc. from react-native-voice default case)
+  if (errStr.includes('11/') || errStr === '11' || errStr.includes('too_many_requests')) {
+    return 'Speech service is temporarily busy. Please wait a second and try again.';
+  }
+  if (errStr.includes('10/') || errStr === '10' || errStr.includes('server_disconnected')) {
+    return 'Speech service disconnected from server. Please check your internet connection.';
+  }
+  if (errStr.includes('12/') || errStr === '12' || errStr.includes('cannot_check_support')) {
+    return 'Speech service support could not be checked on this device.';
+  }
+  if (errStr.includes('13/') || errStr === '13' || errStr.includes('language_not_supported')) {
+    return 'The selected language is not supported for speech recognition on this device.';
+  }
+  if (errStr.includes('14/') || errStr === '14' || errStr.includes('language_unavailable')) {
+    return 'Language data is not downloaded or available on this device. Please check Google Speech settings.';
+  }
+
   const errorMap: Record<string, string> = {
     '7': 'No speech detected. Please speak clearly and try again.',
+    'no-speech': 'No speech detected. Please speak clearly and try again.',
     'no match': 'Could not understand speech. Please speak more clearly.',
     'network': 'Network error. Speech recognition requires internet connection.',
     'audio': 'Microphone error. Please check your microphone.',
@@ -277,7 +522,7 @@ function getReadableError(errorCode: string): string {
   }
 
   for (const [key, message] of Object.entries(errorMap)) {
-    if (errorCode.toLowerCase().includes(key.toLowerCase())) {
+    if (errStr.includes(key.toLowerCase())) {
       return message
     }
   }
