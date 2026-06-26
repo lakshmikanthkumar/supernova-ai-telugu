@@ -1,0 +1,175 @@
+name: Test Suite
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # ─── Unit Tests ──────────────────────────────────────────────────────────────
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: mobile/node_modules
+          key: ${{ runner.os }}-node-18-${{ hashFiles('mobile/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-18-
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: npm ci
+
+      - name: Run Jest unit tests with coverage
+        working-directory: mobile
+        run: npx jest --coverage --coverageReporters=lcov --coverageReporters=text --passWithNoTests
+        env:
+          CI: true
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY_TEST }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL_TEST }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_TEST }}
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: mobile/coverage/lcov.info
+          flags: unit-tests
+          name: englishmitra-unit-coverage
+          fail_ci_if_error: false
+
+      - name: Generate test summary
+        if: always()
+        working-directory: mobile
+        run: |
+          echo "## Unit Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage/coverage-summary.json ]; then
+            echo "Coverage report generated successfully." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload test results artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-coverage
+          path: mobile/coverage/
+          retention-days: 14
+
+      - name: Post PR comment with test summary
+        uses: peter-evans/create-or-update-comment@v4
+        if: github.event_name == 'pull_request'
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## Test Results Summary
+
+            **Unit Tests:** ${{ job.status == 'success' && 'Passed' || 'Failed' }}
+
+            Coverage reports are available in the [Actions artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+            | Check | Status |
+            |-------|--------|
+            | Unit Tests | ${{ job.status == 'success' && '✅ Passed' || '❌ Failed' }} |
+            | Coverage Upload | ${{ job.status == 'success' && '✅ Uploaded' || '⚠️ Check logs' }} |
+
+  # ─── E2E Tests (iOS) ─────────────────────────────────────────────────────────
+  e2e-tests:
+    name: E2E Tests (iOS)
+    runs-on: macos-latest
+    needs: unit-tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: mobile/node_modules
+          key: ${{ runner.os }}-node-18-${{ hashFiles('mobile/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-18-
+
+      - name: Install dependencies
+        working-directory: mobile
+        run: npm ci
+
+      - name: Install detox-cli
+        run: npm install -g detox-cli
+
+      - name: Install CocoaPods
+        working-directory: mobile/ios
+        run: |
+          gem install cocoapods
+          pod install
+
+      - name: Build iOS app for Detox
+        working-directory: mobile
+        run: |
+          detox build --configuration ios.sim.debug
+        env:
+          CI: true
+
+      - name: Run Detox E2E tests
+        working-directory: mobile
+        run: |
+          detox test --configuration ios.sim.debug --cleanup --headless --record-logs all
+        env:
+          CI: true
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY_TEST }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL_TEST }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_TEST }}
+
+      - name: Upload E2E artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-artifacts
+          path: mobile/artifacts/
+          retention-days: 7
+
+      - name: Post PR comment with E2E results
+        uses: peter-evans/create-or-update-comment@v4
+        if: github.event_name == 'pull_request' && always()
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## E2E Test Results
+
+            **iOS E2E Tests:** ${{ job.status == 'success' && 'Passed' || 'Failed' }}
+
+            Detox test artifacts are available in the [Actions artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+            | Suite | Status |
+            |-------|--------|
+            | Onboarding Flow | ${{ job.status == 'success' && '✅' || '❌' }} |
+            | Lesson Flow | ${{ job.status == 'success' && '✅' || '❌' }} |
+            | Chat Flow | ${{ job.status == 'success' && '✅' || '❌' }} |

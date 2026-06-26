@@ -155,6 +155,15 @@ function getRecommendedModules(insights: UserInsights): Array<{ module: string; 
 // ─── DAILY FEED GENERATOR ────────────────────────────────────────────────
 
 export async function generateDailyFeed(userId: string): Promise<DailyFeed> {
+  const today = new Date().toISOString().split('T')[0]
+  const cacheKey = FEED_CACHE_KEY(userId, today)
+
+  // Return cached feed if already generated today
+  try {
+    const cached = await AsyncStorage.getItem(cacheKey)
+    if (cached) return JSON.parse(cached)
+  } catch {}
+
   const insights = await getUserInsights(userId)
   const challenges = await getDailyChallenges(userId, 3)
 
@@ -194,6 +203,10 @@ export async function generateDailyFeed(userId: string): Promise<DailyFeed> {
     speakingPrompt,
   }
 
+  // Cache for the day
+  try {
+    await AsyncStorage.setItem(cacheKey, JSON.stringify(feed))
+  } catch {}
 
   return feed
 }

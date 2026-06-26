@@ -101,7 +101,7 @@ export default function DailyChallengeScreen() {
   // ── Claiming state ────────────────────────────────────────────────────────
   const [claiming, setClaiming] = useState(false)
 
-  const streak = profile?.streak_days ?? 0
+  const streak = profile?.streak_current ?? 0
   const completedCount = completed.size
   const allDone = completedCount === 4
 

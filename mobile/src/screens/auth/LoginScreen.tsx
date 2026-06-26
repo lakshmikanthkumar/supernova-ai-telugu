@@ -15,6 +15,7 @@ import { useAppDispatch } from '../../hooks/useStore'
 import { authService, profileService } from '../../services/api'
 import { setSession, setProfile } from '../../store/slices/authSlice'
 import { Colors } from '../../constants/theme'
+import { Theme } from '../../theme'
 
 export default function LoginScreen() {
   const dispatch = useAppDispatch()
@@ -131,7 +132,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: 'white' }}
+      style={{ flex: 1, backgroundColor: Theme.colors.background }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <LinearGradient colors={['#7B61FF', '#5A42F5']} style={styles.header}>
@@ -142,10 +143,10 @@ export default function LoginScreen() {
         <Text style={styles.tagline}>Telugu Medium Student కి English నేర్పే AI</Text>
       </LinearGradient>
 
-      <ScrollView contentContainerStyle={styles.formContainer} keyboardShouldPersistTaps="handled">
-        <Text style={styles.welcomeText}>Login (లాగిన్) 👋</Text>
-        <Text style={styles.welcomeSubtext}>మీ ఈమెయిల్ మరియు పాస్‌వర్డ్ నమోదు చేయండి</Text>
-        <Text style={styles.welcomeSubtextEn}>Enter your email and password to continue</Text>
+      <View style={styles.formContainerWrapper}>
+        <ScrollView contentContainerStyle={styles.formContainer} keyboardShouldPersistTaps="handled">
+          <Text style={styles.welcomeText}>Welcome Back 👋</Text>
+          <Text style={styles.welcomeSubtext}>లాగిన్ చేసి నేర్చుకోవడం ప్రారంభించండి</Text>
 
         <View style={styles.inputWrapper}>
           <Text style={styles.inputLabel}>Email (ఈమెయిల్)</Text>
@@ -235,23 +236,62 @@ export default function LoginScreen() {
           </View>
 
           <TouchableOpacity
-            style={styles.guestButton}
-            onPress={handleGuestLogin}
+            style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
+            onPress={handleLogin}
             disabled={loading}
+            activeOpacity={0.8}
           >
-            <Text style={styles.guestButtonText}>⚡ Skip Login & Continue as Guest</Text>
+            <LinearGradient 
+              colors={loading ? [Theme.colors.surface, Theme.colors.surface] : [Theme.colors.secondary, '#0096FF']} 
+              start={{x: 0, y: 0}} end={{x: 1, y: 0}}
+              style={styles.primaryButtonGradient}
+            >
+              {loading ? (
+                <ActivityIndicator color={Theme.colors.text} />
+              ) : (
+                <Text style={styles.primaryButtonText}>Initialize Connection →</Text>
+              )}
+            </LinearGradient>
           </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => router.push('/signup')} style={styles.switchAuthMode}>
+            <Text style={styles.switchAuthText}>
+              New user? <Text style={styles.switchAuthLink}>Create Account</Text>
+            </Text>
+            <Text style={styles.switchAuthTextTelugu}>
+              కొత్త వినియోగదారుడా? <Text style={styles.switchAuthLink}>ఖాతాను సృష్టించండి</Text>
+            </Text>
+          </TouchableOpacity>
+
+          <View style={styles.devBypassContainer}>
+            <View style={styles.dividerContainer}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>OR QUICK ACCESS</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <TouchableOpacity
+              style={styles.guestButton}
+              onPress={handleGuestLogin}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="flash-outline" size={18} color={Theme.colors.accent} style={{marginRight: 6}} />
+              <Text style={styles.guestButtonText}>Continue as Guest</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.termsContainer}>
-          <Text style={styles.termsText}>
-            By continuing, you agree to our{' '}
-            <Text style={styles.termsLink}>Terms of Service</Text>
-            {' '}and{' '}
-            <Text style={styles.termsLink}>Privacy Policy</Text>
-          </Text>
-        </View>
-      </ScrollView>
+            <Text style={styles.termsText}>
+              By continuing, you agree to our{' '}
+              <Text style={styles.termsLink}>Terms</Text>
+              {' '}and{' '}
+              <Text style={styles.termsLink}>Privacy Policy</Text>
+            </Text>
+          </View>
+        </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   )
 }
@@ -313,10 +353,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  formContainerWrapper: { flex: 1, backgroundColor: 'white' },
   primaryButton: {
-    backgroundColor: Colors.primary, paddingVertical: 16,
-    borderRadius: 14, alignItems: 'center', elevation: 3,
+    backgroundColor: Colors.primary,
+    borderRadius: 14, elevation: 3,
     marginTop: 8,
+    overflow: 'hidden',
+  },
+  primaryButtonGradient: {
+    paddingVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
   primaryButtonDisabled: { backgroundColor: '#9CA3AF' },
   primaryButtonText: { color: 'white', fontSize: 17, fontWeight: '700' },
@@ -333,8 +381,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#FFD4BA',
     paddingVertical: 16,
-    borderRadius: 14,
-    alignItems: 'center',
+    fontSize: 16,
+    color: Theme.colors.text,
   },
   guestButtonText: { color: Colors.primary, fontSize: 16, fontWeight: '700' },
   termsContainer: { marginTop: 24, alignItems: 'center' },

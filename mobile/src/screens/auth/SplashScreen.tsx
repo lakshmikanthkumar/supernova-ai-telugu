@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, Animated, useWindowDimensions } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { supabase } from '../../services/supabase'
@@ -8,23 +8,33 @@ import { setSession, fetchProfile, setProfile, setOnboarded } from '../../store/
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Colors } from '../../constants/theme'
 
-const { width } = Dimensions.get('window')
+import { Bot } from 'lucide-react-native'
 
 export default function SplashScreen() {
   const dispatch = useAppDispatch()
-  const logoScale = useRef(new Animated.Value(0)).current
+  const { width } = useWindowDimensions()
+  const logoScale = useRef(new Animated.Value(0.8)).current
   const logoOpacity = useRef(new Animated.Value(0)).current
+  const glowOpacity = useRef(new Animated.Value(0.4)).current
   const taglineOpacity = useRef(new Animated.Value(0)).current
   const shimmerAnim = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
+    // Futuristic pulse animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowOpacity, { toValue: 1, duration: 1500, useNativeDriver: true }),
+        Animated.timing(glowOpacity, { toValue: 0.4, duration: 1500, useNativeDriver: true })
+      ])
+    ).start()
+
     // Animate logo in
     Animated.sequence([
       Animated.parallel([
-        Animated.spring(logoScale, { toValue: 1, friction: 5, useNativeDriver: true }),
-        Animated.timing(logoOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
+        Animated.spring(logoScale, { toValue: 1, friction: 6, tension: 40, useNativeDriver: true }),
+        Animated.timing(logoOpacity, { toValue: 1, duration: 800, useNativeDriver: true }),
       ]),
-      Animated.timing(taglineOpacity, { toValue: 1, duration: 400, useNativeDriver: true }),
+      Animated.timing(taglineOpacity, { toValue: 1, duration: 600, useNativeDriver: true }),
     ]).start()
 
     // Shimmer loop on the badge
@@ -37,7 +47,7 @@ export default function SplashScreen() {
 
     // Determine routing after minimum splash duration
     const checkAuth = async () => {
-      await new Promise(r => setTimeout(r, 2000)) // Minimum splash duration
+      await new Promise(r => setTimeout(r, 2500)) // Minimum splash duration
 
       const isGuest = await AsyncStorage.getItem('is_guest_mode')
       if (isGuest === 'true') {
@@ -169,6 +179,7 @@ export default function SplashScreen() {
       </Animated.View>
 
       <View style={styles.poweredBy}>
+        <View style={styles.aiGlowLine} />
         <Text style={styles.poweredByText}>Powered by GPT-4o & Whisper AI</Text>
       </View>
     </LinearGradient>
@@ -308,4 +319,11 @@ const styles = StyleSheet.create({
   // Bottom
   poweredBy: { position: 'absolute', bottom: 40 },
   poweredByText: { color: 'rgba(255,255,255,0.55)', fontSize: 12, letterSpacing: 0.3 },
+  aiGlowLine: {
+    height: 1.5,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    width: 120,
+    alignSelf: 'center',
+    marginBottom: 8,
+  },
 })

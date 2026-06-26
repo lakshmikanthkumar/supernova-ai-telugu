@@ -111,9 +111,14 @@ Experience Level: ${experience_level}
 Interview Question: ${question}
 Candidate's Answer: ${user_answer}
 
+<<<<<<< HEAD
 Please evaluate this answer across all 5 categories and provide structured coaching feedback.`;
 
     const result = await callAIWithFallback(
+Please evaluate this answer and provide structured coaching feedback.`;
+
+    const result = await callGroqWithFallback(
+>>>>>>> 94963c4f21172435ca6ebeb9d54ef39bf4a638ff
       [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -147,11 +152,3 @@ Please evaluate this answer across all 5 categories and provide structured coach
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err) {
-    console.error("interview-coach error:", err);
-    return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : "Internal server error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  }
-});

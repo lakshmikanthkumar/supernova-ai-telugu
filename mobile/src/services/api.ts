@@ -5,18 +5,28 @@
 // TTS: expo-speech (free) | Translation: google-translate-api-x (free)
 // ============================================================
 
-import { supabase } from './supabase'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import type {
-  Profile, Lesson, LessonCategory, Flashcard, QuizQuestion,
-  RoleplayScenario, ChatMessage, Achievement, LeaderboardEntry,
+  Achievement,
+  ChatMessage,
   DailyChallenge,
+  Flashcard,
+  LeaderboardEntry,
+  Lesson, LessonCategory,
+  Profile,
+  QuizQuestion,
+  RoleplayScenario,
 } from '../types'
 import {
-  MOCK_CATEGORIES, MOCK_LESSONS, MOCK_FLASHCARDS,
-  MOCK_QUIZ_QUESTIONS, MOCK_ACHIEVEMENTS, MOCK_LEADERBOARD,
-  MOCK_DAILY_CHALLENGE, MOCK_SCENARIOS
+  MOCK_ACHIEVEMENTS,
+  MOCK_CATEGORIES,
+  MOCK_FLASHCARDS,
+  MOCK_LEADERBOARD,
+  MOCK_LESSONS,
+  MOCK_QUIZ_QUESTIONS,
+  MOCK_SCENARIOS
 } from './mockData'
+import { supabase } from './supabase'
 
 function shuffleArray<T>(array: T[]): T[] {
   const arr = [...array]

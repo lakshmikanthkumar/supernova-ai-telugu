@@ -7,11 +7,11 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import * as Speech from 'expo-speech'
 import { useAppDispatch, useAppSelector } from '../../hooks/useStore'
-import { fetchFlashcards } from '../../store/slices/lessonsSlice'
 import { flashcardService, gamificationService } from '../../services/api'
 import { getDynamicFlashcards, recordContentSeen } from '../../services/personalization/contentRotationService'
 import { Colors } from '../../constants/theme'
 import type { Flashcard } from '../../types'
+import { fetchFlashcards } from '../../store/slices/lessonsSlice'
 
 const { width } = Dimensions.get('window')
 const CARD_WIDTH = width - 48
@@ -63,7 +63,6 @@ export default function FlashcardScreen() {
   })
   const [sessionComplete, setSessionComplete] = useState(false)
   const [xpEarned, setXpEarned] = useState(0)
-
   const flipAnim = useRef(new Animated.Value(0)).current
   const slideAnim = useRef(new Animated.Value(0)).current
   const cardScaleAnim = useRef(new Animated.Value(1)).current

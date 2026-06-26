@@ -319,4 +319,3 @@ export function getAISystemHealth() {
 
 // Re-export for backward compatibility
 export { clearHistory as clearConversationHistory }
-export type { GrammarCorrection, GrammarCheckResult }

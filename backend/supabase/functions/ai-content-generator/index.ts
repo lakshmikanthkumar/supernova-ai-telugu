@@ -32,8 +32,7 @@ interface RequestBody {
 
 // ============================================================
 // MODEL FAILOVER CHAIN (matches tutor-chat pattern)
-import { callAIWithFallback } from "../_shared/ai.ts";`);
-}
+import { callAIWithFallback } from "../_shared/ai.ts";
 
 // ============================================================
 // PROMPT BUILDERS
@@ -44,7 +43,7 @@ function buildPrompt(
   level: Level,
   topic: string | null | undefined
 ): string {
-  const topicClause = topic ? ` Topic: ${topic}.` : "";
+  const topicClause = topic ? `Topic: ${topic}.` : "";
   const levelClause = `Level: ${level}.`;
 
   switch (contentType) {
@@ -264,8 +263,7 @@ serve(async (req: Request) => {
         },
         { role: "user", content: prompt },
       ],
-      groqApiKey,
-      { maxTokens: 500, temperature: 0.8 }
+      { maxTokens: 500, temperature: 0.8, jsonMode: true }
     );
 
     const generatedContent = JSON.parse(rawContent) as Record<string, unknown>;

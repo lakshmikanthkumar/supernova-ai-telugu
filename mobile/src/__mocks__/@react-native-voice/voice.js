@@ -1,0 +1,15 @@
+module.exports = {
+  start: jest.fn().mockResolvedValue(null),
+  stop: jest.fn().mockResolvedValue(null),
+  cancel: jest.fn().mockResolvedValue(null),
+  destroy: jest.fn().mockResolvedValue(null),
+  removeAllListeners: jest.fn(),
+  isAvailable: jest.fn().mockResolvedValue(1),
+  getSpeechRecognitionServices: jest.fn().mockResolvedValue([]),
+  onSpeechStart: null,
+  onSpeechEnd: null,
+  onSpeechError: null,
+  onSpeechResults: null,
+  onSpeechPartialResults: null,
+  onSpeechVolumeChanged: null,
+};

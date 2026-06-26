@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native'
 import * as Speech from 'expo-speech'
 import type { ChatMessage, GrammarCorrection } from '../../types'
+import { Bot, Volume2, Pencil, XCircle, ArrowRight, CheckCircle2 } from 'lucide-react-native'
 
 interface Props {
   message: ChatMessage
@@ -30,9 +31,12 @@ export default function ChatBubble({ message, showTranslation, showCorrections }
               onPress={() => setShowCorrectionDetails(!showCorrectionDetails)}
               style={styles.correctionBadge}
             >
-              <Text style={styles.correctionBadgeText}>
-                ✏️ {message.grammar_corrections.length} correction{message.grammar_corrections.length > 1 ? 's' : ''}
-              </Text>
+              <View style={styles.badgeRow}>
+                <Pencil size={12} color="white" style={{ marginRight: 4 }} />
+                <Text style={styles.correctionBadgeText}>
+                  {message.grammar_corrections.length} correction{message.grammar_corrections.length > 1 ? 's' : ''}
+                </Text>
+              </View>
             </TouchableOpacity>
           )}
         </View>
@@ -52,13 +56,13 @@ export default function ChatBubble({ message, showTranslation, showCorrections }
   return (
     <View style={styles.assistantContainer}>
       <View style={styles.novaAvatar}>
-        <Text style={styles.novaAvatarText}>🤖</Text>
+        <Bot size={18} color="#4F46E5" />
       </View>
       <View style={styles.assistantContent}>
         <View style={styles.assistantBubble}>
           <Text style={styles.assistantText}>{message.content}</Text>
           <TouchableOpacity onPress={speakMessage} style={styles.speakBtn}>
-            <Text style={styles.speakBtnText}>🔊</Text>
+            <Volume2 size={16} color="#6B7280" />
           </TouchableOpacity>
         </View>
         {showTranslation && hasTranslation && (
@@ -78,9 +82,17 @@ export default function ChatBubble({ message, showTranslation, showCorrections }
 function CorrectionItem({ correction }: { correction: GrammarCorrection }) {
   return (
     <View style={styles.correctionItem}>
-      <Text style={styles.correctionOriginal}>❌ "{correction.original}"</Text>
-      <Text style={styles.correctionArrow}>→</Text>
-      <Text style={styles.correctionFixed}>✅ "{correction.corrected}"</Text>
+      <View style={styles.correctionRow}>
+        <XCircle size={14} color="#EF4444" style={{ marginRight: 6, marginTop: 2 }} />
+        <Text style={styles.correctionOriginal}>"{correction.original}"</Text>
+      </View>
+      <View style={styles.arrowRow}>
+        <ArrowRight size={14} color="#6B7280" />
+      </View>
+      <View style={styles.correctionRow}>
+        <CheckCircle2 size={14} color="#059669" style={{ marginRight: 6, marginTop: 2 }} />
+        <Text style={styles.correctionFixed}>"{correction.corrected}"</Text>
+      </View>
       <Text style={styles.correctionExplanation}>{correction.explanation}</Text>
       <Text style={styles.correctionTelugu}>{correction.explanation_telugu}</Text>
     </View>
@@ -95,6 +107,7 @@ const styles = StyleSheet.create({
     borderRadius: 20, borderBottomRightRadius: 4,
   },
   userText: { color: 'white', fontSize: 15, lineHeight: 22 },
+  badgeRow: { flexDirection: 'row', alignItems: 'center' },
   correctionBadge: {
     marginTop: 8, backgroundColor: 'rgba(255,255,255,0.2)',
     paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, alignSelf: 'flex-end',
@@ -105,6 +118,8 @@ const styles = StyleSheet.create({
     marginTop: 6, maxWidth: '85%',
   },
   correctionItem: { marginBottom: 10 },
+  correctionRow: { flexDirection: 'row', alignItems: 'center' },
+  arrowRow: { paddingLeft: 20, marginVertical: 2 },
   correctionOriginal: { fontSize: 13, color: '#EF4444', marginBottom: 2 },
   correctionArrow: { fontSize: 13, color: '#6B7280' },
   correctionFixed: { fontSize: 13, color: '#00D26A', fontWeight: '600', marginBottom: 2 },
@@ -115,7 +130,6 @@ const styles = StyleSheet.create({
     width: 32, height: 32, borderRadius: 16,
     backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center',
   },
-  novaAvatarText: { fontSize: 16 },
   assistantContent: { flex: 1 },
   assistantBubble: {
     backgroundColor: 'white', maxWidth: '85%',
@@ -124,8 +138,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   assistantText: { color: '#111827', fontSize: 15, lineHeight: 22 },
-  speakBtn: { alignSelf: 'flex-end', marginTop: 6 },
-  speakBtnText: { fontSize: 16 },
+  speakBtn: { alignSelf: 'flex-end', marginTop: 8, padding: 4 },
   translationBubble: {
     backgroundColor: '#EEF2FF', borderRadius: 12, padding: 10,
     marginTop: 6, maxWidth: '85%',

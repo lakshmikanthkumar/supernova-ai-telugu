@@ -15,8 +15,11 @@ import {
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Theme } from '../../theme'
 
-const { width, height } = Dimensions.get('window')
+const { width } = Dimensions.get('window')
+
+import { Bot, Layers, Zap, Mic } from 'lucide-react-native'
 
 const STORAGE_KEY = '@englishmitra:onboarding_data_v1'
 const SESSION_KEY = '@englishmitra:session'

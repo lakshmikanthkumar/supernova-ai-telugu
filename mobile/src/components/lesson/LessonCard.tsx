@@ -3,8 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-nati
 import { LinearGradient } from 'expo-linear-gradient'
 import type { LessonCategory } from '../../types'
 
-const { width } = Dimensions.get('window')
-const CARD_WIDTH = (width - 48) / 2
 
 const ICON_MAP: Record<string, string> = {
   chat: '💬', briefcase: '💼', 'shopping-cart': '🛒', airplane: '✈️',
@@ -36,7 +34,7 @@ export default function LessonCard({ category, onPress }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrapper: { width: CARD_WIDTH, borderRadius: 16, overflow: 'hidden', elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.15, shadowRadius: 6 },
+  wrapper: { width: '47%', borderRadius: 16, overflow: 'hidden', elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.15, shadowRadius: 6 },
   card: { padding: 18, minHeight: 120, justifyContent: 'space-between' },
   icon: { fontSize: 32, marginBottom: 8 },
   name: { fontSize: 14, fontWeight: '700', color: 'white', lineHeight: 20 },

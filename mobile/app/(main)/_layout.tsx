@@ -24,6 +24,7 @@ export default function MainLayout() {
         headerTitleStyle: { fontWeight: 'bold', color: '#fff' },
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
+        tabBarItemStyle: { flex: 1, justifyContent: 'center', alignItems: 'center' },
       }}
     >
       <Tabs.Screen

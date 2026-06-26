@@ -230,7 +230,7 @@ export async function callProvider(
       console.warn(`[Provider] Server error ${axiosErr.response.status} on ${model.id}`)
     }
 
-    aiHealthMonitor.recordFailure(model.id, latencyMs, errorType)
+    aiHealthMonitor.recordFailure(model.id, latencyMs, errorType === 'rate_limit' ? '429' : errorType)
     aiRateLimiter.recordRequest(model.id, 0)
 
     throw { type: errorType, latencyMs, retryAfterMs, originalError: err }

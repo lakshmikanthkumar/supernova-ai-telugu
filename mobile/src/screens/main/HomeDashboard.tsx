@@ -538,6 +538,7 @@ const styles = StyleSheet.create({
     width: 44, height: 44, borderRadius: 22,
     backgroundColor: 'rgba(255,255,255,0.25)',
     alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: 'rgba(0,194,255,0.2)',
   },
   avatarEmoji: { fontSize: 20, color: 'white', fontWeight: '700' },
   badgeRow: { flexDirection: 'row', gap: 10 },

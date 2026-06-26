@@ -1143,7 +1143,6 @@ const styles = StyleSheet.create({
   breakdownBarBg: { flex: 1, height: 8, backgroundColor: '#0F0E1A', borderRadius: 4, overflow: 'hidden', marginHorizontal: 10 },
   breakdownBarFill: { height: 8, borderRadius: 4 },
   breakdownScore: { fontSize: 13, fontWeight: '700', width: 30, textAlign: 'right' },
-
   strengthsCard: {
     backgroundColor: '#0D1F1A',
     borderRadius: 16,

@@ -13,8 +13,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useAppSelector, useAppDispatch } from '../../hooks/useStore'
 import { fetchAchievements, fetchLeaderboard } from '../../store/slices/gamificationSlice'
 import { Colors, Shadow, Radius } from '../../constants/theme'
-import { Mic, Edit3, BookOpen, CheckCircle, Headphones, Flame, Trophy, Calendar, Clock, BarChart2, User, Award, ArrowRight } from 'lucide-react-native'
+import { Mic, Edit3, BookOpen, CheckCircle, Headphones, Flame, Trophy, Calendar, Clock, BarChart2, User, Award, ArrowRight, Zap, Medal, Lock } from 'lucide-react-native'
 import type { Achievement, LeaderboardEntry } from '../../types'
+import { Theme } from '../../theme'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 

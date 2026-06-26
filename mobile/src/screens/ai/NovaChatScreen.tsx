@@ -18,7 +18,8 @@ import {
 } from '../../services/audio/speechRecognition'
 import { toTelugu } from '../../services/translation/translationService'
 import { Colors } from '../../constants/theme'
-import { GraduationCap, Volume2, VolumeX, ArrowLeft, Mic, Square, Send, Languages, Globe } from 'lucide-react-native'
+import { Theme } from '../../theme'
+import { GraduationCap, Volume2, VolumeX, ArrowLeft, Mic, Square, Send, Languages, Globe, Bot, XCircle, CheckCircle2 } from 'lucide-react-native'
 import XPToast from '../../components/gamification/XPToast'
 
 interface Message {
@@ -224,7 +225,7 @@ export default function NovaChatScreen() {
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Sorry, I had trouble responding. Please check your connection and try again. నెట్‌వర్క్ సమస్య ఉంది.',
+        content: 'System error. Communication link unstable. నెట్‌వర్క్ సమస్య ఉంది.',
         timestamp: new Date(),
       }])
     } finally {
@@ -311,7 +312,7 @@ export default function NovaChatScreen() {
       <View style={[styles.messageRow, isUser ? styles.messageRowUser : styles.messageRowNova]}>
         {!isUser && (
           <View style={styles.novaAvatar}>
-            <Text style={styles.novaAvatarText}>N</Text>
+            <Bot size={20} color={Theme.colors.secondary} strokeWidth={2} />
           </View>
         )}
         <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleNova]}>
@@ -332,15 +333,22 @@ export default function NovaChatScreen() {
             <Text style={styles.translationText}>{item.translation}</Text>
           )}
           {item.showTranslation && !item.translation && (
-            <ActivityIndicator size="small" color="#6B7280" style={{ marginTop: 6 }} />
+            <ActivityIndicator size="small" color={Theme.colors.secondary} style={{ marginTop: 8 }} />
           )}
 
           {isUser && item.corrections && item.corrections.length > 0 && (
             <View style={styles.corrections}>
+              <Text style={styles.correctionsHeader}>Syntax Diagnostics:</Text>
               {item.corrections.map((c, i) => (
                 <View key={i} style={styles.correctionItem}>
-                  <Text style={styles.correctionOriginal}>✗ "{c.original}"</Text>
-                  <Text style={styles.correctionFixed}>✓ "{c.corrected}"</Text>
+                  <View style={styles.correctionRow}>
+                    <XCircle size={14} color={Theme.colors.error} style={{ marginRight: 4 }} />
+                    <Text style={styles.correctionOriginal}>"{c.original}"</Text>
+                  </View>
+                  <View style={styles.correctionRow}>
+                    <CheckCircle2 size={14} color="#00E676" style={{ marginRight: 4 }} />
+                    <Text style={styles.correctionFixed}>"{c.corrected}"</Text>
+                  </View>
                   <Text style={styles.correctionExplanation}>{c.explanation}</Text>
                   {c.explanation_telugu ? (
                     <Text style={styles.correctionTelugu}>{c.explanation_telugu}</Text>
@@ -394,11 +402,11 @@ export default function NovaChatScreen() {
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <View style={styles.headerAvatar}>
-            <Text style={styles.headerAvatarText}>N</Text>
+            <Bot size={24} color={Theme.colors.secondary} strokeWidth={2} />
           </View>
           <View>
-            <Text style={styles.headerName}>Nova</Text>
-            <Text style={styles.headerSubtitle}>AI English Tutor • Free</Text>
+            <Text style={styles.headerName}>Nova AI</Text>
+            <Text style={styles.headerSubtitle}>System Interface Active</Text>
           </View>
         </View>
         <View style={styles.headerActions}>
@@ -453,8 +461,8 @@ export default function NovaChatScreen() {
           style={styles.textInput}
           value={inputText}
           onChangeText={setInputText}
-          placeholder="Type in English or use mic..."
-          placeholderTextColor="#9CA3AF"
+          placeholder="Input query or initialize mic..."
+          placeholderTextColor={Theme.colors.textSecondary}
           multiline
           maxLength={500}
         />
@@ -488,16 +496,18 @@ export default function NovaChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  container: { flex: 1, backgroundColor: Theme.colors.background },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingTop: 52, paddingBottom: 16, paddingHorizontal: 16,
+    borderBottomWidth: 1, borderBottomColor: Theme.colors.border,
+    shadowColor: Theme.colors.secondary, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5,
   },
-  backBtn: { color: 'white', fontSize: 24 },
-  headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1, marginLeft: 12 },
+  headerCenter: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1, marginLeft: 16 },
   headerAvatar: {
-    width: 40, height: 40, borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.3)', alignItems: 'center', justifyContent: 'center',
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: 'rgba(0,194,255,0.15)', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: Theme.colors.secondary,
   },
   headerAvatarText: { color: 'white', fontSize: 18, fontWeight: '800' },
   headerName: { color: 'white', fontSize: 17, fontWeight: '700' },
@@ -518,7 +528,7 @@ const styles = StyleSheet.create({
   },
   grammarModeBannerText: { color: Colors.primaryDark, fontSize: 12, fontWeight: '600', textAlign: 'center' },
   messagesList: { padding: 16, paddingBottom: 8 },
-  messageRow: { flexDirection: 'row', marginBottom: 16, maxWidth: '85%' },
+  messageRow: { flexDirection: 'row', marginBottom: 20, maxWidth: '85%' },
   messageRowUser: { alignSelf: 'flex-end', flexDirection: 'row-reverse' },
   messageRowNova: { alignSelf: 'flex-start' },
   novaAvatar: {
@@ -540,10 +550,19 @@ const styles = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 6, lineHeight: 20,
   },
   corrections: {
-    marginTop: 8, backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 10, padding: 10,
+    marginTop: 12, backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 12, padding: 14, borderWidth: 1, borderColor: Theme.colors.border,
+  },
+  correctionsHeader: {
+    color: '#FFF',
+    fontSize: 13,
+    fontWeight: '800',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   correctionItem: { marginBottom: 6 },
+  correctionRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
   correctionOriginal: { color: '#FCA5A5', fontSize: 12, fontStyle: 'italic' },
   correctionFixed: { color: '#86EFAC', fontSize: 12, fontWeight: '600' },
   correctionExplanation: { color: 'rgba(255,255,255,0.85)', fontSize: 11, marginTop: 2 },
@@ -567,19 +586,19 @@ const styles = StyleSheet.create({
   },
   partialText: { color: '#7B61FF', fontSize: 14, fontStyle: 'italic' },
   typingIndicator: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    paddingHorizontal: 16, paddingVertical: 8,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingHorizontal: 20, paddingVertical: 12, backgroundColor: Theme.colors.background,
   },
-  typingText: { color: '#6B7280', fontSize: 13, fontStyle: 'italic' },
+  typingText: { color: Theme.colors.secondary, fontSize: 13, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
   inputBar: {
-    flexDirection: 'row', alignItems: 'flex-end', gap: 8,
-    padding: 12, paddingBottom: Platform.OS === 'ios' ? 28 : 12,
-    backgroundColor: 'white', borderTopWidth: 1, borderTopColor: '#E5E7EB',
+    flexDirection: 'row', alignItems: 'flex-end', gap: 10,
+    padding: 16, paddingBottom: Platform.OS === 'ios' ? 32 : 16,
+    backgroundColor: Theme.colors.background, borderTopWidth: 1, borderTopColor: Theme.colors.border,
   },
   textInput: {
-    flex: 1, backgroundColor: '#F3F4F6', borderRadius: 24,
-    paddingHorizontal: 16, paddingVertical: 10, fontSize: 15, color: '#111827',
-    maxHeight: 100,
+    flex: 1, backgroundColor: Theme.colors.surface, borderRadius: 24,
+    paddingHorizontal: 18, paddingVertical: 14, fontSize: 15, color: Theme.colors.text,
+    maxHeight: 120, borderWidth: 1, borderColor: Theme.colors.border,
   },
   micBtn: {
     width: 44, height: 44, borderRadius: 22,
