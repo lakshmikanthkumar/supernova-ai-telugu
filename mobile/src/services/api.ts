@@ -597,7 +597,7 @@ export const flashcardService = {
         .select('*')
         .eq('user_id', user.id)
         .eq('flashcard_id', flashcardId)
-        .single()
+        .maybeSingle()
 
       const easeFactor = existing?.ease_factor || 2.5
       const intervalDays = existing?.interval_days || 1

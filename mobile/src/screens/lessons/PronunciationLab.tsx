@@ -19,7 +19,7 @@ import {
   initializeSpeechRecognition,
   isSpeechRecognitionAvailable,
   startListening, stopListening,
-} from '../../services/audio/speechRecognition'
+} from '../../services/audio/voiceRecognitionService'
 import { speak, speakWord, stopSpeaking } from '../../services/audio/textToSpeech'
 import {
   scorePronunciation,

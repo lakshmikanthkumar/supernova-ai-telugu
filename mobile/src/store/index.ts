@@ -12,6 +12,7 @@ import grammarReducer from './slices/grammarSlice'
 import learningPathReducer from './slices/learningPathSlice'
 import greetingsReducer from './slices/greetingsSlice'
 import dynamicFeedReducer from './slices/dynamicFeedSlice'
+import notificationReducer from './slices/notificationSlice'
 
 // ─── AsyncStorage keys ────────────────────────────────────────────────────────
 const GAMIFICATION_KEY = '@englishmitra:gamification_v1'
@@ -92,6 +93,7 @@ export const store = configureStore({
     learningPath: learningPathReducer,
     greetings: greetingsReducer,
     dynamicFeed: dynamicFeedReducer,
+    notifications: notificationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })

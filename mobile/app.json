@@ -20,7 +20,9 @@
       "infoPlist": {
         "NSMicrophoneUsageDescription": "We need microphone access to practice your English pronunciation.",
         "NSSpeechRecognitionUsageDescription": "We use speech recognition to help improve your pronunciation.",
-        "NSCameraUsageDescription": "Camera access for profile photo."
+        "NSCameraUsageDescription": "Camera access for profile photo.",
+        "NSUserNotificationUsageDescription": "EnglishMitraAI sends reminders to help you practice English daily.",
+        "UIBackgroundModes": ["remote-notification", "fetch"]
       }
     },
     "android": {
@@ -34,7 +36,10 @@
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
         "VIBRATE",
-        "RECEIVE_BOOT_COMPLETED"
+        "RECEIVE_BOOT_COMPLETED",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.USE_EXACT_ALARM"
       ]
     },
     "web": {
@@ -47,7 +52,9 @@
         "expo-notifications",
         {
           "icon": "./src/assets/images/notification-icon.png",
-          "color": "#7B61FF"
+          "color": "#7B61FF",
+          "androidMode": "default",
+          "androidCollapsedKey": "englishmitra_updates"
         }
       ],
       [
@@ -64,6 +71,7 @@
         }
       ],
       "expo-secure-store",
+      "expo-background-fetch",
       "./plugins/withAndroidBuildFixes"
     ],
     "scheme": "englishmitraai",

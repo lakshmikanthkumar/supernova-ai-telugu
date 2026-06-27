@@ -14,7 +14,7 @@ import { speak, stopSpeaking } from '../../src/services/audio/textToSpeech'
 import {
   startListening, stopListening, initializeSpeechRecognition,
   destroySpeechRecognition, isSpeechRecognitionAvailable,
-} from '../../src/services/audio/speechRecognition'
+} from '../../src/services/audio/voiceRecognitionService'
 import { toTelugu } from '../../src/services/translation/translationService'
 import { roleplayService } from '../../src/services/api'
 import type { RoleplayScenario } from '../../src/types'
@@ -72,14 +72,20 @@ export default function ChatScreen() {
   useEffect(() => {
     if (sessionInitialized.current) return
 
+    let id = scenarioId;
+    if (!id && Platform.OS === 'web' && typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      id = params.get('scenarioId') || undefined;
+    }
+
     const expectingRoleplay = Platform.OS === 'web'
       ? typeof window !== 'undefined' && window.location.search.includes('scenarioId')
       : isRoleplay
 
     if (expectingRoleplay) {
-      if (scenarioId) {
+      if (id) {
         sessionInitialized.current = true
-        loadScenario(scenarioId)
+        loadScenario(id as string)
       }
     } else {
       sessionInitialized.current = true
