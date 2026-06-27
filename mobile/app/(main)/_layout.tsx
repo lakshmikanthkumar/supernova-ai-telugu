@@ -57,12 +57,11 @@ export default function MainLayout() {
           tabBarIcon: ({ focused }) => <TabIcon Icon={User} label="Profile" focused={focused} />,
         }}
       />
-      <Tabs.Screen
-        name="daily-challenge"
-        options={{
-          href: null,
-        }}
-      />
+      <Tabs.Screen name="daily-challenge"    options={{ href: null }} />
+      <Tabs.Screen name="learn-hub"          options={{ href: null }} />
+      <Tabs.Screen name="notifications"      options={{ href: null }} />
+      <Tabs.Screen name="reminder-settings"  options={{ href: null }} />
+      <Tabs.Screen name="theme-settings"     options={{ href: null }} />
     </Tabs>
   )
 }

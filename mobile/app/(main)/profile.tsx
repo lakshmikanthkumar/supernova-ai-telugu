@@ -11,7 +11,7 @@ import { updateProfile, clearAuth } from '../../src/store/slices/authSlice'
 import { toggleTranslations } from '../../src/store/slices/uiSlice'
 import { authService } from '../../src/services/api'
 import { Colors, Shadow, Radius } from '../../src/constants/theme'
-import { Footprints, Flame, Gem, Book, Type, Edit3, Briefcase, Trophy, Mail, MailOpen, Mic, Star, Sparkles, Target, Award, Bot, Volume2, Crown, Zap, BookOpen, MessageSquare, Settings, Check, Hand, Lock } from 'lucide-react-native'
+import { Footprints, Flame, Gem, Book, Type, Edit3, Briefcase, Trophy, Mail, MailOpen, Mic, Star, Sparkles, Target, Award, Bot, Volume2, Crown, Zap, BookOpen, MessageSquare, Settings, Check, Hand, Lock, Sun, Bell, Clock, ChevronRight } from 'lucide-react-native'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -306,6 +306,30 @@ export default function ProfileScreen() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Settings</Text>
 
+          {/* Navigable sub-sections */}
+          <SettingsNavRow
+            icon={Bell}
+            iconColor={Colors.primary}
+            label="Notifications"
+            desc="View your notification history"
+            onPress={() => router.push('/(main)/notifications')}
+          />
+          <SettingsNavRow
+            icon={Clock}
+            iconColor={Colors.secondary}
+            label="Reminder Settings"
+            desc="Set daily practice reminders"
+            onPress={() => router.push('/(main)/reminder-settings')}
+          />
+          <SettingsNavRow
+            icon={Sun}
+            iconColor="#F59E0B"
+            label="Appearance"
+            desc="Light, dark, or system theme"
+            onPress={() => router.push('/(main)/theme-settings')}
+          />
+
+          {/* Toggle rows */}
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
               <Text style={styles.settingLabel}>Telugu Translations</Text>
@@ -376,6 +400,24 @@ export default function ProfileScreen() {
 }
 
 // ─── Sub-components ────────────────────────────────────────────────────────
+
+function SettingsNavRow({
+  icon: IconComp, iconColor, label, desc, onPress,
+}: { icon: any; iconColor: string; label: string; desc: string; onPress: () => void }) {
+  return (
+    <TouchableOpacity style={styles.navRow} onPress={onPress} activeOpacity={0.7}>
+      <View style={[styles.navIconBox, { backgroundColor: iconColor + '18' }]}>
+        <IconComp size={18} color={iconColor} />
+      </View>
+      <View style={styles.settingInfo}>
+        <Text style={styles.settingLabel}>{label}</Text>
+        <Text style={styles.settingDesc}>{desc}</Text>
+      </View>
+      <ChevronRight size={18} color={Colors.textLight} />
+    </TouchableOpacity>
+  )
+}
+
 function StatCard({ icon: IconComp, value, label, color }: { icon: any; value: string; label: string; color: string }) {
   return (
     <View style={[styles.statCard, { borderTopColor: color, borderTopWidth: 3 }]}>
@@ -559,6 +601,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 3,
     lineHeight: 12,
+  },
+
+  // Settings nav rows
+  navRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 13,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  navIconBox: {
+    width: 36, height: 36, borderRadius: 10,
+    alignItems: 'center', justifyContent: 'center',
+    marginRight: 12,
   },
 
   // Settings
