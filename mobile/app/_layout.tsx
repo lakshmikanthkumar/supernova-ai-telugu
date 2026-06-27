@@ -8,6 +8,8 @@ import { loadReminderSettings, loadNotificationHistory } from '../src/store/slic
 import { StatusBar } from 'expo-status-bar'
 import * as SplashScreen from 'expo-splash-screen'
 import { useAuth } from '../src/hooks/useAuth'
+import { useTheme } from '../src/context/ThemeContext'
+import { ThemeProvider } from '../src/context/ThemeContext'
 import { supabase } from '../src/services/supabase'
 import { notificationService } from '../src/services/notifications/notificationService'
 import { backgroundService } from '../src/services/notifications/backgroundService'
@@ -43,6 +45,11 @@ function handleNotificationAction(action: string, data?: any) {
 function AuthProvider({ children }: { children: React.ReactNode }) {
   useAuth()
   return <>{children}</>
+}
+
+function ThemedStatusBar() {
+  const { isDark } = useTheme()
+  return <StatusBar style={isDark ? 'light' : 'dark'} />
 }
 
 function NotificationNavigator() {
@@ -108,19 +115,21 @@ export default function RootLayout() {
 
   return (
     <Provider store={store}>
-      <AuthProvider>
-        <NotificationNavigator />
-        <StatusBar style="light" />
-        <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(auth)" />
-          <Stack.Screen name="(main)" />
-          <Stack.Screen name="lessons" />
-          <Stack.Screen name="ai" />
-          <Stack.Screen name="admin" />
-          <Stack.Screen name="features" options={{ headerShown: false }} />
-        </Stack>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <NotificationNavigator />
+          <ThemedStatusBar />
+          <Stack screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(auth)" />
+            <Stack.Screen name="(main)" />
+            <Stack.Screen name="lessons" />
+            <Stack.Screen name="ai" />
+            <Stack.Screen name="admin" />
+            <Stack.Screen name="features" options={{ headerShown: false }} />
+          </Stack>
+        </AuthProvider>
+      </ThemeProvider>
     </Provider>
   )
 }
