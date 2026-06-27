@@ -569,7 +569,7 @@ const PhoneSimulatorScreen: React.FC = () => {
       await startListening({
         language: 'en-IN',
         partialResults: true,
-        continuous: Platform.OS === 'android',
+        continuous: Platform.OS === 'android' || Platform.OS === 'web',
         onPartialResult: (text: string) => {
           const prefix = baseInputRef.current;
           setUserInput(prefix ? `${prefix} ${text}` : text);

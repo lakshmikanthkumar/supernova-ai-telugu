@@ -173,11 +173,15 @@ export async function startListening(options: SpeechRecognitionOptions = {}): Pr
   const language = options.language || 'en-IN'
 
   if (Platform.OS === 'web') {
-    if (typeof window === 'undefined') return
+    if (typeof window === 'undefined') {
+      isStarting = false;
+      return;
+    }
     const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
     if (!SpeechRecognitionClass) {
+      isStarting = false;
       options.onError?.('Speech recognition not supported in this browser.')
-      return
+      return;
     }
 
     try {
@@ -192,6 +196,7 @@ export async function startListening(options: SpeechRecognitionOptions = {}): Pr
 
       webRecognition.onstart = () => {
         isListening = true
+        isStarting = false
         options.onStart?.()
       }
 
@@ -223,12 +228,14 @@ export async function startListening(options: SpeechRecognitionOptions = {}): Pr
 
       webRecognition.onerror = (event: any) => {
         isListening = false
+        isStarting = false
         const errCode = event.error || 'unknown'
         options.onError?.(getReadableError(errCode))
       }
 
       webRecognition.onend = () => {
         isListening = false
+        isStarting = false
         options.onEnd?.()
       }
 
@@ -236,6 +243,7 @@ export async function startListening(options: SpeechRecognitionOptions = {}): Pr
       isListening = true
     } catch (err: any) {
       isListening = false
+      isStarting = false
       options.onError?.(getReadableError(err.message || 'Failed to start web speech recognition'))
     }
     return
@@ -307,6 +315,8 @@ export async function stopListening(): Promise<void> {
       } catch {}
       isListening = false
     }
+    isStarting = false
+    isStopping = false
     return
   }
 
@@ -340,6 +350,8 @@ export async function cancelListening(): Promise<void> {
       isListening = false
       currentOptions = {}
     }
+    isStarting = false
+    isStopping = false
     return
   }
 
@@ -374,6 +386,8 @@ export async function destroySpeechRecognition(): Promise<void> {
       isListening = false
       currentOptions = {}
     }
+    isStarting = false
+    isStopping = false
     return
   }
 

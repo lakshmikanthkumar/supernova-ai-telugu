@@ -1,28 +1,47 @@
 import { Tabs } from 'expo-router'
 import { View, Text, StyleSheet, Platform } from 'react-native'
-import { Colors } from '../../src/constants/theme'
+import { useTheme } from '../../src/context/ThemeContext'
 import { Home, BookOpen, Bot, BarChart2, User } from 'lucide-react-native'
 
 function TabIcon({ Icon, label, focused }: { Icon: any; label: string; focused: boolean }) {
+  const { theme } = useTheme()
+  const c = theme.colors
+
   return (
-    <View style={[styles.tabItem, focused && styles.tabItemFocused]}>
-      <View style={[styles.tabEmojiWrap, focused && styles.tabEmojiWrapFocused]}>
-        <Icon size={20} color={focused ? Colors.primary : "#9CA3AF"} />
+    <View style={styles.tabItem}>
+      <View style={[
+        styles.tabEmojiWrap,
+        focused && { backgroundColor: c.primaryLight }
+      ]}>
+        <Icon size={20} color={focused ? c.primary : c.textTertiary} />
       </View>
-      <Text style={[styles.tabLabel, focused && styles.tabLabelFocused]}>{label}</Text>
+      <Text style={[
+        styles.tabLabel,
+        focused ? { color: c.primary } : { color: c.textTertiary }
+      ]}>{label}</Text>
     </View>
   )
 }
 
 export default function MainLayout() {
+  const { theme } = useTheme()
+  const c = theme.colors
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        headerStyle: { backgroundColor: '#FFFFFF' },
-        headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold', color: '#fff' },
-        tabBarStyle: styles.tabBar,
+        headerStyle: { backgroundColor: c.surface },
+        headerTintColor: c.textPrimary,
+        headerTitleStyle: { fontWeight: 'bold', color: c.textPrimary },
+        tabBarStyle: [
+          styles.tabBar,
+          {
+            backgroundColor: c.surface,
+            borderTopColor: c.border,
+            shadowColor: c.shadow,
+          }
+        ],
         tabBarShowLabel: false,
         tabBarItemStyle: { flex: 1, justifyContent: 'center', alignItems: 'center' },
       }}
@@ -68,28 +87,19 @@ export default function MainLayout() {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: '#E8E0D8',
     height: Platform.OS === 'ios' ? 82 : 66,
     paddingBottom: Platform.OS === 'ios' ? 20 : 0,
     elevation: 12,
-    shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.08,
     shadowRadius: 10,
     paddingTop: 9,
   },
   tabItem: { alignItems: 'center', paddingTop: 6, width: 58 },
-  tabItemFocused: {},
   tabEmojiWrap: {
     width: 36, height: 28, borderRadius: 10,
     alignItems: 'center', justifyContent: 'center',
   },
-  tabEmojiWrapFocused: {
-    backgroundColor: '#FFF0E8',
-  },
-  tabEmoji: { fontSize: 20 },
-  tabLabel: { fontSize: 10, color: '#9CA3AF', marginTop: 2, fontWeight: '600' },
-  tabLabelFocused: { color: Colors.primary },
+  tabLabel: { fontSize: 10, marginTop: 2, fontWeight: '600' },
 })

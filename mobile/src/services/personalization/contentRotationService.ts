@@ -8,11 +8,16 @@ import {
 
 // ─── DYNAMIC FLASHCARDS ───────────────────────────────────────────────────
 
+const UUID_RE_ROTATION = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export async function getDynamicFlashcards(
   userId: string,
   options: { mode?: 'smart' | 'shuffle' | 'weak_first' | 'new_only'; limit?: number } = {}
 ): Promise<any[]> {
   const { mode = 'smart', limit = 20 } = options
+
+  // Guest users have non-UUID ids — skip Supabase entirely
+  if (!UUID_RE_ROTATION.test(userId)) return []
 
   // Fetch all flashcards with user progress
   const { data: flashcards } = await supabase
@@ -202,8 +207,13 @@ export async function getDynamicSpeakingPrompts(userId: string, count = 3): Prom
 
 // ─── MARK CONTENT COMPLETED ───────────────────────────────────────────────
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export async function recordContentSeen(userId: string, type: string, contentId: string, score?: number) {
   await markContentSeen(userId, type, contentId, score)
+
+  // Skip Supabase sync for guest users (non-UUID id → FK violation + 400 cast error)
+  if (!UUID_RE.test(userId)) return
 
   // Also record in Supabase for cross-device sync (fire and forget)
   supabase.from('user_content_history').upsert({

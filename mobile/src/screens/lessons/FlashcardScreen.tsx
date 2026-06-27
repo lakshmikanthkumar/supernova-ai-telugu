@@ -67,6 +67,8 @@ export default function FlashcardScreen() {
   const slideAnim = useRef(new Animated.Value(0)).current
   const cardScaleAnim = useRef(new Animated.Value(1)).current
 
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
   const loadCards = useCallback(async (selectedMode: Mode) => {
     setLoading(true)
     setCurrentIndex(0)
@@ -77,7 +79,8 @@ export default function FlashcardScreen() {
     slideAnim.setValue(0)
     cardScaleAnim.setValue(1)
 
-    if (userId) {
+    // Only query Supabase for real (UUID) user IDs — guest IDs cause 400 errors
+    if (userId && UUID_RE.test(userId)) {
       try {
         const dynamic = await getDynamicFlashcards(userId, { mode: selectedMode, limit: 20 })
         if (dynamic && dynamic.length > 0) {
@@ -88,7 +91,12 @@ export default function FlashcardScreen() {
       } catch (_) {}
     }
 
-    dispatch(fetchFlashcards({}))
+    // Fallback: fetch via Redux (handles guest → returns mock data)
+    const result = await dispatch(fetchFlashcards({}))
+    if (fetchFlashcards.fulfilled.match(result) && result.payload.length > 0) {
+      setCards(result.payload)
+    }
+    setLoading(false)
   }, [userId, dispatch])
 
   useEffect(() => {
@@ -96,16 +104,6 @@ export default function FlashcardScreen() {
     return () => { Speech.stop() }
   }, [])
 
-  // Sync fallback redux cards when dynamic load yields nothing
-  useEffect(() => {
-    if (!userId && !reduxLoading) {
-      setCards(reduxFlashcards)
-      setLoading(false)
-    } else if (userId && !loading && cards.length === 0 && !reduxLoading) {
-      setCards(reduxFlashcards)
-      setLoading(false)
-    }
-  }, [reduxFlashcards, reduxLoading])
 
   const handleModeChange = (newMode: Mode) => {
     setMode(newMode)
@@ -208,7 +206,7 @@ export default function FlashcardScreen() {
         <Text style={{ fontSize: 14, color: Colors.textSecondary, textAlign: 'center', paddingHorizontal: 32 }}>
           Flashcard content is being added. Check back soon!
         </Text>
-        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')} style={{ marginTop: 24, padding: 12 }}>
+        <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/(main)/home')} style={{ marginTop: 24, padding: 12 }}>
           <Text style={{ color: Colors.primary, fontWeight: '700', fontSize: 16 }}>← Go Back</Text>
         </TouchableOpacity>
       </View>
@@ -283,7 +281,7 @@ export default function FlashcardScreen() {
               <Text style={styles.switchModeBtnText}>Switch Mode</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.homeBtn} onPress={() => router.replace('/home')}>
+          <TouchableOpacity style={styles.homeBtn} onPress={() => router.replace('/(main)/home')}>
             <Text style={styles.homeBtnText}>Return Home →</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -299,7 +297,7 @@ export default function FlashcardScreen() {
       {/* Header */}
       <LinearGradient colors={Colors.gradient} style={styles.header}>
         <View style={styles.headerTopRow}>
-          <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/home')}>
+          <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/(main)/home')}>
             <Text style={styles.backBtn}>←</Text>
           </TouchableOpacity>
           <View style={{ flex: 1, alignItems: 'center' }}>

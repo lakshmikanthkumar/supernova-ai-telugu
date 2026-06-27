@@ -480,6 +480,7 @@ const PracticeModal: React.FC<{
       await startListening({
         language: 'en-IN',
         partialResults: true,
+        continuous: Platform.OS === 'android' || Platform.OS === 'web',
         onPartialResult: (text) => setPartialTranscript(text),
         onFinalResult: async (recognitionResult) => {
           setIsListening(false);

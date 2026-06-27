@@ -278,6 +278,7 @@ const PracticeModal: React.FC<{
     await startListening({
       language: 'en-IN',
       partialResults: true,
+      continuous: Platform.OS === 'android' || Platform.OS === 'web',
       onPartialResult: (text) => setPartialText(text),
       onFinalResult: (result) => {
         setTranscript(result.transcript);
@@ -649,6 +650,15 @@ const SelfIntroductionScreen: React.FC = () => {
   };
 
   const handleDeleteSaved = async (id: string) => {
+    if (Platform.OS === 'web') {
+      const confirmDelete = window.confirm('Remove this saved introduction?');
+      if (confirmDelete) {
+        const updated = savedIntros.filter(i => i.id !== id);
+        setSavedIntros(updated);
+        await AsyncStorage.setItem(SAVED_INTROS_KEY, JSON.stringify(updated));
+      }
+      return;
+    }
     Alert.alert('Delete Introduction', 'Remove this saved introduction?', [
       { text: 'Cancel', style: 'cancel' },
       {

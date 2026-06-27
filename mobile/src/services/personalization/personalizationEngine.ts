@@ -32,6 +32,18 @@ export interface DailyFeed {
 const FEED_CACHE_KEY = (userId: string, date: string) => `daily_feed:${userId}:${date}`
 const INSIGHTS_CACHE_KEY = (userId: string) => `user_insights:${userId}`
 
+// guest users have a non-UUID id — skip all Supabase queries for them
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+function isRealUser(userId: string): boolean {
+  return UUID_RE.test(userId)
+}
+
+const DEFAULT_INSIGHTS: UserInsights = {
+  level: 1, streak: 0, weakTopics: [], strongTopics: [],
+  recentActivity: [], avgGrammarScore: 70, avgSpeakingScore: 70,
+  avgPronunciationScore: 70, preferredCategory: 'speaking', learningPace: 'slow',
+}
+
 // ─── USER INSIGHTS ────────────────────────────────────────────────────────
 
 export async function getUserInsights(userId: string): Promise<UserInsights> {
@@ -43,6 +55,11 @@ export async function getUserInsights(userId: string): Promise<UserInsights> {
       if (Date.now() - ts < 60 * 60 * 1000) return data
     }
   } catch {}
+
+  // Skip Supabase for guest users — non-UUID id would cause a 400 cast error
+  if (!isRealUser(userId)) {
+    return DEFAULT_INSIGHTS
+  }
 
   // Fetch from Supabase in parallel
   const [profileRes, grammarRes, speakingRes, challengeRes] = await Promise.allSettled([

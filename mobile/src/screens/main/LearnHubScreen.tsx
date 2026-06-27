@@ -6,6 +6,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { Colors } from '../../constants/theme'
+import { useTheme } from '../../context/ThemeContext'
 import { Sun, Mic, Briefcase, Mail, Phone, Edit3, Volume2, Layers, Target, Bot, Users, Search, Star, ArrowRight, X } from 'lucide-react-native'
 
 const { width } = Dimensions.get('window')
@@ -46,26 +47,19 @@ const RECOMMENDED_NAMES = ['Office Conversations', 'Grammar Engine', 'AI Nova Ch
 
 const CATEGORIES = ['All', 'Speaking', 'Writing', 'Vocabulary', 'Grammar', 'Interview']
 
-const CATEGORY_COLORS: Record<string, string> = {
-  All:       Colors.primary,
-  Speaking:  '#7B61FF',
-  Writing:   '#00D26A',
-  Vocabulary:'#2ECC71',
-  Grammar:   '#D97706',
-  Interview: '#E74C3C',
-}
-
 // ── Sub-components ──────────────────────────────────────────────────────────
 
 function LevelBadge({ level }: { level: string }) {
+  const { theme } = useTheme()
+  const c = theme.colors
   const bg = level === 'Beginner'
-    ? '#D1FAE5' : level === 'Intermediate'
-      ? '#FEF3C7' : level === 'Advanced'
-        ? '#FEE2E2' : '#EEF2FF'
+    ? c.successLight : level === 'Intermediate'
+      ? c.warningLight : level === 'Advanced'
+        ? c.errorLight : c.primaryLight
   const fg = level === 'Beginner'
-    ? '#00D26A' : level === 'Intermediate'
-      ? '#D97706' : level === 'Advanced'
-        ? '#DC2626' : '#7B61FF'
+    ? c.success : level === 'Intermediate'
+      ? c.warning : level === 'Advanced'
+        ? c.error : c.primary
   return (
     <View style={[badgeStyles.wrap, { backgroundColor: bg }]}>
       <Text style={[badgeStyles.text, { color: fg }]}>{level}</Text>
@@ -79,6 +73,9 @@ const badgeStyles = StyleSheet.create({
 })
 
 function ModuleGridCard({ mod }: { mod: ModuleDef }) {
+  const { theme } = useTheme()
+  const c = theme.colors
+  const gridCardStyles = getGridCardStyles(c)
   const hasProgress = typeof mod.progress === 'number'
   const isComplete = mod.progress === 100
   return (
@@ -109,13 +106,13 @@ function ModuleGridCard({ mod }: { mod: ModuleDef }) {
             gridCardStyles.progressFill,
             {
               width: `${mod.progress ?? 0}%` as `${number}%`,
-              backgroundColor: isComplete ? '#00D26A' : mod.color,
+              backgroundColor: isComplete ? c.success : mod.color,
             },
           ]} />
         </View>
 
         {/* Progress label */}
-        <Text style={[gridCardStyles.progressLabel, { color: isComplete ? '#00D26A' : '#9CA3AF' }]}>
+        <Text style={[gridCardStyles.progressLabel, { color: isComplete ? c.success : c.textTertiary }]}>
           {isComplete ? '✓ Done' : hasProgress ? `${mod.progress}%` : 'Not started'}
         </Text>
       </View>
@@ -123,10 +120,10 @@ function ModuleGridCard({ mod }: { mod: ModuleDef }) {
   )
 }
 
-const gridCardStyles = StyleSheet.create({
+const getGridCardStyles = (c: any) => StyleSheet.create({
   card: {
     width: CARD_WIDTH,
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     borderRadius: 16,
     overflow: 'hidden',
     elevation: 3,
@@ -139,14 +136,17 @@ const gridCardStyles = StyleSheet.create({
   colorBar: { height: 5, width: '100%' },
   body: { padding: 12, gap: 6 },
   icon: { fontSize: 28 },
-  name: { fontSize: 13, fontWeight: '700', color: '#111827', lineHeight: 18 },
-  time: { fontSize: 11, color: '#9CA3AF' },
-  progressBg: { height: 5, backgroundColor: '#E5E7EB', borderRadius: 3, overflow: 'hidden', marginTop: 4 },
+  name: { fontSize: 13, fontWeight: '700', color: c.textPrimary, lineHeight: 18 },
+  time: { fontSize: 11, color: c.textSecondary },
+  progressBg: { height: 5, backgroundColor: c.border, borderRadius: 3, overflow: 'hidden', marginTop: 4 },
   progressFill: { height: 5, borderRadius: 3 },
   progressLabel: { fontSize: 10, fontWeight: '700', marginTop: 2 },
 })
 
 function RecommendedCard({ mod }: { mod: ModuleDef }) {
+  const { theme } = useTheme()
+  const c = theme.colors
+  const recCardStyles = getRecCardStyles(c)
   return (
     <TouchableOpacity
       style={recCardStyles.card}
@@ -171,7 +171,7 @@ function RecommendedCard({ mod }: { mod: ModuleDef }) {
   )
 }
 
-const recCardStyles = StyleSheet.create({
+const getRecCardStyles = (c: any) => StyleSheet.create({
   card: {
     borderRadius: 16,
     overflow: 'hidden',
@@ -199,8 +199,21 @@ const recCardStyles = StyleSheet.create({
 // ── Main screen ─────────────────────────────────────────────────────────────
 
 export default function LearnHubScreen() {
+  const { theme, isDark } = useTheme()
+  const c = theme.colors
+  const styles = getStyles(c)
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('All')
+
+  // Category tab colors based on active theme
+  const categoryColors: Record<string, string> = {
+    All:       c.primary,
+    Speaking:  c.primary,
+    Writing:   c.success,
+    Vocabulary:c.secondary,
+    Grammar:   c.warning,
+    Interview: c.error,
+  }
 
   // Derived data
   const completedCount = useMemo(
@@ -244,7 +257,7 @@ export default function LearnHubScreen() {
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
 
       {/* ── Header ── */}
-      <LinearGradient colors={[Colors.primary, Colors.primaryDark]} style={styles.header}>
+      <LinearGradient colors={[c.primary, c.primaryDark]} style={styles.header}>
         <Text style={styles.headerTitle}>Learn English</Text>
         <Text style={styles.headerSubtitle}>Your complete learning journey</Text>
 
@@ -272,18 +285,18 @@ export default function LearnHubScreen() {
       {/* ── Search Bar ── */}
       <View style={styles.searchWrap}>
         <View style={styles.searchBar}>
-          <Search size={16} color='#9CA3AF' style={{ marginRight: 8 }} />
+          <Search size={16} color={c.textTertiary} style={{ marginRight: 8 }} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search modules, categories..."
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={c.textTertiary}
             value={search}
             onChangeText={setSearch}
             returnKeyType="search"
           />
           {search.length > 0 && (
             <TouchableOpacity onPress={() => setSearch('')}>
-              <X size={16} color='#9CA3AF' style={{ marginLeft: 8 }} />
+              <X size={16} color={c.textTertiary} style={{ marginLeft: 8 }} />
             </TouchableOpacity>
           )}
         </View>
@@ -303,7 +316,7 @@ export default function LearnHubScreen() {
               key={cat}
               style={[
                 styles.tab,
-                active && { backgroundColor: CATEGORY_COLORS[cat] ?? Colors.primary },
+                active && { backgroundColor: categoryColors[cat] ?? c.primary },
               ]}
               onPress={() => setActiveCategory(cat)}
               activeOpacity={0.8}
@@ -318,7 +331,7 @@ export default function LearnHubScreen() {
       {showRecommended && (
         <View style={styles.section}>
           <View style={styles.sectionTitleRow}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}><Star size={18} color='#F59E0B' style={{marginRight: 6}} /><Text style={styles.sectionTitle}>AI Recommended for You</Text></View>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}><Star size={18} color={c.warning} style={{marginRight: 6}} /><Text style={styles.sectionTitle}>AI Recommended for You</Text></View>
             <Text style={styles.sectionSubtitle}>Based on your progress</Text>
           </View>
           {recommendedModules.map(m => (
@@ -338,7 +351,7 @@ export default function LearnHubScreen() {
 
         {filteredModules.length === 0 ? (
           <View style={styles.emptyState}>
-            <Search size={40} color='#9CA3AF' style={{ marginBottom: 12 }} />
+            <Search size={40} color={c.textTertiary} style={{ marginBottom: 12 }} />
             <Text style={styles.emptyText}>No modules found for "{search}"</Text>
           </View>
         ) : (
@@ -396,8 +409,8 @@ export default function LearnHubScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFF8F0' },
+const getStyles = (c: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.background },
 
   // Header
   header: {
@@ -429,23 +442,23 @@ const styles = StyleSheet.create({
   searchWrap: { paddingHorizontal: 16, marginTop: -18 },
   searchBar: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: 'white', borderRadius: 14, paddingHorizontal: 14,
+    backgroundColor: c.surface, borderRadius: 14, paddingHorizontal: 14,
     elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1, shadowRadius: 6,
   },
   searchIcon: { fontSize: 16, marginRight: 8 },
-  searchInput: { flex: 1, paddingVertical: 14, fontSize: 14, color: '#111827' },
-  searchClear: { fontSize: 14, color: '#9CA3AF', paddingLeft: 8 },
+  searchInput: { flex: 1, paddingVertical: 14, fontSize: 14, color: c.textPrimary },
+  searchClear: { fontSize: 14, color: c.textSecondary, paddingLeft: 8 },
 
   // Category tabs
   tabsScroll: { marginTop: 16 },
   tabsContent: { paddingHorizontal: 16, gap: 8 },
   tab: {
     paddingHorizontal: 16, paddingVertical: 8,
-    borderRadius: 20, backgroundColor: 'white',
-    borderWidth: 1.5, borderColor: '#E5E7EB',
+    borderRadius: 20, backgroundColor: c.surface,
+    borderWidth: 1.5, borderColor: c.border,
   },
-  tabText: { fontSize: 13, fontWeight: '600', color: '#6B7280' },
+  tabText: { fontSize: 13, fontWeight: '600', color: c.textSecondary },
   tabTextActive: { color: 'white' },
 
   // Sections
@@ -453,9 +466,9 @@ const styles = StyleSheet.create({
   sectionTitleRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12,
   },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#111827' },
-  sectionSubtitle: { fontSize: 12, color: Colors.primary, fontWeight: '600' },
-  sectionCount: { fontSize: 13, color: '#6B7280', fontWeight: '600' },
+  sectionTitle: { fontSize: 17, fontWeight: '700', color: c.textPrimary },
+  sectionSubtitle: { fontSize: 12, color: c.primary, fontWeight: '600' },
+  sectionCount: { fontSize: 13, color: c.textSecondary, fontWeight: '600' },
 
   // Grid
   grid: { gap: 0 },
@@ -467,22 +480,22 @@ const styles = StyleSheet.create({
   // Empty state
   emptyState: { alignItems: 'center', paddingVertical: 40 },
   emptyIcon: { fontSize: 40, marginBottom: 12 },
-  emptyText: { fontSize: 15, color: '#6B7280', textAlign: 'center' },
+  emptyText: { fontSize: 15, color: c.textSecondary, textAlign: 'center' },
 
   // Recently active
   recentCard: {
-    backgroundColor: 'white', borderRadius: 16, padding: 16,
+    backgroundColor: c.surface, borderRadius: 16, padding: 16,
     elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08, shadowRadius: 6,
   },
   recentRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, gap: 12 },
-  recentRowBorder: { borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
+  recentRowBorder: { borderBottomWidth: 1, borderBottomColor: c.border },
   recentIcon: { fontSize: 26 },
-  recentTitle: { fontSize: 14, fontWeight: '600', color: '#111827', marginBottom: 6 },
+  recentTitle: { fontSize: 14, fontWeight: '600', color: c.textPrimary, marginBottom: 6 },
   recentProgressRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  recentProgressBg: { flex: 1, height: 5, backgroundColor: '#E5E7EB', borderRadius: 3, overflow: 'hidden' },
+  recentProgressBg: { flex: 1, height: 5, backgroundColor: c.border, borderRadius: 3, overflow: 'hidden' },
   recentProgressFill: { height: 5, borderRadius: 3 },
-  recentProgressPct: { fontSize: 11, color: '#6B7280', fontWeight: '700', width: 30 },
+  recentProgressPct: { fontSize: 11, color: c.textSecondary, fontWeight: '700', width: 30 },
   continueBtn: {
     borderRadius: 10, paddingHorizontal: 12, paddingVertical: 7,
   },

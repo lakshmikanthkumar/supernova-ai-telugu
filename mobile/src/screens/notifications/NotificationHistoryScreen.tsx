@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useDispatch, useSelector } from 'react-redux'
 import { useFocusEffect } from '@react-navigation/native'
 import { AppDispatch, RootState } from '../../store'
+import { useTheme } from '../../context/ThemeContext'
 import {
   loadNotificationHistory,
   markNotificationRead,
@@ -37,6 +38,9 @@ function timeAgo(iso: string): string {
 }
 
 export const NotificationHistoryScreen: React.FC = () => {
+  const { theme } = useTheme()
+  const c = theme.colors
+  const styles = getStyles(c)
   const dispatch = useDispatch<AppDispatch>()
   const { history, unreadCount, loading } = useSelector((s: RootState) => s.notifications)
 
@@ -59,7 +63,7 @@ export const NotificationHistoryScreen: React.FC = () => {
         activeOpacity={0.8}
       >
         <View style={[styles.iconBox, !item.read && styles.iconBoxUnread]}>
-          <Ionicons name={icon as any} size={22} color={item.read ? '#7B61FF' : '#7B61FF'} />
+          <Ionicons name={icon as any} size={22} color={c.primary} />
         </View>
         <View style={styles.itemBody}>
           <Text style={[styles.itemTitle, !item.read && styles.itemTitleUnread]}>{item.title}</Text>
@@ -96,7 +100,7 @@ export const NotificationHistoryScreen: React.FC = () => {
         refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
         ListEmptyComponent={(
           <View style={styles.emptyBox}>
-            <Ionicons name="notifications-off-outline" size={64} color="#D1D5DB" />
+            <Ionicons name="notifications-off-outline" size={64} color={c.textSecondary} />
             <Text style={styles.emptyTitle}>No notifications yet</Text>
             <Text style={styles.emptySub}>
               Reminders, achievements, and streak alerts will appear here.
@@ -108,47 +112,47 @@ export const NotificationHistoryScreen: React.FC = () => {
   )
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F9FA' },
+const getStyles = (c: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.background },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 20, paddingTop: 20, paddingBottom: 12,
-    backgroundColor: 'white', borderBottomWidth: 1, borderBottomColor: '#F0F0F0',
+    backgroundColor: c.surface, borderBottomWidth: 1, borderBottomColor: c.border,
   },
-  headerTitle: { fontSize: 22, fontWeight: '700', color: '#2D3436' },
-  markAll: { color: '#7B61FF', fontSize: 14, fontWeight: '600' },
+  headerTitle: { fontSize: 22, fontWeight: '700', color: c.textPrimary },
+  markAll: { color: c.primary, fontSize: 14, fontWeight: '600' },
   badge: {
     marginHorizontal: 20, marginTop: 12,
-    backgroundColor: '#F5F0FF', paddingHorizontal: 12, paddingVertical: 6,
+    backgroundColor: c.primaryLight, paddingHorizontal: 12, paddingVertical: 6,
     borderRadius: 20, alignSelf: 'flex-start',
   },
-  badgeText: { color: '#7B61FF', fontSize: 13, fontWeight: '600' },
+  badgeText: { color: c.primary, fontSize: 13, fontWeight: '600' },
   list: { padding: 16 },
   empty: { flex: 1 },
   item: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: 'white', borderRadius: 14, padding: 14,
+    backgroundColor: c.surface, borderRadius: 14, padding: 14,
     marginBottom: 10, elevation: 2,
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05, shadowRadius: 2,
   },
-  itemUnread: { borderLeftWidth: 4, borderLeftColor: '#7B61FF', backgroundColor: '#FAFAFE' },
+  itemUnread: { borderLeftWidth: 4, borderLeftColor: c.primary, backgroundColor: c.primaryLight },
   iconBox: {
     width: 42, height: 42, borderRadius: 21,
-    backgroundColor: '#F5F0FF', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: c.primaryLight, alignItems: 'center', justifyContent: 'center',
     marginRight: 12,
   },
-  iconBoxUnread: { backgroundColor: '#EDE9FF' },
+  iconBoxUnread: { backgroundColor: c.primaryLight },
   itemBody: { flex: 1 },
-  itemTitle: { fontSize: 15, color: '#2D3436', marginBottom: 2 },
+  itemTitle: { fontSize: 15, color: c.textPrimary, marginBottom: 2 },
   itemTitleUnread: { fontWeight: '700' },
-  itemText: { fontSize: 13, color: '#636E72', lineHeight: 18 },
-  itemTime: { fontSize: 11, color: '#B2BEC3', marginTop: 4 },
+  itemText: { fontSize: 13, color: c.textSecondary, lineHeight: 18 },
+  itemTime: { fontSize: 11, color: c.textSecondary, marginTop: 4 },
   dot: {
     width: 8, height: 8, borderRadius: 4,
-    backgroundColor: '#7B61FF', marginLeft: 8,
+    backgroundColor: c.primary, marginLeft: 8,
   },
   emptyBox: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 48, marginTop: 80 },
-  emptyTitle: { fontSize: 20, fontWeight: '600', color: '#2D3436', marginTop: 16 },
-  emptySub: { fontSize: 14, color: '#999', textAlign: 'center', marginTop: 8, lineHeight: 22 },
+  emptyTitle: { fontSize: 20, fontWeight: '600', color: c.textPrimary, marginTop: 16 },
+  emptySub: { fontSize: 14, color: c.textSecondary, textAlign: 'center', marginTop: 8, lineHeight: 22 },
 })

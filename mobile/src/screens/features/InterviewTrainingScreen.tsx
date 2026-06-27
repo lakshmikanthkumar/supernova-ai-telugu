@@ -244,7 +244,7 @@ export default function InterviewTrainingScreen() {
       startListening({
         language: 'en-IN',
         partialResults: true,
-        continuous: Platform.OS === 'android',
+        continuous: Platform.OS === 'android' || Platform.OS === 'web',
         onPartialResult: (text: string) => {
           const prefix = baseAnswerRef.current;
           setCurrentAnswer(prefix ? `${prefix} ${text}` : text);
@@ -1084,7 +1084,7 @@ const styles = StyleSheet.create({
   followUpText: { color: '#C7D2FE', fontSize: 14, lineHeight: 22, fontStyle: 'italic' },
 
   teluguCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1A1830',
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,

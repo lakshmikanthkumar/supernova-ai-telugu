@@ -286,7 +286,7 @@ export default function PublicSpeakingScreen() {
       startListening({
         language: 'en-IN',
         partialResults: true,
-        continuous: Platform.OS === 'android', // Android supports continuous better
+        continuous: Platform.OS === 'android' || Platform.OS === 'web', // Android and Web support continuous
         onPartialResult: (text: string) => {
           // Show live partial transcript
           setTranscript(text);
@@ -402,6 +402,30 @@ export default function PublicSpeakingScreen() {
       const fallbackMsg = sttAvailable
         ? 'Not enough speech was captured. Please speak clearly into your microphone for at least a few seconds and try again.'
         : 'Speech recognition is not available on this device. Please try on a different device or check your microphone settings.';
+
+      if (Platform.OS === 'web') {
+        const useDemo = window.confirm(
+          `${fallbackMsg}\n\nClick "OK" to use Demo Content, or "Cancel" to try again.`
+        );
+        if (useDemo) {
+          const demoText = "Good afternoon everyone. Today I want to share my thoughts on this topic. It's a subject close to my heart, and I believe we need to address it with creativity and perseverance. There are three key elements to keep in mind: first, connection; second, clarity; and third, commitment.";
+          const result = analyzeSpeech(demoText, 15, selectedMode!);
+          setAnalysisResult(result);
+          scoreAnimation.setValue(0);
+          Animated.timing(scoreAnimation, {
+            toValue: result.overall,
+            duration: 1600,
+            useNativeDriver: false,
+          }).start();
+          fadeAnim.setValue(0);
+          slideAnim.setValue(40);
+          setPhase('results');
+        } else {
+          resetAll();
+        }
+        return;
+      }
+
       Alert.alert(
         'No Speech Detected',
         fallbackMsg,

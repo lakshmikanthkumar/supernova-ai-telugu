@@ -9,6 +9,7 @@ import { router } from 'expo-router'
 import * as Speech from 'expo-speech'
 import { Colors } from '../../constants/theme'
 import { useAppDispatch, useAppSelector } from '../../hooks/useStore'
+import { useTheme } from '../../context/ThemeContext'
 import { fetchCategories } from '../../store/slices/lessonsSlice'
 import { fetchDailyChallenge, fetchLeaderboard } from '../../store/slices/gamificationSlice'
 import { fetchProfile } from '../../store/slices/authSlice'
@@ -52,6 +53,8 @@ export default function HomeDashboard() {
   const [dailyFeed, setDailyFeed] = useState<DailyFeed | null>(null)
   const [feedLoading, setFeedLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const { theme, isDark } = useTheme()
+  const c = theme.colors
 
   const getGreeting = () => {
     const hour = new Date().getHours()
@@ -155,7 +158,7 @@ export default function HomeDashboard() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: c.background }]}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl
@@ -165,7 +168,7 @@ export default function HomeDashboard() {
       }
     >
       {/* ── Header ── */}
-      <LinearGradient colors={['#7B61FF', '#5A42F5']} style={styles.header}>
+      <LinearGradient colors={[c.primary, c.primaryDark]} style={styles.header}>
         <View style={styles.headerTop}>
           <View style={{ flex: 1 }}>
             <Text style={styles.greeting}>{getGreeting()}</Text>
@@ -173,7 +176,7 @@ export default function HomeDashboard() {
           </View>
           <View style={styles.headerRight}>
             <TouchableOpacity
-              style={styles.notifBtn}
+              style={[styles.notifBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)' }]}
               onPress={() => {
                 router.push('/(main)/notifications')
               }}
@@ -181,7 +184,7 @@ export default function HomeDashboard() {
               <Bell size={20} color='white' />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push('/profile')}>
-              <View style={styles.avatarCircle}>
+              <View style={[styles.avatarCircle, { backgroundColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.25)', borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,194,255,0.2)' }]}>
                 <User size={22} color='white' />
               </View>
             </TouchableOpacity>
@@ -190,25 +193,25 @@ export default function HomeDashboard() {
 
         {/* Streak + XP badges */}
         <View style={styles.badgeRow}>
-          <View style={styles.badge}>
+          <View style={[styles.badge, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)' }]}>
             <Flame size={14} color='white' style={{marginRight: 4}} /><Text style={styles.badgeText}>{streak} Day Streak</Text>
           </View>
-          <View style={[styles.badge, { backgroundColor: 'rgba(251,191,36,0.25)' }]}>
+          <View style={[styles.badge, { backgroundColor: isDark ? 'rgba(251,191,36,0.15)' : 'rgba(251,191,36,0.25)' }]}>
             <Flame size={14} color='white' style={{marginRight: 4}} /><Text style={styles.badgeText}>{xpTotal.toLocaleString()} XP</Text>
           </View>
         </View>
       </LinearGradient>
 
       {/* ── Today's Progress Card ── */}
-      <View style={styles.progressCard}>
+      <View style={[styles.progressCard, { backgroundColor: c.surface, shadowColor: c.shadow }]}>
         <View style={styles.progressHeader}>
-          <Text style={styles.progressTitle}>Today's Progress</Text>
-          <Text style={styles.progressXP}>{xpToday} / {dailyGoalXP} XP</Text>
+          <Text style={[styles.progressTitle, { color: c.textPrimary }]}>Today's Progress</Text>
+          <Text style={[styles.progressXP, { color: c.primary }]}>{xpToday} / {dailyGoalXP} XP</Text>
         </View>
-        <View style={styles.progressBarBg}>
-          <View style={[styles.progressBarFill, { width: `${progressPct}%` }]} />
+        <View style={[styles.progressBarBg, { backgroundColor: c.border }]}>
+          <View style={[styles.progressBarFill, { width: `${progressPct}%`, backgroundColor: c.primary }]} />
         </View>
-        <Text style={styles.progressMotivation}>
+        <Text style={[styles.progressMotivation, { color: c.textSecondary }]}>
           {progressPct >= 80 ? '🎉 Almost there! You\'re crushing it!' : progressPct >= 50 ? '💪 Keep going! Almost there!' : '🚀 Great start! Keep the momentum!'}
         </Text>
       </View>
@@ -216,21 +219,21 @@ export default function HomeDashboard() {
       {/* ── Vocabulary of the Day ── */}
       {vocab && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Vocabulary of the Day</Text>
-          <View style={styles.vocabCard}>
+          <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Vocabulary of the Day</Text>
+          <View style={[styles.vocabCard, { backgroundColor: c.surface, shadowColor: c.shadow }]}>
             <View style={styles.vocabTopRow}>
-              <Text style={styles.vocabWord}>{vocab.word}</Text>
-              <View style={styles.difficultyBadge}>
-                <Text style={styles.difficultyBadgeText}>{vocab.category || 'General'}</Text>
+              <Text style={[styles.vocabWord, { color: c.textPrimary }]}>{vocab.word}</Text>
+              <View style={[styles.difficultyBadge, { backgroundColor: c.primaryLight }]}>
+                <Text style={[styles.difficultyBadgeText, { color: c.primary }]}>{vocab.category || 'General'}</Text>
               </View>
             </View>
-            <Text style={styles.vocabMeaning}>{vocab.meaning_telugu}</Text>
-            <Text style={styles.vocabExample}>"{vocab.example}"</Text>
+            <Text style={[styles.vocabMeaning, { color: c.success }]}>{vocab.meaning_telugu}</Text>
+            <Text style={[styles.vocabExample, { color: c.textSecondary }]}>"{vocab.example}"</Text>
             <TouchableOpacity
-              style={styles.hearBtn}
+              style={[styles.hearBtn, { backgroundColor: c.primaryLight }]}
               onPress={() => Speech.speak(vocab.word, { language: 'en-IN', rate: 0.85 })}
             >
-              <View style={{flexDirection: 'row', alignItems: 'center'}}><Volume2 size={16} color='#7B61FF' style={{marginRight: 6}} /><Text style={styles.hearBtnText}>Hear it</Text></View>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}><Volume2 size={16} color={c.primary} style={{marginRight: 6}} /><Text style={[styles.hearBtnText, { color: c.primary }]}>Hear it</Text></View>
             </TouchableOpacity>
           </View>
         </View>
@@ -238,7 +241,7 @@ export default function HomeDashboard() {
 
       {/* ── Featured Module ── */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Today's Focus</Text>
+        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Today's Focus</Text>
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={() => router.push(todayFeatured.route as any)}
@@ -265,16 +268,16 @@ export default function HomeDashboard() {
       {/* ── Today's Speaking Prompt ── */}
       {speakingPrompt && (
         <View style={styles.section}>
-          <View style={styles.speakCard}>
+          <View style={[styles.speakCard, { backgroundColor: c.surface, shadowColor: c.shadow }]}>
             <View style={styles.speakTopRow}>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}><Mic size={18} color='#000' style={{marginRight: 8}} /><Text style={styles.speakTitle}>Today's Speaking Challenge</Text></View>
-              <View style={styles.durationBadge}>
-                <Text style={styles.durationBadgeText}>2 min</Text>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}><Mic size={18} color={c.textPrimary} style={{marginRight: 8}} /><Text style={[styles.speakTitle, { color: c.textPrimary }]}>Today's Speaking Challenge</Text></View>
+              <View style={[styles.durationBadge, { backgroundColor: c.border }]}>
+                <Text style={[styles.durationBadgeText, { color: c.textSecondary }]}>2 min</Text>
               </View>
             </View>
-            <Text style={styles.speakPrompt}>{speakingPrompt}</Text>
+            <Text style={[styles.speakPrompt, { color: c.textPrimary }]}>{speakingPrompt}</Text>
             <TouchableOpacity
-              style={styles.speakBtn}
+              style={[styles.speakBtn, { backgroundColor: c.primary }]}
               onPress={() => router.push('/features/public-speaking' as any)}
             >
               <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}><Text style={styles.speakBtnText}>Start Speaking</Text><ArrowRight size={16} color='white' style={{marginLeft: 4}}/></View>
@@ -286,29 +289,29 @@ export default function HomeDashboard() {
       {/* ── Grammar Tip of the Day ── */}
       {grammarTip && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Grammar Tip of the Day</Text>
-          <View style={styles.grammarTipCard}>
+          <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Grammar Tip of the Day</Text>
+          <View style={[styles.grammarTipCard, { backgroundColor: c.surface, shadowColor: c.shadow }]}>
             <View style={styles.grammarTipTopRow}>
-              <View style={styles.grammarTopicBadge}>
-                <Text style={styles.grammarTopicBadgeText}>{grammarTip.topic}</Text>
+              <View style={[styles.grammarTopicBadge, { backgroundColor: c.warningLight }]}>
+                <Text style={[styles.grammarTopicBadgeText, { color: c.warning }]}>{grammarTip.topic}</Text>
               </View>
             </View>
-            <Text style={styles.grammarTipText}>{grammarTip.tip}</Text>
+            <Text style={[styles.grammarTipText, { color: c.textPrimary }]}>{grammarTip.tip}</Text>
             <View style={styles.grammarExampleRow}>
-              <View style={styles.grammarExampleBlock}>
-                <Text style={styles.grammarExampleLabel}>✅ Correct</Text>
-                <Text style={[styles.grammarExampleText, { color: '#00D26A' }]}>{grammarTip.example_correct}</Text>
+              <View style={[styles.grammarExampleBlock, { backgroundColor: c.background }]}>
+                <Text style={[styles.grammarExampleLabel, { color: c.textSecondary }]}>✅ Correct</Text>
+                <Text style={[styles.grammarExampleText, { color: c.success }]}>{grammarTip.example_correct}</Text>
               </View>
-              <View style={styles.grammarExampleBlock}>
-                <Text style={styles.grammarExampleLabel}>❌ Wrong</Text>
-                <Text style={[styles.grammarExampleText, { color: '#DC2626' }]}>{grammarTip.example_wrong}</Text>
+              <View style={[styles.grammarExampleBlock, { backgroundColor: c.background }]}>
+                <Text style={[styles.grammarExampleLabel, { color: c.textSecondary }]}>❌ Wrong</Text>
+                <Text style={[styles.grammarExampleText, { color: c.error }]}>{grammarTip.example_wrong}</Text>
               </View>
             </View>
             <TouchableOpacity
-              style={styles.practiceTipBtn}
+              style={[styles.practiceTipBtn, { backgroundColor: c.warningLight }]}
               onPress={() => router.push('/features/grammar-engine' as any)}
             >
-              <Text style={styles.practiceTipBtnText}>Practice This →</Text>
+              <Text style={[styles.practiceTipBtnText, { color: c.warning }]}>Practice This →</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -316,21 +319,21 @@ export default function HomeDashboard() {
 
       {/* ── Quick Access Grid ── */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Access</Text>
+        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Quick Access</Text>
         <View style={styles.quickGrid}>
           {quickAccessItems.map((item) => (
             <TouchableOpacity
               key={item.name}
-              style={styles.quickCard}
+              style={[styles.quickCard, { backgroundColor: c.surface, shadowColor: c.shadow }]}
               activeOpacity={0.8}
               onPress={() => router.push(item.route as any)}
             >
               {item.isNew && <View style={styles.newBadge}><Text style={styles.newBadgeText}>NEW</Text></View>}
-              <item.icon size={28} color='#111827' style={{ marginBottom: 6 }} />
-              <Text style={styles.quickName}>{item.name}</Text>
+              <item.icon size={28} color={c.textPrimary} style={{ marginBottom: 6 }} />
+              <Text style={[styles.quickName, { color: c.textPrimary }]}>{item.name}</Text>
               <View style={styles.difficultyRow}>
                 {[1, 2, 3].map(d => (
-                  <View key={d} style={[styles.diffDot, { backgroundColor: d <= item.difficulty ? '#7B61FF' : '#E5E7EB' }]} />
+                  <View key={d} style={[styles.diffDot, { backgroundColor: d <= item.difficulty ? c.primary : c.border }]} />
                 ))}
               </View>
             </TouchableOpacity>
@@ -343,7 +346,7 @@ export default function HomeDashboard() {
         <TouchableOpacity activeOpacity={0.9} onPress={() => router.push('/ai/chat' as any)}>
           <LinearGradient colors={['#dc2626', '#b91c1c']} style={styles.novaCard}>
             <View style={styles.novaAvatarWrap}>
-              <LinearGradient colors={['#7B61FF', '#5A42F5']} style={styles.novaAvatar}>
+              <LinearGradient colors={[c.primary, c.primaryDark]} style={styles.novaAvatar}>
                 <Bot size={28} color='white' />
               </LinearGradient>
             </View>
@@ -358,30 +361,30 @@ export default function HomeDashboard() {
 
       {/* ── Daily Challenge ── */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Daily Challenge</Text>
-        <View style={styles.challengeCard}>
+        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Daily Challenge</Text>
+        <View style={[styles.challengeCard, { backgroundColor: c.surface, shadowColor: c.shadow }]}>
           <View style={styles.challengeHeader}>
-            <View style={{width: 48, height: 48, borderRadius: 24, backgroundColor: '#FFF3EE', alignItems: 'center', justifyContent: 'center'}}><Target size={24} color='#7B61FF' /></View>
+            <View style={{width: 48, height: 48, borderRadius: 24, backgroundColor: c.primaryLight, alignItems: 'center', justifyContent: 'center'}}><Target size={24} color={c.primary} /></View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.challengeTitle}>
+              <Text style={[styles.challengeTitle, { color: c.textPrimary }]}>
                 {dailyChallenge?.title || 'Workplace Warrior'}
               </Text>
-              <Text style={styles.challengeDesc}>
+              <Text style={[styles.challengeDesc, { color: c.textSecondary }]}>
                 {dailyChallenge?.description || 'Complete 3 office conversation exercises'}
               </Text>
             </View>
-            <View style={styles.xpReward}>
-              <Text style={styles.xpRewardText}>+50 XP</Text>
+            <View style={[styles.xpReward, { backgroundColor: c.warningLight }]}>
+              <Text style={[styles.xpRewardText, { color: c.warning }]}>+50 XP</Text>
             </View>
           </View>
           <View style={styles.challengeProgress}>
-            <Text style={styles.challengeProgressText}>Progress: 0 / 3 tasks</Text>
-            <View style={styles.challengeProgressBar}>
-              <View style={[styles.challengeProgressFill, { width: '0%' }]} />
+            <Text style={[styles.challengeProgressText, { color: c.textSecondary }]}>Progress: 0 / 3 tasks</Text>
+            <View style={[styles.challengeProgressBar, { backgroundColor: c.border }]}>
+              <View style={[styles.challengeProgressFill, { width: '0%', backgroundColor: c.primary }]} />
             </View>
           </View>
           <TouchableOpacity
-            style={styles.challengeBtn}
+            style={[styles.challengeBtn, { backgroundColor: c.primary }]}
             onPress={() => router.push('/daily-challenge' as any)}
           >
             <Text style={styles.challengeBtnText}>Accept Challenge</Text>
@@ -392,25 +395,25 @@ export default function HomeDashboard() {
       {/* ── Interview Question of the Day ── */}
       {interviewQ && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Interview Question of the Day</Text>
-          <View style={styles.interviewCard}>
+          <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Interview Question of the Day</Text>
+          <View style={[styles.interviewCard, { backgroundColor: c.surface, shadowColor: c.shadow }]}>
             <View style={styles.interviewTopRow}>
-              <View style={[styles.categoryBadge, { backgroundColor: interviewQ.category === 'Technical' ? '#FFF3EE' : '#FEF3C7' }]}>
-                <Text style={[styles.categoryBadgeText, { color: interviewQ.category === 'Technical' ? '#7B61FF' : '#D97706' }]}>
+              <View style={[styles.categoryBadge, { backgroundColor: interviewQ.category === 'Technical' ? c.primaryLight : c.warningLight }]}>
+                <Text style={[styles.categoryBadgeText, { color: interviewQ.category === 'Technical' ? c.primary : c.warning }]}>
                   {interviewQ.category}
                 </Text>
               </View>
             </View>
-            <Text style={styles.interviewQuestion}>{interviewQ.question}</Text>
+            <Text style={[styles.interviewQuestion, { color: c.textPrimary }]}>{interviewQ.question}</Text>
             {interviewQ.tips && interviewQ.tips.length > 0 && (
               <View style={styles.tipsContainer}>
                 {interviewQ.tips.slice(0, 3).map((tip, i) => (
-                  <Text key={i} style={styles.tipText}>• {tip}</Text>
+                  <Text key={i} style={[styles.tipText, { color: c.textSecondary }]}>• {tip}</Text>
                 ))}
               </View>
             )}
             <TouchableOpacity
-              style={styles.answerBtn}
+              style={[styles.answerBtn, { backgroundColor: c.primary }]}
               onPress={() => router.push('/features/interview-training' as any)}
             >
               <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}><Text style={styles.answerBtnText}>Answer This</Text><ArrowRight size={16} color='white' style={{marginLeft: 4}}/></View>
@@ -421,42 +424,42 @@ export default function HomeDashboard() {
 
       {/* ── Continue Learning ── */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Continue Learning</Text>
+        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Continue Learning</Text>
         <TouchableOpacity
-          style={styles.continueCard}
+          style={[styles.continueCard, { backgroundColor: c.surface, shadowColor: c.shadow }]}
           activeOpacity={0.85}
           onPress={() => router.push('/lessons/office-conversations' as any)}
         >
           <View style={styles.continueLeft}>
-            <View style={{width: 54, height: 54, borderRadius: 16, backgroundColor: '#F0FDF4', alignItems: 'center', justifyContent: 'center'}}><Briefcase size={28} color='#00D26A' /></View>
+            <View style={{width: 54, height: 54, borderRadius: 16, backgroundColor: c.successLight, alignItems: 'center', justifyContent: 'center'}}><Briefcase size={28} color={c.success} /></View>
             <View style={{ marginLeft: 12, flex: 1 }}>
-              <Text style={styles.continueName}>Office Conversations</Text>
-              <Text style={styles.continueProgress}>45% complete</Text>
-              <View style={styles.continueBarBg}>
-                <View style={[styles.continueBarFill, { width: '45%' }]} />
+              <Text style={[styles.continueName, { color: c.textPrimary }]}>Office Conversations</Text>
+              <Text style={[styles.continueProgress, { color: c.textSecondary }]}>45% complete</Text>
+              <View style={[styles.continueBarBg, { backgroundColor: c.border }]}>
+                <View style={[styles.continueBarFill, { width: '45%', backgroundColor: c.success }]} />
               </View>
             </View>
           </View>
-          <ArrowRight size={20} color='#7B61FF' />
+          <ArrowRight size={20} color={c.primary} />
         </TouchableOpacity>
       </View>
 
       {/* ── Grammar Check Widget ── */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Grammar Check</Text>
-        <View style={styles.grammarCard}>
-          <Text style={styles.grammarHint}>Check your grammar instantly</Text>
+        <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>Quick Grammar Check</Text>
+        <View style={[styles.grammarCard, { backgroundColor: c.surface, shadowColor: c.shadow }]}>
+          <Text style={[styles.grammarHint, { color: c.textSecondary }]}>Check your grammar instantly</Text>
           <View style={styles.grammarInputRow}>
             <TextInput
-              style={styles.grammarInput}
+              style={[styles.grammarInput, { backgroundColor: c.inputBackground, borderColor: c.border, color: c.textPrimary }]}
               placeholder="Type a sentence to check..."
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={c.placeholder}
               value={grammarText}
               onChangeText={setGrammarText}
               multiline={false}
             />
             <TouchableOpacity
-              style={styles.grammarBtn}
+              style={[styles.grammarBtn, { backgroundColor: c.primary }]}
               onPress={() => {
                 if (grammarText.trim()) {
                   router.push({ pathname: '/features/grammar-engine', params: { text: grammarText } });
@@ -474,11 +477,11 @@ export default function HomeDashboard() {
       {/* ── Motivational Quote ── */}
       {quote && (
         <View style={styles.section}>
-          <View style={styles.quoteCard}>
-            <Text style={styles.quoteText}>"{quote.quote}"</Text>
-            <Text style={styles.quoteAuthor}>— {quote.author}</Text>
+          <View style={[styles.quoteCard, { backgroundColor: c.primaryLight, borderLeftColor: c.primary, shadowColor: c.shadow }]}>
+            <Text style={[styles.quoteText, { color: c.textPrimary }]}>"{quote.quote}"</Text>
+            <Text style={[styles.quoteAuthor, { color: c.primary }]}>— {quote.author}</Text>
             {quote.telugu ? (
-              <Text style={styles.quoteTelugu}>{quote.telugu}</Text>
+              <Text style={[styles.quoteTelugu, { color: c.textSecondary }]}>{quote.telugu}</Text>
             ) : null}
           </View>
         </View>
@@ -487,25 +490,25 @@ export default function HomeDashboard() {
       {/* ── Leaderboard Preview ── */}
       <View style={styles.section}>
         <View style={styles.leaderHeader}>
-          <Text style={styles.sectionTitle}>This Week's Top Learners</Text>
+          <Text style={[styles.sectionTitle, { color: c.textPrimary }]}>This Week's Top Learners</Text>
           <TouchableOpacity onPress={() => router.push({ pathname: '/progress', params: { tab: 'leaderboard' } } as any)}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}><Text style={styles.viewAll}>View All</Text><ArrowRight size={14} color='#7B61FF' style={{marginLeft: 2}}/></View>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}><Text style={[styles.viewAll, { color: c.primary }]}>View All</Text><ArrowRight size={14} color={c.primary} style={{marginLeft: 2}}/></View>
           </TouchableOpacity>
         </View>
-        <View style={styles.leaderCard}>
+        <View style={[styles.leaderCard, { backgroundColor: c.surface, shadowColor: c.shadow }]}>
           {displayLeaderboard.map(item => (
             <View key={item.rank} style={styles.leaderRow}>
               <View style={{ width: 32, alignItems: 'center' }}><Trophy size={22} color={item.emoji} /></View>
-              <Text style={styles.leaderName}>{item.name}</Text>
-              <Text style={styles.leaderXP}>{item.xp.toLocaleString()} XP</Text>
+              <Text style={[styles.leaderName, { color: c.textPrimary }]}>{item.name}</Text>
+              <Text style={[styles.leaderXP, { color: c.textSecondary }]}>{item.xp.toLocaleString()} XP</Text>
             </View>
           ))}
-          <View style={[styles.leaderRow, styles.leaderYouRow]}>
-            <View style={{ width: 32, alignItems: 'center' }}><User size={22} color='#7B61FF' /></View>
-            <Text style={[styles.leaderName, { color: '#7B61FF', fontWeight: '700' }]}>
+          <View style={[styles.leaderRow, styles.leaderYouRow, { borderTopColor: c.border }]}>
+            <View style={{ width: 32, alignItems: 'center' }}><User size={22} color={c.primary} /></View>
+            <Text style={[styles.leaderName, { color: c.primary, fontWeight: '700' }]}>
               {profile?.full_name?.split(' ')[0] || 'You'} (You)
             </Text>
-            <Text style={styles.leaderXP}>{xpTotal.toLocaleString()} XP</Text>
+            <Text style={[styles.leaderXP, { color: c.primary, fontWeight: '700' }]}>{xpTotal.toLocaleString()} XP</Text>
           </View>
         </View>
       </View>

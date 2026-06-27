@@ -13,6 +13,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useAppSelector, useAppDispatch } from '../../hooks/useStore'
 import { fetchAchievements, fetchLeaderboard } from '../../store/slices/gamificationSlice'
 import { Colors, Shadow, Radius } from '../../constants/theme'
+import { useTheme } from '../../context/ThemeContext'
 import { Mic, Edit3, BookOpen, CheckCircle, Headphones, Flame, Trophy, Calendar, Clock, BarChart2, User, Award, ArrowRight, Zap, Medal, Lock } from 'lucide-react-native'
 import type { Achievement, LeaderboardEntry } from '../../types'
 import { Theme } from '../../theme'
@@ -66,6 +67,9 @@ function AnimatedBar({
   isToday: boolean
   label: string
 }) {
+  const { theme } = useTheme()
+  const c = theme.colors
+  const chartStyles = getChartStyles(c)
   const anim = useRef(new Animated.Value(0)).current
   const BAR_MAX_HEIGHT = 80
 
@@ -87,7 +91,7 @@ function AnimatedBar({
             chartStyles.barFill,
             {
               height: anim,
-              backgroundColor: isToday ? Colors.primary : Colors.secondary,
+              backgroundColor: isToday ? c.primary : c.secondary,
               opacity: isToday ? 1 : 0.6,
             },
           ]}
@@ -103,6 +107,9 @@ function AnimatedBar({
 // ─── Animated skill progress bar ─────────────────────────────────────────────
 
 function SkillBar({ label, icon: IconComp, pct }: { label: string; icon: any; pct: number }) {
+  const { theme } = useTheme()
+  const c = theme.colors
+  const skillStyles = getSkillStyles(c)
   const anim = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
@@ -120,7 +127,7 @@ function SkillBar({ label, icon: IconComp, pct }: { label: string; icon: any; pc
 
   return (
     <View style={skillStyles.row}>
-      <View style={{ width: 36, alignItems: 'center' }}><IconComp size={22} color={Colors.textSecondary} /></View>
+      <View style={{ width: 36, alignItems: 'center' }}><IconComp size={22} color={c.textSecondary} /></View>
       <View style={skillStyles.info}>
         <View style={skillStyles.labelRow}>
           <Text style={skillStyles.label}>{label}</Text>
@@ -137,9 +144,12 @@ function SkillBar({ label, icon: IconComp, pct }: { label: string; icon: any; pc
 // ─── Stat card ───────────────────────────────────────────────────────────────
 
 function StatCard({ icon: IconComp, label, value }: { icon: any; label: string; value: string }) {
+  const { theme } = useTheme()
+  const c = theme.colors
+  const statStyles = getStatStyles(c)
   return (
     <View style={statStyles.card}>
-      <IconComp size={26} color={Colors.primary} style={{ marginBottom: 6 }} />
+      <IconComp size={26} color={c.primary} style={{ marginBottom: 6 }} />
       <Text style={statStyles.value}>{value}</Text>
       <Text style={statStyles.label}>{label}</Text>
     </View>
@@ -157,6 +167,9 @@ function LeaderboardRow({
   rank: number
   isCurrentUser: boolean
 }) {
+  const { theme } = useTheme()
+  const c = theme.colors
+  const lbStyles = getLbStyles(c)
   const medal = rank === 1 ? '#FFD700' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : null
   return (
     <View style={[lbStyles.row, isCurrentUser && lbStyles.rowHighlight]}>
@@ -168,7 +181,7 @@ function LeaderboardRow({
         )}
       </View>
       <View style={lbStyles.avatar}>
-        <User size={20} color={Colors.primary} />
+        <User size={20} color={c.primary} />
       </View>
       <View style={lbStyles.nameBox}>
         <Text style={[lbStyles.name, isCurrentUser && lbStyles.nameHighlight]}>
@@ -184,10 +197,13 @@ function LeaderboardRow({
 // ─── Achievement badge (compact) ─────────────────────────────────────────────
 
 function AchievementBadge({ achievement }: { achievement: Achievement }) {
+  const { theme } = useTheme()
+  const c = theme.colors
+  const achStyles = getAchStyles(c)
   return (
     <View style={achStyles.badge}>
-      <View style={[achStyles.circle, { borderColor: achievement.badge_color || Colors.primary }]}>
-        <Award size={26} color={achievement.badge_color || Colors.primary} />
+      <View style={[achStyles.circle, { borderColor: achievement.badge_color || c.primary }]}>
+        <Award size={26} color={achievement.badge_color || c.primary} />
       </View>
       <Text style={achStyles.name} numberOfLines={2}>{achievement.name}</Text>
     </View>
@@ -197,6 +213,14 @@ function AchievementBadge({ achievement }: { achievement: Achievement }) {
 // ─── Main screen ─────────────────────────────────────────────────────────────
 
 export default function ProgressScreen() {
+  const { theme } = useTheme()
+  const c = theme.colors
+  const styles = getStyles(c)
+  const chartStyles = getChartStyles(c)
+  const statStyles = getStatStyles(c)
+  const achStyles = getAchStyles(c)
+  const lbStyles = getLbStyles(c)
+
   const dispatch = useAppDispatch()
   const router = useRouter()
   const { profile } = useAppSelector(s => s.auth)
@@ -233,7 +257,7 @@ export default function ProgressScreen() {
   return (
     <View style={styles.container}>
       {/* ── Header ── */}
-      <LinearGradient colors={[Colors.primary, Colors.accent]} style={styles.header}>
+      <LinearGradient colors={[c.primary, c.primaryDark]} style={styles.header}>
         <Text style={styles.headerTitle}>My Progress</Text>
         <View style={styles.headerMeta}>
           <View style={styles.levelBadge}>
@@ -254,13 +278,13 @@ export default function ProgressScreen() {
           style={[styles.tab, activeTab === 'progress' && styles.tabActive]}
           onPress={() => setActiveTab('progress')}
         >
-          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}><BarChart2 size={16} color={activeTab === 'progress' ? Colors.primary : Colors.textSecondary} style={{marginRight: 6}} /><Text style={[styles.tabText, activeTab === 'progress' && styles.tabTextActive]}>Progress</Text></View>
+          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}><BarChart2 size={16} color={activeTab === 'progress' ? c.primary : c.textSecondary} style={{marginRight: 6}} /><Text style={[styles.tabText, activeTab === 'progress' && styles.tabTextActive]}>Progress</Text></View>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'leaderboard' && styles.tabActive]}
           onPress={() => setActiveTab('leaderboard')}
         >
-          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}><Trophy size={16} color={activeTab === 'leaderboard' ? Colors.primary : Colors.textSecondary} style={{marginRight: 6}} /><Text style={[styles.tabText, activeTab === 'leaderboard' && styles.tabTextActive]}>Leaderboard</Text></View>
+          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}><Trophy size={16} color={activeTab === 'leaderboard' ? c.primary : c.textSecondary} style={{marginRight: 6}} /><Text style={[styles.tabText, activeTab === 'leaderboard' && styles.tabTextActive]}>Leaderboard</Text></View>
         </TouchableOpacity>
       </View>
 
@@ -291,7 +315,7 @@ export default function ProgressScreen() {
               <View style={chartStyles.legend}>
                 <View style={chartStyles.legendDot} />
                 <Text style={chartStyles.legendText}>Today</Text>
-                <View style={[chartStyles.legendDot, { backgroundColor: Colors.secondary, opacity: 0.6 }]} />
+                <View style={[chartStyles.legendDot, { backgroundColor: c.secondary, opacity: 0.6 }]} />
                 <Text style={chartStyles.legendText}>Other days</Text>
               </View>
             </View>
@@ -340,7 +364,7 @@ export default function ProgressScreen() {
                   style={achStyles.viewAllBtn}
                   onPress={() => router.push('/(main)/profile')}
                 >
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}><Text style={achStyles.viewAllText}>View All</Text><ArrowRight size={14} color={Colors.primary} style={{marginLeft: 2}}/></View>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}><Text style={achStyles.viewAllText}>View All</Text><ArrowRight size={14} color={c.primary} style={{marginLeft: 2}}/></View>
                 </TouchableOpacity>
               </View>
               {recentBadges.length > 0 ? (
@@ -371,7 +395,7 @@ export default function ProgressScreen() {
             ))}
             {leaderboard.length === 0 && (
               <View style={lbStyles.empty}>
-                <Trophy size={44} color={Colors.textSecondary} style={{ marginBottom: 12 }} />
+                <Trophy size={44} color={c.textSecondary} style={{ marginBottom: 12 }} />
                 <Text style={lbStyles.emptyText}>
                   Be the first to top the leaderboard this week!
                 </Text>
@@ -388,8 +412,8 @@ export default function ProgressScreen() {
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+const getStyles = (c: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.background },
   header: {
     paddingTop: 52,
     paddingBottom: 24,
@@ -430,7 +454,7 @@ const styles = StyleSheet.create({
   },
   tabRow: {
     flexDirection: 'row',
-    backgroundColor: Colors.surface,
+    backgroundColor: c.surface,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -438,13 +462,13 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   tab: { flex: 1, paddingVertical: 14, alignItems: 'center' },
-  tabActive: { borderBottomWidth: 3, borderBottomColor: Colors.primary },
-  tabText: { fontSize: 13, color: Colors.textSecondary, fontWeight: '600' },
-  tabTextActive: { color: Colors.primary },
+  tabActive: { borderBottomWidth: 3, borderBottomColor: c.primary },
+  tabText: { fontSize: 13, color: c.textSecondary, fontWeight: '600' },
+  tabTextActive: { color: c.primary },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, gap: 16 },
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: c.surface,
     borderRadius: Radius.lg,
     padding: 16,
     ...Shadow.card,
@@ -452,17 +476,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: Colors.text,
+    color: c.textPrimary,
     marginBottom: 2,
   },
   sectionSub: {
     fontSize: 12,
-    color: Colors.textSecondary,
+    color: c.textSecondary,
     marginBottom: 14,
   },
 })
 
-const chartStyles = StyleSheet.create({
+const getChartStyles = (c: any) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -477,13 +501,13 @@ const chartStyles = StyleSheet.create({
   },
   barValue: {
     fontSize: 10,
-    color: Colors.textSecondary,
+    color: c.textSecondary,
     marginBottom: 4,
     fontWeight: '600',
   },
   barTrack: {
     width: 24,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: c.borderLight || '#F3F4F6',
     borderRadius: 6,
     overflow: 'hidden',
     justifyContent: 'flex-end',
@@ -495,11 +519,11 @@ const chartStyles = StyleSheet.create({
   dayLabel: {
     marginTop: 6,
     fontSize: 11,
-    color: Colors.textSecondary,
+    color: c.textSecondary,
     fontWeight: '500',
   },
   dayLabelToday: {
-    color: Colors.primary,
+    color: c.primary,
     fontWeight: '700',
   },
   legend: {
@@ -512,16 +536,16 @@ const chartStyles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: Colors.primary,
+    backgroundColor: c.primary,
   },
   legendText: {
     fontSize: 11,
-    color: Colors.textSecondary,
+    color: c.textSecondary,
     marginRight: 10,
   },
 })
 
-const skillStyles = StyleSheet.create({
+const getSkillStyles = (c: any) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -535,22 +559,22 @@ const skillStyles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 6,
   },
-  label: { fontSize: 14, fontWeight: '600', color: Colors.text },
-  pct: { fontSize: 13, fontWeight: '700', color: Colors.primary },
+  label: { fontSize: 14, fontWeight: '600', color: c.textPrimary },
+  pct: { fontSize: 13, fontWeight: '700', color: c.primary },
   track: {
     height: 8,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: c.borderLight || '#F3F4F6',
     borderRadius: 4,
     overflow: 'hidden',
   },
   fill: {
     height: '100%',
-    backgroundColor: Colors.primary,
+    backgroundColor: c.primary,
     borderRadius: 4,
   },
 })
 
-const statStyles = StyleSheet.create({
+const getStatStyles = (c: any) => StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -559,73 +583,73 @@ const statStyles = StyleSheet.create({
   },
   card: {
     width: (SCREEN_WIDTH - 64 - 12) / 2,
-    backgroundColor: Colors.background,
+    backgroundColor: c.background,
     borderRadius: Radius.md,
     padding: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: c.border,
   },
   emoji: { fontSize: 26, marginBottom: 6 },
-  value: { fontSize: 20, fontWeight: '800', color: Colors.text, marginBottom: 2 },
-  label: { fontSize: 11, color: Colors.textSecondary, textAlign: 'center', fontWeight: '500' },
+  value: { fontSize: 20, fontWeight: '800', color: c.textPrimary, marginBottom: 2 },
+  label: { fontSize: 11, color: c.textSecondary, textAlign: 'center', fontWeight: '500' },
 })
 
-const lbStyles = StyleSheet.create({
+const getLbStyles = (c: any) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.background,
+    backgroundColor: c.background,
     borderRadius: Radius.md,
     padding: 12,
     marginBottom: 8,
     gap: 10,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: c.border,
   },
   rowHighlight: {
-    backgroundColor: '#FFF3EE',
-    borderColor: Colors.primary,
+    backgroundColor: c.primaryLight,
+    borderColor: c.primary,
     borderWidth: 2,
   },
   rankBox: { width: 30, alignItems: 'center' },
   medal: { fontSize: 22 },
-  rankNum: { fontSize: 16, fontWeight: '700', color: Colors.textSecondary },
+  rankNum: { fontSize: 16, fontWeight: '700', color: c.textSecondary },
   avatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#FFF3EE',
+    backgroundColor: c.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontSize: 17, fontWeight: '700', color: Colors.primary },
+  avatarText: { fontSize: 17, fontWeight: '700', color: c.primary },
   nameBox: { flex: 1 },
-  name: { fontSize: 14, fontWeight: '600', color: Colors.text },
-  nameHighlight: { color: Colors.primary },
-  xp: { fontSize: 13, fontWeight: '700', color: Colors.accent },
+  name: { fontSize: 14, fontWeight: '600', color: c.textPrimary },
+  nameHighlight: { color: c.primary },
+  xp: { fontSize: 13, fontWeight: '700', color: c.secondary },
   empty: { alignItems: 'center', paddingVertical: 40 },
   emptyEmoji: { fontSize: 44, marginBottom: 12 },
-  emptyText: { fontSize: 14, color: Colors.textSecondary, textAlign: 'center' },
+  emptyText: { fontSize: 14, color: c.textSecondary, textAlign: 'center' },
 })
 
-const achStyles = StyleSheet.create({
+const getAchStyles = (c: any) => StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 14,
   },
-  count: { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
+  count: { fontSize: 12, color: c.textSecondary, marginTop: 2 },
   viewAllBtn: {
-    backgroundColor: '#FFF3EE',
+    backgroundColor: c.primaryLight,
     borderRadius: Radius.sm,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: c.primary,
   },
-  viewAllText: { fontSize: 13, fontWeight: '700', color: Colors.primary },
+  viewAllText: { fontSize: 13, fontWeight: '700', color: c.primary },
   badgeRow: { flexDirection: 'row', gap: 12 },
   badge: {
     alignItems: 'center',
@@ -639,9 +663,9 @@ const achStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 6,
-    backgroundColor: '#FFF8F0',
+    backgroundColor: c.surface,
   },
   icon: { fontSize: 26 },
-  name: { fontSize: 11, fontWeight: '600', color: Colors.text, textAlign: 'center' },
-  empty: { fontSize: 13, color: Colors.textSecondary, textAlign: 'center', paddingVertical: 12 },
+  name: { fontSize: 11, fontWeight: '600', color: c.textPrimary, textAlign: 'center' },
+  empty: { fontSize: 13, color: c.textSecondary, textAlign: 'center', paddingVertical: 12 },
 })

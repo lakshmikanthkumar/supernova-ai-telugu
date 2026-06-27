@@ -11,6 +11,7 @@ import { RootState } from '../../src/store'
 import { supabase } from '../../src/services/supabase'
 import { chatWithNova, checkGrammar } from '../../src/services/ai/groqService'
 import { speak, stopSpeaking } from '../../src/services/audio/textToSpeech'
+import { useTheme } from '../../src/context/ThemeContext'
 import {
   startListening, stopListening, initializeSpeechRecognition,
   destroySpeechRecognition, isSpeechRecognitionAvailable,
@@ -41,6 +42,9 @@ const SCENARIO_ICONS: Record<string, string> = {
 }
 
 export default function ChatScreen() {
+  const { theme } = useTheme()
+  const c = theme.colors
+  const styles = getStyles(c)
   const { scenarioId, mode } = useLocalSearchParams<{ scenarioId?: string; mode?: string }>()
   const isRoleplay = mode === 'roleplay' && !!scenarioId
 
@@ -287,12 +291,12 @@ export default function ChatScreen() {
     return (
       <View style={[styles.messageRow, isUser ? styles.messageRowUser : styles.messageRowNova]}>
         {!isUser && (
-          <View style={[styles.novaAvatar, { backgroundColor: isRoleplay ? '#00D26A' : '#7B61FF' }]}>
+          <View style={[styles.novaAvatar, { backgroundColor: isRoleplay ? c.success : c.primary }]}>
             <Text style={styles.novaAvatarText}>{isRoleplay ? (scenario ? (SCENARIO_ICONS[scenario.scenario_type] || '🎭') : '🎭') : 'N'}</Text>
           </View>
         )}
         <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleNova,
-          isUser && isRoleplay && { backgroundColor: '#00D26A' }]}>
+          isUser && isRoleplay && { backgroundColor: c.success }]}>
           <Text style={[styles.bubbleText, isUser ? styles.bubbleTextUser : styles.bubbleTextNova]}>
             {item.content}
           </Text>
@@ -311,12 +315,12 @@ export default function ChatScreen() {
           )}
           {isUser && item.corrections && item.corrections.length > 0 && (
             <View style={styles.corrections}>
-              {item.corrections.map((c, i) => (
+              {item.corrections.map((cMsg, i) => (
                 <View key={i} style={styles.correctionItem}>
-                  <Text style={styles.correctionOriginal}>✗ "{c.original}"</Text>
-                  <Text style={styles.correctionFixed}>✓ "{c.corrected}"</Text>
-                  <Text style={styles.correctionExplanation}>{c.explanation}</Text>
-                  {c.explanation_telugu ? <Text style={styles.correctionTelugu}>{c.explanation_telugu}</Text> : null}
+                  <Text style={styles.correctionOriginal}>✗ "{cMsg.original}"</Text>
+                  <Text style={styles.correctionFixed}>✓ "{cMsg.corrected}"</Text>
+                  <Text style={styles.correctionExplanation}>{cMsg.explanation}</Text>
+                  {cMsg.explanation_telugu ? <Text style={styles.correctionTelugu}>{cMsg.explanation_telugu}</Text> : null}
                 </View>
               ))}
             </View>
@@ -331,12 +335,12 @@ export default function ChatScreen() {
     )
   }
 
-  const headerColors: [string, string] = isRoleplay ? ['#00D26A', '#00D26A'] : ['#7B61FF', '#7C3AED']
+  const headerColors: [string, string] = isRoleplay ? [c.success, c.success] : [c.primary, c.primaryDark]
   const headerTitle = isRoleplay && scenario ? scenario.title : 'Nova'
   const headerSub = isRoleplay && scenario ? scenario.ai_persona : 'AI English Tutor • Free'
 
   if (scenarioLoading) {
-    return <View style={styles.center}><ActivityIndicator size="large" color="#00D26A" /></View>
+    return <View style={styles.center}><ActivityIndicator size="large" color={isRoleplay ? c.success : c.primary} /></View>
   }
 
   return (
@@ -391,7 +395,7 @@ export default function ChatScreen() {
       {sending && (
         <View style={styles.typingIndicator}>
           <Text style={styles.typingText}>{isRoleplay && scenario ? `${scenario.ai_persona} is typing...` : 'Nova is typing...'}</Text>
-          <ActivityIndicator size="small" color={isRoleplay ? '#00D26A' : '#7B61FF'} />
+          <ActivityIndicator size="small" color={isRoleplay ? c.success : c.primary} />
         </View>
       )}
 
@@ -401,7 +405,7 @@ export default function ChatScreen() {
           value={inputText}
           onChangeText={setInputText}
           placeholder={isRoleplay ? 'Reply in English...' : 'Type in English or use mic...'}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor={c.textSecondary}
           multiline
           maxLength={500}
           onSubmitEditing={() => sendMessage()}
@@ -416,7 +420,7 @@ export default function ChatScreen() {
         </Animated.View>
         <TouchableOpacity
           style={[styles.sendBtn, (!inputText.trim() || sending) && styles.sendBtnDisabled,
-            isRoleplay && { backgroundColor: '#00D26A' }]}
+            isRoleplay && { backgroundColor: c.success }]}
           onPress={() => sendMessage()}
           disabled={!inputText.trim() || sending}
         >
@@ -430,8 +434,8 @@ export default function ChatScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6' },
+const getStyles = (c: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -448,10 +452,10 @@ const styles = StyleSheet.create({
   headerSubtitle: { color: 'rgba(255,255,255,0.7)', fontSize: 11 },
   muteBtn: { fontSize: 22 },
   scenarioBanner: {
-    backgroundColor: '#FFFFFF', paddingHorizontal: 16, paddingVertical: 10,
-    borderBottomWidth: 1, borderBottomColor: '#BAE6FD',
+    backgroundColor: c.surface, paddingHorizontal: 16, paddingVertical: 10,
+    borderBottomWidth: 1, borderBottomColor: c.border,
   },
-  scenarioBannerText: { color: '#00D26A', fontSize: 13, lineHeight: 18 },
+  scenarioBannerText: { color: c.success, fontSize: 13, lineHeight: 18 },
   messagesList: { padding: 16, paddingBottom: 8 },
   messageRow: { flexDirection: 'row', marginBottom: 16, maxWidth: '85%' },
   messageRowUser: { alignSelf: 'flex-end', flexDirection: 'row-reverse' },
@@ -463,16 +467,16 @@ const styles = StyleSheet.create({
   },
   novaAvatarText: { color: 'white', fontSize: 18, fontWeight: '800' },
   bubble: { borderRadius: 20, padding: 14, maxWidth: '100%' },
-  bubbleUser: { backgroundColor: '#7B61FF', borderBottomRightRadius: 4 },
-  bubbleNova: { backgroundColor: 'white', borderBottomLeftRadius: 4, elevation: 2 },
+  bubbleUser: { backgroundColor: c.primary, borderBottomRightRadius: 4 },
+  bubbleNova: { backgroundColor: c.surface, borderBottomLeftRadius: 4, elevation: 2 },
   bubbleText: { fontSize: 15, lineHeight: 22 },
   bubbleTextUser: { color: 'white' },
-  bubbleTextNova: { color: '#111827' },
+  bubbleTextNova: { color: c.textPrimary },
   translateBtn: { marginTop: 8 },
-  translateBtnText: { fontSize: 12, color: '#6B7280', fontWeight: '600' },
+  translateBtnText: { fontSize: 12, color: c.textSecondary, fontWeight: '600' },
   translationText: {
-    fontSize: 13, color: '#7B61FF', marginTop: 6,
-    borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingTop: 6, lineHeight: 20,
+    fontSize: 13, color: c.primary, marginTop: 6,
+    borderTopWidth: 1, borderTopColor: c.border, paddingTop: 6, lineHeight: 20,
   },
   corrections: {
     marginTop: 8, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 10, padding: 10,
@@ -485,35 +489,35 @@ const styles = StyleSheet.create({
   speakBtn: { alignSelf: 'flex-end', marginTop: 6 },
   speakBtnText: { fontSize: 16 },
   partialTranscriptBar: {
-    backgroundColor: '#FFFFFF', paddingHorizontal: 16, paddingVertical: 10,
-    borderTopWidth: 1, borderTopColor: '#BAE6FD',
+    backgroundColor: c.surface, paddingHorizontal: 16, paddingVertical: 10,
+    borderTopWidth: 1, borderTopColor: c.border,
   },
-  partialText: { color: '#00D26A', fontSize: 14, fontStyle: 'italic' },
+  partialText: { color: c.success, fontSize: 14, fontStyle: 'italic' },
   typingIndicator: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingHorizontal: 16, paddingVertical: 8,
   },
-  typingText: { color: '#6B7280', fontSize: 13, fontStyle: 'italic' },
+  typingText: { color: c.textSecondary, fontSize: 13, fontStyle: 'italic' },
   inputBar: {
     flexDirection: 'row', alignItems: 'flex-end', gap: 8,
     padding: 12, paddingBottom: Platform.OS === 'ios' ? 28 : 12,
-    backgroundColor: 'white', borderTopWidth: 1, borderTopColor: '#E5E7EB',
+    backgroundColor: c.surface, borderTopWidth: 1, borderTopColor: c.border,
   },
   textInput: {
-    flex: 1, backgroundColor: '#F3F4F6', borderRadius: 24,
-    paddingHorizontal: 16, paddingVertical: 10, fontSize: 15, color: '#111827',
+    flex: 1, backgroundColor: c.background, borderRadius: 24,
+    paddingHorizontal: 16, paddingVertical: 10, fontSize: 15, color: c.textPrimary,
     maxHeight: 100,
   },
   micBtn: {
     width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#EEF2FF', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: c.primaryLight, alignItems: 'center', justifyContent: 'center',
   },
   micBtnActive: { backgroundColor: '#EF4444' },
   micBtnIcon: { fontSize: 20 },
   sendBtn: {
     width: 44, height: 44, borderRadius: 22,
-    backgroundColor: '#7B61FF', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: c.primary, alignItems: 'center', justifyContent: 'center',
   },
-  sendBtnDisabled: { backgroundColor: '#9D84FF' },
+  sendBtnDisabled: { backgroundColor: c.primaryLight },
   sendBtnIcon: { color: 'white', fontSize: 16 },
 })

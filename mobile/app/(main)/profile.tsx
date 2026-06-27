@@ -11,6 +11,7 @@ import { updateProfile, clearAuth } from '../../src/store/slices/authSlice'
 import { toggleTranslations } from '../../src/store/slices/uiSlice'
 import { authService } from '../../src/services/api'
 import { Colors, Shadow, Radius } from '../../src/constants/theme'
+import { useTheme } from '../../src/context/ThemeContext'
 import { Footprints, Flame, Gem, Book, Type, Edit3, Briefcase, Trophy, Mail, MailOpen, Mic, Star, Sparkles, Target, Award, Bot, Volume2, Crown, Zap, BookOpen, MessageSquare, Settings, Check, Hand, Lock, Sun, Bell, Clock, ChevronRight } from 'lucide-react-native'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
@@ -72,14 +73,14 @@ function getLevelLabel(level: number): string {
 }
 
 // ─── Skill percentages derived from XP ────────────────────────────────────
-function deriveSkills(xp: number, level: number) {
+function deriveSkills(xp: number, level: number, c: any) {
   const base = Math.min(xp, 2000)
   return [
-    { label: 'Speaking',    color: Colors.primary,   pct: Math.min(100, Math.round(base * 0.35 / 7)) },
-    { label: 'Grammar',     color: Colors.secondary, pct: Math.min(100, Math.round(base * 0.40 / 8)) },
-    { label: 'Vocabulary',  color: '#2ECC71',         pct: Math.min(100, Math.round(base * 0.50 / 10)) },
-    { label: 'Writing',     color: '#5A42F5',         pct: Math.min(100, Math.round(base * 0.28 / 5.6)) },
-    { label: 'Listening',   color: '#9B59B6',         pct: Math.min(100, Math.round(base * 0.32 / 6.4)) },
+    { label: 'Speaking',    color: c.primary,   pct: Math.min(100, Math.round(base * 0.35 / 7)) },
+    { label: 'Grammar',     color: c.secondary, pct: Math.min(100, Math.round(base * 0.40 / 8)) },
+    { label: 'Vocabulary',  color: c.success,   pct: Math.min(100, Math.round(base * 0.50 / 10)) },
+    { label: 'Writing',     color: c.primaryDark, pct: Math.min(100, Math.round(base * 0.28 / 5.6)) },
+    { label: 'Listening',   color: c.accent,    pct: Math.min(100, Math.round(base * 0.32 / 6.4)) },
   ]
 }
 
@@ -112,6 +113,9 @@ export default function ProfileScreen() {
   const dispatch    = useAppDispatch()
   const { user, profile }          = useAppSelector(s => s.auth)
   const { showTeluguTranslations } = useAppSelector(s => s.ui)
+  const { theme, isDark } = useTheme()
+  const c = theme.colors
+  const styles = getStyles(c)
 
   const [editing,            setEditing]            = useState(false)
   const [name,               setName]               = useState(profile?.full_name || '')
@@ -137,7 +141,7 @@ export default function ProfileScreen() {
   const xp     = profile?.xp_total       ?? 0
   const streak = profile?.streak_current ?? 0
   const level  = profile?.current_level  ?? 1
-  const skills = deriveSkills(xp, level)
+  const skills = deriveSkills(xp, level, c)
   const lessonsDone  = estimateLessonsCompleted(xp)
   const wordsLearned = estimateWordsLearned(xp)
 
@@ -192,7 +196,7 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       {/* ── HEADER ─────────────────────────────────────────────────────── */}
-      <LinearGradient colors={[Colors.primary, Colors.accent]} style={styles.header}>
+      <LinearGradient colors={[c.primary, c.primaryDark]} style={styles.header}>
         <View style={styles.avatarInner}>
           <Text style={styles.avatarText}>{firstLetter}</Text>
         </View>
@@ -229,7 +233,7 @@ export default function ProfileScreen() {
                 value={name}
                 onChangeText={setName}
                 placeholder="Your full name"
-                placeholderTextColor={Colors.textLight}
+                placeholderTextColor={c.textTertiary}
               />
             </View>
             <View style={styles.field}>
@@ -239,7 +243,7 @@ export default function ProfileScreen() {
                 value={dailyGoal}
                 onChangeText={setDailyGoal}
                 keyboardType="numeric"
-                placeholderTextColor={Colors.textLight}
+                placeholderTextColor={c.textTertiary}
               />
             </View>
             <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
@@ -250,10 +254,10 @@ export default function ProfileScreen() {
 
         {/* ── STATS ROW ────────────────────────────────────────────────── */}
         <View style={styles.statsRow}>
-          <StatCard icon={Zap} value={`${xp}`}          label="Total XP"      color={Colors.accent} />
-          <StatCard icon={Flame} value={`${streak}`}       label="Day Streak"    color={Colors.primary} />
-          <StatCard icon={BookOpen} value={`${lessonsDone}`}  label="Lessons"       color={Colors.secondary} />
-          <StatCard icon={MessageSquare} value={`${wordsLearned}`} label="Words"         color="#2ECC71" />
+          <StatCard icon={Zap} value={`${xp}`}          label="Total XP"      color={c.accent} />
+          <StatCard icon={Flame} value={`${streak}`}       label="Day Streak"    color={c.primary} />
+          <StatCard icon={BookOpen} value={`${lessonsDone}`}  label="Lessons"       color={c.secondary} />
+          <StatCard icon={MessageSquare} value={`${wordsLearned}`} label="Words"         color={c.success} />
         </View>
 
         {/* ── SKILL PROGRESS ───────────────────────────────────────────── */}
@@ -284,7 +288,7 @@ export default function ProfileScreen() {
                   key={a.id}
                   style={[styles.achievementBadge, unlocked ? styles.achievementUnlocked : styles.achievementLocked]}
                 >
-                  {unlocked ? <a.icon size={28} color={Colors.text} style={{marginBottom: 6}} /> : <Lock size={28} color={Colors.textLight} style={{marginBottom: 6}} />}
+                  {unlocked ? <a.icon size={28} color={c.textPrimary} style={{marginBottom: 6}} /> : <Lock size={28} color={c.textTertiary} style={{marginBottom: 6}} />}
                   <Text
                     style={[styles.achievementName, !unlocked && styles.achievementNameLocked]}
                     numberOfLines={2}
@@ -309,21 +313,21 @@ export default function ProfileScreen() {
           {/* Navigable sub-sections */}
           <SettingsNavRow
             icon={Bell}
-            iconColor={Colors.primary}
+            iconColor={c.primary}
             label="Notifications"
             desc="View your notification history"
             onPress={() => router.push('/(main)/notifications')}
           />
           <SettingsNavRow
             icon={Clock}
-            iconColor={Colors.secondary}
+            iconColor={c.secondary}
             label="Reminder Settings"
             desc="Set daily practice reminders"
             onPress={() => router.push('/(main)/reminder-settings')}
           />
           <SettingsNavRow
             icon={Sun}
-            iconColor="#F59E0B"
+            iconColor={c.accent}
             label="Appearance"
             desc="Light, dark, or system theme"
             onPress={() => router.push('/(main)/theme-settings')}
@@ -338,23 +342,10 @@ export default function ProfileScreen() {
             <Switch
               value={showTeluguTranslations}
               onValueChange={handleTeluguToggle}
-              trackColor={{ false: Colors.border, true: Colors.primary }}
-              thumbColor={showTeluguTranslations ? Colors.primaryDark : '#f4f3f4'}
+              trackColor={{ false: c.border, true: c.primary }}
+              thumbColor={showTeluguTranslations ? c.primaryDark : '#f4f3f4'}
             />
           </View>
-
-          {/* <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
-            <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>Daily Reminder</Text>
-              <Text style={styles.settingDesc}>Get notified to practice daily</Text>
-            </View>
-            <Switch
-              value={dailyReminder}
-              onValueChange={handleReminderToggle}
-              trackColor={{ false: Colors.border, true: Colors.secondary }}
-              thumbColor={dailyReminder ? Colors.secondaryLight : '#f4f3f4'}
-            />
-          </View> */}
         </View>
 
         {/* ── ADMIN ────────────────────────────────────────────────────── */}
@@ -378,7 +369,7 @@ export default function ProfileScreen() {
       {showConfirmModal && (
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Hand size={48} color={Colors.primary} style={{marginBottom: 16}} />
+            <Hand size={48} color={c.primary} style={{marginBottom: 16}} />
             <Text style={styles.modalTitle}>Sign Out</Text>
             <Text style={styles.modalText}>Are you sure you want to sign out of your account?</Text>
             <View style={styles.modalButtons}>
@@ -404,6 +395,9 @@ export default function ProfileScreen() {
 function SettingsNavRow({
   icon: IconComp, iconColor, label, desc, onPress,
 }: { icon: any; iconColor: string; label: string; desc: string; onPress: () => void }) {
+  const { theme } = useTheme()
+  const c = theme.colors
+  const styles = getStyles(c)
   return (
     <TouchableOpacity style={styles.navRow} onPress={onPress} activeOpacity={0.7}>
       <View style={[styles.navIconBox, { backgroundColor: iconColor + '18' }]}>
@@ -413,17 +407,20 @@ function SettingsNavRow({
         <Text style={styles.settingLabel}>{label}</Text>
         <Text style={styles.settingDesc}>{desc}</Text>
       </View>
-      <ChevronRight size={18} color={Colors.textLight} />
+      <ChevronRight size={18} color={c.textTertiary} />
     </TouchableOpacity>
   )
 }
 
 function StatCard({ icon: IconComp, value, label, color }: { icon: any; value: string; label: string; color: string }) {
+  const { theme } = useTheme()
+  const c = theme.colors
+  const styles = getStyles(c)
   return (
     <View style={[styles.statCard, { borderTopColor: color, borderTopWidth: 3 }]}>
       <IconComp size={24} color={color} style={{marginBottom: 4}} />
       <Text style={[styles.statValue, { color }]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={[styles.statLabel, { color: c.textSecondary }]}>{label}</Text>
     </View>
   )
 }
@@ -432,8 +429,8 @@ function StatCard({ icon: IconComp, value, label, color }: { icon: any; value: s
 const CARD_GAP     = 14
 const BADGE_SIZE   = (SCREEN_WIDTH - 66 - CARD_GAP * 2) / 3
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
+const getStyles = (c: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.background },
 
   // Header
   header: {
@@ -484,27 +481,27 @@ const styles = StyleSheet.create({
 
   // Card
   card: {
-    backgroundColor: Colors.surface,
+    backgroundColor: c.surface,
     marginHorizontal: 16,
     marginTop: 14,
     borderRadius: Radius.lg,
     padding: 16,
     ...Shadow.card,
   },
-  cardTitle: { fontSize: 16, fontWeight: '800', color: Colors.text, marginBottom: 4 },
-  cardSubtitle: { fontSize: 12, color: Colors.textSecondary, marginBottom: 14 },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: c.textPrimary, marginBottom: 4 },
+  cardSubtitle: { fontSize: 12, color: c.textSecondary, marginBottom: 14 },
 
   // Edit fields
-  field: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  fieldLabel: { fontSize: 11, color: Colors.textSecondary, fontWeight: '700', textTransform: 'uppercase', marginBottom: 4 },
+  field: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: c.border },
+  fieldLabel: { fontSize: 11, color: c.textSecondary, fontWeight: '700', textTransform: 'uppercase', marginBottom: 4 },
   fieldInput: {
-    fontSize: 15, color: Colors.text,
-    borderBottomWidth: 2, borderBottomColor: Colors.primary,
+    fontSize: 15, color: c.textPrimary,
+    borderBottomWidth: 2, borderBottomColor: c.primary,
     paddingVertical: 4,
   },
   saveBtn: {
     marginTop: 16,
-    backgroundColor: Colors.primary,
+    backgroundColor: c.primary,
     paddingVertical: 13,
     borderRadius: Radius.md,
     alignItems: 'center',
@@ -520,7 +517,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: Colors.surface,
+    backgroundColor: c.surface,
     borderRadius: Radius.md,
     paddingVertical: 14,
     alignItems: 'center',
@@ -528,7 +525,7 @@ const styles = StyleSheet.create({
   },
   statEmoji: { fontSize: 18, marginBottom: 4 },
   statValue: { fontSize: 18, fontWeight: '800' },
-  statLabel: { fontSize: 10, color: Colors.textSecondary, marginTop: 2, fontWeight: '600' },
+  statLabel: { fontSize: 10, color: c.textSecondary, marginTop: 2, fontWeight: '600' },
 
   // Skills
   skillRow: {
@@ -540,12 +537,12 @@ const styles = StyleSheet.create({
     width: 90,
     fontSize: 13,
     fontWeight: '600',
-    color: Colors.text,
+    color: c.textPrimary,
   },
   skillBarBg: {
     flex: 1,
     height: 8,
-    backgroundColor: Colors.border,
+    backgroundColor: c.border,
     borderRadius: 4,
     overflow: 'hidden',
     marginHorizontal: 8,
@@ -576,28 +573,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   achievementUnlocked: {
-    backgroundColor: '#FFF8F0',
+    backgroundColor: c.primaryLight,
     borderWidth: 1.5,
-    borderColor: Colors.accent,
+    borderColor: c.primary,
   },
   achievementLocked: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: c.borderLight,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: c.border,
   },
   achievementEmoji: { fontSize: 28, marginBottom: 6 },
   achievementEmojiLocked: { opacity: 0.45 },
   achievementName: {
     fontSize: 11,
     fontWeight: '700',
-    color: Colors.text,
+    color: c.textPrimary,
     textAlign: 'center',
     lineHeight: 14,
   },
-  achievementNameLocked: { color: Colors.textLight },
+  achievementNameLocked: { color: c.textTertiary },
   achievementCondition: {
     fontSize: 9,
-    color: Colors.textLight,
+    color: c.textTertiary,
     textAlign: 'center',
     marginTop: 3,
     lineHeight: 12,
@@ -609,7 +606,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 13,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: c.border,
   },
   navIconBox: {
     width: 36, height: 36, borderRadius: 10,
@@ -624,39 +621,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: c.border,
   },
   settingInfo: { flex: 1, marginRight: 12 },
-  settingLabel: { fontSize: 15, fontWeight: '700', color: Colors.text },
-  settingDesc:  { fontSize: 12, color: Colors.textSecondary, marginTop: 2 },
+  settingLabel: { fontSize: 15, fontWeight: '700', color: c.textPrimary },
+  settingDesc:  { fontSize: 12, color: c.textSecondary, marginTop: 2 },
 
   // Admin
   adminBtn: {
     marginHorizontal: 16,
     marginTop: 14,
-    backgroundColor: Colors.text,
+    backgroundColor: c.textPrimary,
     paddingVertical: 14,
     borderRadius: Radius.md,
     alignItems: 'center',
     ...Shadow.card,
   },
-  adminBtnText: { color: 'white', fontWeight: '700', fontSize: 15 },
+  adminBtnText: { color: c.textInverse, fontWeight: '700', fontSize: 15 },
 
   // Logout
   logoutBtn: {
     marginHorizontal: 16,
     marginTop: 14,
-    backgroundColor: '#FEE2E2',
+    backgroundColor: c.errorLight,
     paddingVertical: 15,
     borderRadius: Radius.md,
     alignItems: 'center',
     ...Shadow.card,
   },
-  logoutBtnText: { color: Colors.error, fontWeight: '800', fontSize: 16 },
+  logoutBtnText: { color: c.error, fontWeight: '800', fontSize: 16 },
 
   version: {
     textAlign: 'center',
-    color: Colors.textLight,
+    color: c.textTertiary,
     fontSize: 12,
     marginTop: 18,
   },
@@ -671,7 +668,7 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     borderRadius: Radius.xl,
     padding: 28,
     width: '85%',
@@ -680,20 +677,20 @@ const styles = StyleSheet.create({
     ...Shadow.heavy,
   },
   modalEmoji:   { fontSize: 48, marginBottom: 16 },
-  modalTitle:   { fontSize: 20, fontWeight: '800', color: Colors.text, marginBottom: 8 },
-  modalText:    { fontSize: 15, color: Colors.textSecondary, textAlign: 'center', marginBottom: 24, lineHeight: 22 },
+  modalTitle:   { fontSize: 20, fontWeight: '800', color: c.textPrimary, marginBottom: 8 },
+  modalText:    { fontSize: 15, color: c.textSecondary, textAlign: 'center', marginBottom: 24, lineHeight: 22 },
   modalButtons: { flexDirection: 'row', gap: 12, width: '100%' },
   modalCancelBtn: {
     flex: 1, paddingVertical: 13,
     borderRadius: Radius.md,
-    borderWidth: 1, borderColor: Colors.border,
-    alignItems: 'center', backgroundColor: '#F9FAFB',
+    borderWidth: 1, borderColor: c.border,
+    alignItems: 'center', backgroundColor: c.background,
   },
-  modalCancelText:  { color: Colors.text, fontWeight: '700', fontSize: 15 },
+  modalCancelText:  { color: c.textPrimary, fontWeight: '700', fontSize: 15 },
   modalConfirmBtn: {
     flex: 1, paddingVertical: 13,
     borderRadius: Radius.md,
-    backgroundColor: Colors.error,
+    backgroundColor: c.error,
     alignItems: 'center',
   },
   modalConfirmText: { color: 'white', fontWeight: '700', fontSize: 15 },
