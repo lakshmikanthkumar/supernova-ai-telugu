@@ -343,7 +343,7 @@ export default function ProfileScreen() {
             />
           </View>
 
-          <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
+          {/* <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
             <View style={styles.settingInfo}>
               <Text style={styles.settingLabel}>Daily Reminder</Text>
               <Text style={styles.settingDesc}>Get notified to practice daily</Text>
@@ -354,7 +354,7 @@ export default function ProfileScreen() {
               trackColor={{ false: Colors.border, true: Colors.secondary }}
               thumbColor={dailyReminder ? Colors.secondaryLight : '#f4f3f4'}
             />
-          </View>
+          </View> */}
         </View>
 
         {/* ── ADMIN ────────────────────────────────────────────────────── */}

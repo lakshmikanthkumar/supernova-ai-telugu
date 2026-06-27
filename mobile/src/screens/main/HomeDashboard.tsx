@@ -175,11 +175,7 @@ export default function HomeDashboard() {
             <TouchableOpacity
               style={styles.notifBtn}
               onPress={() => {
-                Alert.alert(
-                  "Notifications",
-                  "• Daily Challenge is ready!\n• Practice your Greetings today.\n• You are on a 5-day streak, keep it up!",
-                  [{ text: "Close", style: "cancel" }]
-                )
+                router.push('/(main)/notifications')
               }}
             >
               <Bell size={20} color='white' />
