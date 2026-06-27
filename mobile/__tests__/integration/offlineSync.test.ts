@@ -22,13 +22,16 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
-// Supabase mock
-const mockSupabase = createMockSupabaseClient({
-  lessons: MOCK_LESSONS as any,
-});
-
+// Supabase mock — factory cannot reference imported vars; inline it
 jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => mockSupabase),
+  createClient: jest.fn(() => ({
+    from: jest.fn().mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      then: jest.fn().mockResolvedValue({ data: [], error: null }),
+    }),
+    auth: { getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }) },
+  })),
 }));
 
 // Offline sync service mock

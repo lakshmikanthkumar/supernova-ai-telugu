@@ -1,11 +1,19 @@
-import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { renderWithProviders, createMockStore, flushPromises } from '../utils/testHelpers';
-import { createMockSupabaseClient, MOCK_USER, MOCK_PROFILE } from '../mocks/supabaseMocks';
+import { createMockStore } from '../utils/testHelpers';
+import { MOCK_USER, MOCK_PROFILE } from '../mocks/supabaseMocks';
 
-// Mock dependencies
-const mockSupabaseClient = createMockSupabaseClient();
+// ─── Mock setup ─────────────────────────────────────────────────────────────
+// Variables prefixed with `mock` are allowed inside jest.mock() factories (Jest rule).
+const mockAuth = {
+  signInWithPassword: jest.fn(),
+  signUp: jest.fn(),
+  signOut: jest.fn(),
+  getUser: jest.fn(),
+  getSession: jest.fn(),
+  onAuthStateChange: jest.fn(),
+};
+const mockFrom = jest.fn();
+const mockSupabaseClient = { from: mockFrom, auth: mockAuth };
 
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => mockSupabaseClient),
@@ -46,7 +54,27 @@ jest.mock('../../src/services/auth', () => ({
 describe('Auth Integration Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (AsyncStorage.clear as jest.Mock).mockClear?.();
+    // Re-apply default implementations after clearAllMocks
+    mockAuth.signInWithPassword.mockResolvedValue({
+      data: { user: MOCK_USER, session: { access_token: 'mock-jwt-token', user: MOCK_USER } },
+      error: null,
+    });
+    mockAuth.signUp.mockResolvedValue({
+      data: { user: MOCK_USER, session: null },
+      error: null,
+    });
+    mockAuth.signOut.mockResolvedValue({ error: null });
+    mockAuth.getUser.mockResolvedValue({ data: { user: MOCK_USER }, error: null });
+    mockAuth.getSession.mockResolvedValue({ data: { session: { access_token: 'mock-jwt-token' } }, error: null });
+    mockAuth.onAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: jest.fn() } } });
+    mockFrom.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      insert: jest.fn().mockReturnThis(),
+      update: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({ data: MOCK_PROFILE, error: null }),
+      then: jest.fn().mockResolvedValue({ data: [MOCK_PROFILE], error: null }),
+    });
   });
 
   // ─── Login ───────────────────────────────────────────────────────────────────

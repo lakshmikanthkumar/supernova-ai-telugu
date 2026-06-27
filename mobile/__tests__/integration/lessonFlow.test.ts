@@ -2,13 +2,28 @@ import { MOCK_LESSONS, MOCK_FLASHCARDS, MOCK_QUIZ_QUESTIONS } from '../utils/moc
 import { createMockSupabaseClient } from '../mocks/supabaseMocks';
 import { createMockStore, flushPromises } from '../utils/testHelpers';
 
-jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => createMockSupabaseClient({
-    lessons: MOCK_LESSONS as any,
-    flashcards: MOCK_FLASHCARDS as any,
-    quiz_questions: MOCK_QUIZ_QUESTIONS as any,
-  })),
-}));
+// jest.mock factory cannot reference imported variables — inline the mock
+jest.mock('@supabase/supabase-js', () => {
+  const mockChain = {
+    select: jest.fn().mockReturnThis(),
+    insert: jest.fn().mockReturnThis(),
+    update: jest.fn().mockReturnThis(),
+    delete: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    order: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    single: jest.fn().mockResolvedValue({ data: null, error: null }),
+    then: jest.fn().mockResolvedValue({ data: [], error: null }),
+  };
+  return {
+    createClient: jest.fn(() => ({
+      from: jest.fn().mockReturnValue(mockChain),
+      auth: {
+        getUser: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      },
+    })),
+  };
+});
 
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),

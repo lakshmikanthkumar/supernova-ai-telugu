@@ -1,5 +1,3 @@
-import { jest } from '@jest/globals';
-
 // Mock User
 export const MOCK_USER = {
   id: 'user-123-uuid',
@@ -194,15 +192,10 @@ export function createMockSupabaseClient(tableData: Partial<Record<SupabaseTable
   };
 }
 
-// Mock the entire supabase module
+// Call createMockSupabaseClient() and pass the result to jest.mock() separately.
+// Cannot inline inside jest.mock() factory due to Jest's scope restriction.
 export function mockSupabaseModule(tableData: Partial<Record<SupabaseTable, object[]>> = {}) {
-  const mockClient = createMockSupabaseClient(tableData);
-
-  jest.mock('@supabase/supabase-js', () => ({
-    createClient: jest.fn(() => mockClient),
-  }));
-
-  return mockClient;
+  return createMockSupabaseClient(tableData);
 }
 
 export type MockSupabaseClient = ReturnType<typeof createMockSupabaseClient>;

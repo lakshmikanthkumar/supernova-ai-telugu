@@ -22,7 +22,13 @@ module.exports = {
     '<rootDir>/jest.setup.ts',
   ],
   testMatch: [
-    '**/__tests__/**/*.{test,spec}.{ts,tsx}',
+    '**/__tests__/**/*.test.{ts,tsx}',
+    '**/__tests__/unit/**/*.spec.{ts,tsx}',
+    '**/__tests__/integration/**/*.spec.{ts,tsx}',
+  ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/__tests__/e2e/',
   ],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
