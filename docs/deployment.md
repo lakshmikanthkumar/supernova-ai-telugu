@@ -1,28 +1,25 @@
 # EnglishMitraAI — Deployment Guide
 
-## Free Hosting Summary
+---
 
+## 🌐 Free Hosting Summary
 | Component | Host | Cost |
 |-----------|------|------|
-| Mobile app | Expo EAS (build) + Play Store / App Store | EAS free tier + $25 Play Store one-time |
-| Database | Supabase free tier | Free (500MB) |
-| Edge Functions | Supabase free tier | Free (500K invocations/month) |
-| AI (all models) | Groq free tier | Free (14,400 req/day per key) |
+| Mobile app | Expo EAS (build) + Play Store / App Store | **Free tier** + $25 Play Store one‑time fee |
+| Database | Supabase Free Tier | **Free** – 500 MB |
+| Edge Functions | Supabase Deno Runtime | **Free** – 500 K invocations/month |
+| AI (all models) | Groq Free Tier | **Free** – 14 400 requests/day per key |
 
 ---
 
-## 1. Supabase Production Setup
-
+## 1️⃣ Supabase Production Setup
 ### Create Production Project
-
-1. Go to https://supabase.com → **New Project**
-2. Region: **Singapore** or **Mumbai** (lowest latency for India)
-3. Set a strong database password and save it
+1. Visit https://supabase.com and click **New Project**.
+2. Choose a low‑latency region (e.g., **Singapore** or **Mumbai**).
+3. Set a strong database password.
 
 ### Run All Migrations
-
-In **Supabase Dashboard → SQL Editor**, run each file in order:
-
+In the Supabase dashboard → **SQL editor**, run the migration files in order:
 ```
 001_initial_schema.sql
 002_rls_policies.sql
@@ -33,21 +30,17 @@ In **Supabase Dashboard → SQL Editor**, run each file in order:
 007_dynamic_content.sql
 008_ai_analytics.sql
 ```
-
 Or via CLI:
-
 ```bash
 supabase login
-supabase link --project-ref your-project-ref
+supabase link --project-ref <your‑project‑ref>
 supabase db push
 ```
 
-### Deploy All Edge Functions
-
+### Deploy Edge Functions
 ```bash
 cd backend/supabase
-
-PROJECT=your-project-ref
+PROJECT=<your‑project‑ref>
 
 supabase functions deploy tutor-chat             --project-ref $PROJECT
 supabase functions deploy interview-coach        --project-ref $PROJECT
@@ -57,228 +50,161 @@ supabase functions deploy public-speaking-coach  --project-ref $PROJECT
 supabase functions deploy ai-content-generator   --project-ref $PROJECT
 supabase functions deploy update-progress        --project-ref $PROJECT
 ```
+All functions share a single **GROQ_API_KEY** secret and use the same four‑model fail‑over chain.
 
 ### Set Production Secrets
-
 ```bash
-supabase secrets set GROQ_API_KEY=gsk_your_production_key --project-ref your-project-ref
+supabase secrets set GROQ_API_KEY=gsk_<your‑production‑key> --project-ref <your‑project‑ref>
 ```
-
-All 7 edge functions share one secret. They all use the same 4-model failover chain internally.
 
 ---
 
-## 2. Build Mobile App with Expo EAS
-
+## 2️⃣ Build Mobile App with Expo EAS
 ### Install EAS CLI
-
 ```bash
 npm install -g eas-cli
 eas login
 ```
-
 ### Configure EAS
-
 ```bash
 cd mobile
 eas build:configure
 ```
-
-Update `eas.json`:
-
+Update `eas.json` (excerpt):
 ```json
 {
   "cli": { "version": ">= 5.0.0" },
   "build": {
-    "preview": {
-      "android": { "buildType": "apk" }
-    },
+    "preview": { "android": { "buildType": "apk" } },
     "production": {
       "android": { "buildType": "app-bundle" },
       "ios": { "resourceClass": "m-medium" }
     }
   },
-  "submit": {
-    "production": {}
-  }
+  "submit": { "production": {} }
 }
 ```
-
-### Set EAS Environment Variables
-
+### Set EAS Secrets (mirrored to Supabase)
 ```bash
+# Supabase URL & anon key
+
 eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_URL \
-  --value https://your-project-ref.supabase.co
+  --value https://<project‑ref>.supabase.co
 
 eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_ANON_KEY \
-  --value your_anon_key
+  --value <your‑anon‑key>
 
 eas secret:create --scope project --name EXPO_PUBLIC_GROQ_API_KEY \
-  --value gsk_your_production_key
+  --value gsk_<your‑production‑key>
 ```
-
-### Build APK (Android)
-
+### Build Packages
 ```bash
-# Test APK (direct install, no Play Store)
+# Test build (APK – direct install)
 eas build --platform android --profile preview
 
-# Production AAB for Play Store
+# Production build for Play Store (AAB)
 eas build --platform android --profile production
-```
 
-### Build for iOS
+# iOS build
 
-```bash
 eas build --platform ios --profile production
 ```
+---
+
+## 3️⃣ Play Store & App Store Submission
+### Play Store
+- Google Play Developer account (one‑time $25).
+- EAS handles signing keys automatically.
+- Provide screenshots (minimum 2 per device), a privacy‑policy URL, and the required **Microphone** and **Internet** permissions.
+- Submit via `eas submit --platform android`.
+
+### App Store
+- Apple Developer Program membership.
+- Configure App Store Connect metadata.
+- Submit via `eas submit --platform ios`.
 
 ---
 
-## 3. Play Store Submission
-
-### Requirements
-
-- Google Play Developer account ($25 one-time fee)
-- App signing key (EAS manages this automatically)
-- Screenshots (minimum 2 per device type)
-- Privacy policy URL (required — app uses mic + phone number)
-
-### Submit via EAS
-
-```bash
-eas submit --platform android
-```
-
-### Privacy Policy Requirements
-
-The app uses:
-- **Microphone** (`RECORD_AUDIO`) — for speech recognition in Pronunciation Lab
-- **Internet** — for AI calls and Supabase sync
-
-Host a privacy policy free at GitHub Pages or Notion and add the URL to your Play Store listing.
-
----
-
-## 4. Keeping Supabase Free Tier Active
-
-The free tier **pauses projects after 1 week of inactivity**.
-
-### Option A: Daily ping (cron job)
-
-```bash
-# Add to cron — runs daily at 8am
-0 8 * * * curl https://your-project-ref.supabase.co/rest/v1/ \
-  -H "apikey: your_anon_key" -s -o /dev/null
-```
-
-### Option B: GitHub Actions scheduled workflow
-
+## 4️⃣ CI/CD Pipeline (GitHub Actions)
+Create `.github/workflows/deploy.yml`:
 ```yaml
-name: Keep Supabase Active
+name: Deploy
 on:
-  schedule:
-    - cron: '0 8 * * *'
+  push:
+    branches: [ main ]
 jobs:
-  ping:
+  supabase:
     runs-on: ubuntu-latest
     steps:
-      - run: curl ${{ secrets.SUPABASE_URL }}/rest/v1/ -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}"
+      - uses: actions/checkout@v3
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+      - name: Deploy Edge Functions
+        env:
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          supabase login --api-key $SUPABASE_API_KEY
+          supabase link --project-ref $SUPABASE_PROJECT_REF
+          supabase functions deploy tutor-chat --project-ref $SUPABASE_PROJECT_REF
+          # repeat for other functions …
+  eas:
+    needs: supabase
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+      - name: Build Production APK
+        env:
+          EAS_BUILD_PROFILE: production
+        run: |
+          eas login --token ${{ secrets.EAS_TOKEN }}
+          eas build --platform android --profile production --non-interactive
 ```
-
-### Option C: Upgrade to Pro ($25/month)
-
-Once you have real users, Pro removes the pause limit and gives 8GB storage.
+This pipeline automatically deploys backend functions then triggers a production mobile build on every merge to `main`.
 
 ---
 
-## 5. Production Checklist
-
-### Before First Release
-
-- [ ] All 8 migrations applied successfully (001 → 008)
-- [ ] All 7 edge functions deployed
-- [ ] `GROQ_API_KEY` secret set on Supabase
-- [ ] EAS secrets set for Supabase URL, anon key, Groq key
-- [ ] RLS verified (all tables have Row Level Security enabled)
-- [ ] Auth provider configured (email/password at minimum)
-- [ ] Privacy policy URL published and added to Play Store listing
-- [ ] App tested on physical Android device with Indian English STT
-- [ ] Offline mode tested (airplane mode → complete lesson → reconnect → check XP synced)
-- [ ] Guest mode tested (skip login → features work with offline fallback)
-
-### AI System Verification
-
-- [ ] Nova chat responds and grammar corrections appear
-- [ ] Grammar Engine returns Telugu explanations
-- [ ] Interview coaching returns structured JSON feedback
-- [ ] Email assistant generates appropriate emails
-- [ ] All features show offline fallback content (not errors) when no internet
-- [ ] Check Supabase logs: Functions → tutor-chat → Logs — verify model fallback messages appear
-
-### Content System Verification
-
-- [ ] Daily Challenges show different content each day
-- [ ] Flashcards use SM-2 ordering (due cards appear first)
-- [ ] Pronunciation Lab records and scores
-- [ ] Seen content doesn't repeat within a session
+## 5️⃣ Post‑Deployment Checklist
+- [ ] All migrations (001‑008) applied.
+- [ ] All 7 edge functions deployed and healthy.
+- [ ] `GROQ_API_KEY` secret set in Supabase.
+- [ ] EAS secrets mirrored correctly.
+- [ ] Row‑Level Security verified on all tables.
+- [ ] Auth providers (email/password at minimum) configured.
+- [ ] Privacy‑policy URL published and linked in store listings.
+- [ ] Physical device testing on Android & iOS (including offline mode).
+- [ ] UI/UX verification of non‑blocking dialogs and theme consistency.
 
 ---
 
-## 6. Scaling Beyond Free Tier
-
-| Bottleneck | When | Solution | Cost |
-|------------|------|----------|------|
-| Groq 14,400 req/day | >144 active users/day | Multiple Groq API keys (rotate per user session) | $0 |
-| Groq rate limits | Burst traffic | Already handled by 4-model failover + response cache | $0 |
-| Supabase 500MB | ~50K users with history | Upgrade to Supabase Pro | $25/month |
-| Edge Function 500K invocations/month | Heavy usage | Upgrade to Supabase Pro | Included |
-| Translation API throttling | >1000 req/day | Self-host LibreTranslate | ~$5/month VPS |
-
-### Multiple Groq API Keys Strategy
-
-When user base grows, distribute load across multiple free Groq accounts:
-
-```typescript
-// In aiProviderAdapter.ts — rotate key by user session
-const GROQ_KEYS = [
-  process.env.EXPO_PUBLIC_GROQ_API_KEY_1,
-  process.env.EXPO_PUBLIC_GROQ_API_KEY_2,
-  process.env.EXPO_PUBLIC_GROQ_API_KEY_3,
-]
-const keyIndex = parseInt(userId.slice(-1), 16) % GROQ_KEYS.length
-const apiKey = GROQ_KEYS[keyIndex]
-```
-
-This gives 43,200 req/day across 3 keys with consistent routing per user.
+## 🛡️ Scaling Beyond Free Tier
+| Bottleneck | When | Solution |
+|------------|------|----------|
+| Groq request limit (14 400 req/day) | > 144 active users/day | Rotate multiple free Groq keys (see `aiProviderAdapter.ts`). |
+| Supabase storage (500 MB) | ~ 50 K users with history | Upgrade to Supabase Pro ($25 / month). |
+| Edge function invocations (500 K / mo) | Heavy usage | Supabase Pro includes higher limits. |
+| Translation API throttling | > 1 000 req/day | Self‑host LibreTranslate (~ $5 / mo). |
 
 ---
 
-## 7. Monitoring
-
-### Supabase Dashboard
-- **Database**: Table Editor → Check row counts in `ai_usage_logs`
-- **Functions**: Functions → Select function → Logs (real-time)
-- **Auth**: Authentication → Users (user count, sign-in rates)
-
-### AI Health (in-app)
-Call `getAISystemHealth()` from `mobile/src/services/ai/index.ts` to get:
-- Circuit breaker state per model (closed/open/half-open)
-- Success rate and average latency last 2 minutes
-- Requests used today vs daily limit
-- Cache hit count
-
-### AI Analytics Tables
-Query `ai_usage_logs` to see model usage, error rates, and latency trends:
-
+## 🧭 Monitoring & Analytics
+- **Supabase Dashboard** → Database → Table editor → inspect `ai_usage_logs`.
+- **Functions** → Logs → real‑time view of each edge function.
+- **In‑app health**: `getAISystemHealth()` reports circuit‑breaker state, success rates, request quotas, and cache hit ratio.
+- **SQL for model success rate (last 7 days)**:
 ```sql
--- Model success rate last 7 days
 SELECT provider_id, model_id,
-  COUNT(*) as total,
-  SUM(CASE WHEN success THEN 1 ELSE 0 END) as successes,
-  AVG(latency_ms) as avg_latency_ms
+       COUNT(*) AS total,
+       SUM(CASE WHEN success THEN 1 ELSE 0 END) AS successes,
+       AVG(latency_ms) AS avg_latency_ms
 FROM ai_usage_logs
 WHERE created_at > now() - interval '7 days'
 GROUP BY provider_id, model_id
 ORDER BY total DESC;
 ```
+---
+
+## 🛡️ License
+MIT
