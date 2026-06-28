@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { View, Text, StyleSheet, Animated, useWindowDimensions } from 'react-native'
+import { View, Text, StyleSheet, Animated, useWindowDimensions, Image } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { supabase } from '../../services/supabase'
@@ -150,7 +150,7 @@ export default function SplashScreen() {
         {/* Premium logo circle with inner glow */}
         <View style={styles.logoRing}>
           <View style={styles.logoCircle}>
-            <Text style={styles.logoEmoji}>🎓</Text>
+            <Image source={require('../../assets/images/favicon.png')} style={styles.logoEmoji} />
           </View>
         </View>
 
@@ -188,7 +188,7 @@ export default function SplashScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-
+  logoEmoji: { width: 60, height: 60, marginBottom: 8 },
   // Background decorative circles
   bgCircle1: {
     position: 'absolute',
@@ -232,13 +232,12 @@ const styles = StyleSheet.create({
     width: 110,
     height: 110,
     borderRadius: 55,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(255, 255, 255, 1)',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
     borderColor: 'rgba(255,255,255,0.5)',
   },
-  logoEmoji: { fontSize: 52 },
 
   // App name
   appNameRow: {

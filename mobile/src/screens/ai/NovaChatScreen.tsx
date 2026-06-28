@@ -393,7 +393,7 @@ export default function NovaChatScreen() {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={0}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
     >
       {/* Header */}
       <LinearGradient colors={['#7B61FF', '#5A42F5']} style={styles.header}>

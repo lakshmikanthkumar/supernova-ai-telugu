@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Text, TextInput, TouchableOpacity,
   View,
+  Image,
 } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Ionicons } from '@expo/vector-icons'
@@ -136,7 +137,7 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <LinearGradient colors={['#7B61FF', '#5A42F5']} style={styles.header}>
-        <Text style={styles.logoEmoji}>🎓</Text>
+        <Image source={require('../../assets/images/logo.png')} style={styles.logoEmoji} />
         <Text style={styles.appName}>EnglishMitraAI</Text>
         <Text style={styles.poweredByMaansvi}>powered by Maansvi</Text>
         <Text style={styles.taglineMain}>తెలుగులో ఇంగ్లీష్ నేర్చుకోండి</Text>
@@ -212,11 +213,18 @@ export default function LoginScreen() {
           onPress={handleLogin}
           disabled={loading}
         >
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.primaryButtonText}>Login →</Text>
-          )}
+          <LinearGradient
+            colors={loading ? [Colors.primary, Colors.primary] : [Colors.primary, '#0096FF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.primaryButtonGradient}
+          >
+            {loading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text style={styles.primaryButtonText}>Login →</Text>
+            )}
+          </LinearGradient>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push('/signup')} style={styles.switchAuthMode}>
@@ -298,7 +306,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   header: { paddingTop: 60, paddingBottom: 40, alignItems: 'center' },
-  logoEmoji: { fontSize: 56, marginBottom: 8 },
+  logoEmoji: { width: 40, height: 40, marginBottom: 8 },
   appName: { fontSize: 32, fontWeight: '800', color: 'white', letterSpacing: 0.5 },
   poweredByMaansvi: {
     fontSize: 12,
@@ -355,8 +363,9 @@ const styles = StyleSheet.create({
   },
   formContainerWrapper: { flex: 1, backgroundColor: 'white' },
   primaryButton: {
-    backgroundColor: Colors.primary,
-    borderRadius: 14, elevation: 3,
+    backgroundColor: 'transparent',
+    borderRadius: 14,
+    elevation: 3,
     marginTop: 8,
     overflow: 'hidden',
   },
@@ -377,12 +386,18 @@ const styles = StyleSheet.create({
   dividerLine: { flex: 1, height: 1, backgroundColor: '#E5E7EB' },
   dividerText: { fontSize: 11, fontWeight: '700', color: '#9CA3AF', marginHorizontal: 12, letterSpacing: 1 },
   guestButton: {
-    backgroundColor: '#FFF3ED',
+    backgroundColor: 'rgba(255,255,255,0.2)',
     borderWidth: 2,
-    borderColor: '#FFD4BA',
+    borderColor: 'rgba(255,255,255,0.5)',
     paddingVertical: 16,
-    fontSize: 16,
-    color: Theme.colors.text,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   guestButtonText: { color: Colors.primary, fontSize: 16, fontWeight: '700' },
   termsContainer: { marginTop: 24, alignItems: 'center' },
