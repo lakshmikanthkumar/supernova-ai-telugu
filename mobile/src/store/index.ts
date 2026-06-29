@@ -13,6 +13,7 @@ import learningPathReducer from './slices/learningPathSlice'
 import greetingsReducer from './slices/greetingsSlice'
 import dynamicFeedReducer from './slices/dynamicFeedSlice'
 import notificationReducer from './slices/notificationSlice'
+import fluencyCoachReducer from '../features/fluencyCoach/redux/fluencyCoachSlice'
 
 // ─── AsyncStorage keys ────────────────────────────────────────────────────────
 const GAMIFICATION_KEY = '@englishmitra:gamification_v1'
@@ -94,6 +95,7 @@ export const store = configureStore({
     greetings: greetingsReducer,
     dynamicFeed: dynamicFeedReducer,
     notifications: notificationReducer,
+    fluencyCoach: fluencyCoachReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false })
