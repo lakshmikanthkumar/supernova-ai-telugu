@@ -1,4 +1,6 @@
-const { withAndroidManifest, withGradleProperties } = require('@expo/config-plugins');
+const { withAndroidManifest, withGradleProperties, withDangerousMod } = require('@expo/config-plugins');
+const fs = require('fs');
+const path = require('path');
 
 function withAndroidBuildFixes(config) {
   // 1. Modify AndroidManifest.xml to ensure the tools:replace has its replacement value and add <queries> for speech recognition visibility
@@ -70,6 +72,32 @@ function withAndroidBuildFixes(config) {
 
     return config;
   });
+
+  // 3. Modify proguard-rules.pro to keep react-native-voice classes in release builds
+  config = withDangerousMod(config, [
+    'android',
+    async (config) => {
+      const proguardPath = path.join(
+        config.modRequest.platformProjectRoot,
+        'app',
+        'proguard-rules.pro'
+      );
+      if (fs.existsSync(proguardPath)) {
+        let content = fs.readFileSync(proguardPath, 'utf8');
+        const customRules = `
+# Keep react-native-voice classes for release builds
+-keep class com.wenkesj.voice.** { *; }
+-dontwarn com.wenkesj.voice.**
+`;
+        if (!content.includes('com.wenkesj.voice')) {
+          content += '\n' + customRules;
+          fs.writeFileSync(proguardPath, content, 'utf8');
+          console.log('[withAndroidBuildFixes] Appended react-native-voice Proguard rules.');
+        }
+      }
+      return config;
+    },
+  ]);
 
   return config;
 }
