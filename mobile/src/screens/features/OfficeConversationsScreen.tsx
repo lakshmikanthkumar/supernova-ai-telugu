@@ -1007,7 +1007,7 @@ const styles = StyleSheet.create({
   roleBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10 },
   roleBadgeText: { fontSize: 12, fontWeight: '700' },
 
-  hintBanner: { backgroundColor: '#FFFFFF', paddingHorizontal: 14, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: BORDER },
+  hintBanner: { backgroundColor: '#18182b', paddingHorizontal: 14, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: BORDER },
   hintText: { fontSize: 12, color: TEXT_MUTED, lineHeight: 18 },
 
   chatScroll: { flex: 1 },
@@ -1055,7 +1055,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 14,
-    color: TEXT,
+    color: '#111827',
     maxHeight: 100,
     borderWidth: 1,
     borderColor: BORDER,

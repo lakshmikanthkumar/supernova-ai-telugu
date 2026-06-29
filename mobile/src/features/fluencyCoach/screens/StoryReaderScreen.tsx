@@ -95,31 +95,47 @@ export default function StoryReaderScreen() {
   }, [])
 
   const handleStop = useCallback(() => {
-    Alert.alert(
-      'Stop Reading?',
-      'Your progress will be saved. You can resume this story later.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Stop', style: 'destructive', onPress: () => handleSessionComplete() },
-      ]
-    )
+    if (Platform.OS === 'web') {
+      const confirmStop = window.confirm('Stop Reading?\n\nYour progress will be saved. You can resume this story later.')
+      if (confirmStop) {
+        handleSessionComplete()
+      }
+    } else {
+      Alert.alert(
+        'Stop Reading?',
+        'Your progress will be saved. You can resume this story later.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Stop', style: 'destructive', onPress: () => handleSessionComplete() },
+        ]
+      )
+    }
   }, [handleSessionComplete])
 
   const handleBack = useCallback(() => {
     if (isSession) {
-      Alert.alert(
-        'Leave session?',
-        'Your reading session will be paused.',
-        [
-          { text: 'Stay', style: 'cancel' },
-          {
-            text: 'Leave', onPress: async () => {
-              await handlePause()
-              router.back()
-            }
-          },
-        ]
-      )
+      if (Platform.OS === 'web') {
+        const confirmLeave = window.confirm('Leave session?\n\nYour reading session will be paused.')
+        if (confirmLeave) {
+          handlePause().then(() => {
+            router.back()
+          })
+        }
+      } else {
+        Alert.alert(
+          'Leave session?',
+          'Your reading session will be paused.',
+          [
+            { text: 'Stay', style: 'cancel' },
+            {
+              text: 'Leave', onPress: async () => {
+                await handlePause()
+                router.back()
+              }
+            },
+          ]
+        )
+      }
     } else {
       router.back()
     }

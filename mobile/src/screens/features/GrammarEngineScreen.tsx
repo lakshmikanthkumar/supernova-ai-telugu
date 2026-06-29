@@ -13,6 +13,7 @@ import {
   StatusBar,
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../../services/supabase';
 import { Colors } from '../../constants/theme';
 
@@ -998,12 +999,18 @@ const GrammarEngineScreen: React.FC = () => {
             <Text style={styles.quizScorePct}>{pct}%</Text>
           </View>
           <Text style={styles.xpLabel}>+{xpEarned} XP Earned!</Text>
-          <TouchableOpacity style={styles.quizBtn} onPress={goHome} activeOpacity={0.85}>
-            <Text style={styles.quizBtnText}>← Back to Topics</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.quizBtn, { backgroundColor: '#17A2B8', marginTop: 10 }]} onPress={openQuiz} activeOpacity={0.85}>
-            <Text style={styles.quizBtnText}>🔄 Retry Quiz</Text>
-          </TouchableOpacity>
+          
+          <View style={styles.quizDoneButtonContainer}>
+            <TouchableOpacity style={styles.quizRetryBtn} onPress={openQuiz} activeOpacity={0.85}>
+              <Ionicons name="refresh" size={20} color="#fff" style={{ marginRight: 8 }} />
+              <Text style={styles.quizRetryBtnText}>Retry Quiz</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.quizBackBtn} onPress={goHome} activeOpacity={0.85}>
+              <Ionicons name="arrow-back" size={20} color={Colors.primary} style={{ marginRight: 8 }} />
+              <Text style={styles.quizBackBtnText}>Back to Topics</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       );
     }
@@ -1213,6 +1220,47 @@ const styles = StyleSheet.create({
   quizDoneScore: { fontSize: 18, color: '#555', marginBottom: 16 },
   quizScoreCircle: { width: 90, height: 90, borderRadius: 45, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
   quizScorePct: { fontSize: 28, fontWeight: '800', color: '#fff' },
+  quizDoneButtonContainer: {
+    width: '100%',
+    paddingHorizontal: 20,
+    marginTop: 20,
+    gap: 12,
+  },
+  quizRetryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
+    borderRadius: 14,
+    paddingVertical: 14,
+    width: '100%',
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  quizRetryBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  quizBackBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+    borderRadius: 14,
+    paddingVertical: 14,
+    width: '100%',
+  },
+  quizBackBtnText: {
+    color: Colors.primary,
+    fontSize: 16,
+    fontWeight: '700',
+  },
 });
 
 export default GrammarEngineScreen;
