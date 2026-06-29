@@ -42,7 +42,7 @@ export const LiveMetricsBanner = memo(() => {
   const { wpm, accuracy, pauses } = useSelector(selectLiveStats)
 
   return (
-    <View style={styles.container} accessibilityRole="none">
+    <View style={styles.container} accessibilityRole="none" testID="live-metrics-banner">
       <MetricPill
         label="WPM"
         value={wpm > 0 ? String(wpm) : '--'}

@@ -135,6 +135,20 @@ export const fetchWordMeaning = createAsyncThunk(
   }
 )
 
+// ── PURE HELPER (must be declared before slice reducers reference it) ─────────
+
+function applyFilters(
+  stories: Story[],
+  category: StoryCategory | 'all',
+  difficulty: DifficultyLevel | 'all'
+): Story[] {
+  return stories.filter(s => {
+    const catMatch = category === 'all' || s.category === category
+    const diffMatch = difficulty === 'all' || s.difficulty === difficulty
+    return catMatch && diffMatch
+  })
+}
+
 // ── SLICE ─────────────────────────────────────────────────────
 
 const fluencyCoachSlice = createSlice({
@@ -297,6 +311,45 @@ const fluencyCoachSlice = createSlice({
       state.sessionId = action.payload
     },
 
+    // ── Direct state setters (used by route wrappers & tests)
+    setStories(state, action: PayloadAction<Story[]>) {
+      state.stories = action.payload
+      state.filteredStories = applyFilters(
+        action.payload, state.selectedCategory, state.selectedDifficulty
+      )
+    },
+    setAIFeedback(state, action: PayloadAction<AIFeedback>) {
+      state.aiFeedback = action.payload
+    },
+    setXPEarned(state, action: PayloadAction<number>) {
+      state.xpEarned = action.payload
+    },
+    // Alias: incrementSentence = advanceSentence (semantic synonym for tests)
+    incrementSentence(state) {
+      if (!state.currentStory?.sentences) {
+        state.currentSentenceIndex += 1
+        return
+      }
+      const total = state.currentStory.sentences.length
+      if (state.currentSentenceIndex < total - 1) {
+        state.currentSentenceIndex += 1
+        state.completionPercent = Math.round(
+          (state.currentSentenceIndex / total) * 100
+        )
+      }
+    },
+    // Alias: setPaused (mirrors pauseSession/resumeSession for direct boolean)
+    setPaused(state, action: PayloadAction<boolean>) {
+      state.isPaused = action.payload
+      if (action.payload) {
+        state.isListening = false
+      }
+    },
+    // Alias: setScrollSpeedMultiplier = setScrollSpeed
+    setScrollSpeedMultiplier(state, action: PayloadAction<number>) {
+      state.scrollSpeedMultiplier = Math.min(2.0, Math.max(0.5, action.payload))
+    },
+
     clearError(state) { state.error = null },
   },
 
@@ -357,20 +410,6 @@ const fluencyCoachSlice = createSlice({
   },
 })
 
-// ── PURE HELPER ───────────────────────────────────────────────
-
-function applyFilters(
-  stories: Story[],
-  category: StoryCategory | 'all',
-  difficulty: DifficultyLevel | 'all'
-): Story[] {
-  return stories.filter(s => {
-    const catMatch = category === 'all' || s.category === category
-    const diffMatch = difficulty === 'all' || s.difficulty === difficulty
-    return catMatch && diffMatch
-  })
-}
-
 // ── SELECTORS ─────────────────────────────────────────────────
 
 const selectFluency = (state: RootState) => state.fluencyCoach
@@ -406,17 +445,18 @@ export const selectSessionProgress = createSelector(
 
 export const selectLiveStats = createSelector(
   selectFluency,
-  (s) => ({
-    wpm:       s.sessionStats?.currentWPM ?? 0,
-    accuracy:  s.sessionStats
-      ? Math.round(
-          (s.sessionStats.correctSentences /
-            Math.max(1, s.sessionStats.sentenceAccuracies.length)) * 100
-        )
-      : 0,
-    pauses:    s.sessionStats?.pauseCount ?? 0,
-    wordsSpoken: s.sessionStats?.wordsSpoken ?? 0,
-  })
+  (s) => {
+    const scores = Object.values(s.sentenceScores)
+    const accuracy = scores.length
+      ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+      : 0
+    return {
+      wpm:        s.sessionStats?.currentWPM ?? 0,
+      accuracy,
+      pauses:     s.sessionStats?.pauseCount ?? 0,
+      wordsSpoken: s.sessionStats?.wordsSpoken ?? 0,
+    }
+  }
 )
 
 export const {
@@ -424,12 +464,14 @@ export const {
   selectStory, clearCurrentStory,
   beginSession, pauseSession, resumeSession, endSession,
   setScrollMode, setScrollSpeed,
-  advanceSentence, setSentenceIndex,
+  advanceSentence, setSentenceIndex, incrementSentence,
   setListening, setPartialTranscript,
   recordSentenceResult, recordPause,
   setLiveFeedback,
   openWordMeaning, closeWordMeaning,
   setSessionId,
+  setStories, setAIFeedback, setXPEarned,
+  setPaused, setScrollSpeedMultiplier,
   clearError,
 } = fluencyCoachSlice.actions
 

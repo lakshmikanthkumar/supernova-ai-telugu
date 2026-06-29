@@ -41,6 +41,8 @@ describe('fluencyCoachSlice reducers', () => {
     expect(state.currentSentenceIndex).toBe(0)
     expect(state.isListening).toBe(false)
     expect(state.scrollMode).toBe('auto')
+    expect(state.storiesLoading).toBe(false)
+    expect(state.storiesError).toBeNull()
   })
 
   it('setCategory updates selectedCategory', () => {
@@ -54,11 +56,11 @@ describe('fluencyCoachSlice reducers', () => {
   })
 
   it('selectStory sets currentStory and resets session state', () => {
-    const pre = { ...getInitial(), currentSentenceIndex: 5, sentenceScores: [80, 90] }
+    const pre = { ...getInitial(), currentSentenceIndex: 5, sentenceScores: { 0: 80, 1: 90 } }
     const state = fluencyCoachReducer(pre as any, selectStory(story))
     expect(state.currentStory).toEqual(story)
     expect(state.currentSentenceIndex).toBe(0)
-    expect(state.sentenceScores).toEqual([])
+    expect(state.sentenceScores).toEqual({})
   })
 
   it('clearCurrentStory resets to null', () => {
@@ -108,7 +110,8 @@ describe('fluencyCoach selectors', () => {
   })
 
   it('selectAverageAccuracy averages sentence scores', () => {
-    const root = makeRoot({ sentenceScores: [80, 100, 60] })
+    // Record<number, number> shape matching slice state
+    const root = makeRoot({ sentenceScores: { 0: 80, 1: 100, 2: 60 } })
     expect(selectAverageAccuracy(root as RootState)).toBe(80)
   })
 
@@ -116,10 +119,10 @@ describe('fluencyCoach selectors', () => {
     const root = makeRoot({
       sessionStats: {
         startTime: Date.now(), endTime: null, wordsSpoken: 10, totalWords: 10,
-        pauseCount: 2, totalPauseMs: 0, missedSentences: 0, correctSentences: 1,
+        pauseCount: 2, totalPauseMs: 0, missedSentences: [], correctSentences: 1,
         currentWPM: 95, peakWPM: 100, sentenceAccuracies: [90],
       },
-      sentenceScores: [90],
+      sentenceScores: { 0: 90 },
     })
     const stats = selectLiveStats(root as RootState)
     expect(stats.wpm).toBe(95)

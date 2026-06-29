@@ -131,7 +131,7 @@ export default function StoryReaderScreen() {
   const diffColor = DIFFICULTY_COLORS[story.difficulty]
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['top']} testID="story-reader-screen">
 
       {/* ── HEADER ───────────────────────────────────────── */}
       <LinearGradient colors={['#7B61FF', '#5A42F5']} style={styles.header}>
@@ -229,13 +229,17 @@ export default function StoryReaderScreen() {
               onPress={handleStop}
               accessibilityRole="button"
               accessibilityLabel="Stop session"
+              testID="stop-session-btn"
             >
               <Square size={18} color="white" fill="white" />
             </TouchableOpacity>
 
             {/* Mic pulse */}
             <Animated.View style={{ transform: [{ scale: micPulse }] }}>
-              <View style={[styles.micIndicator, isListening && styles.micIndicatorActive]}>
+              <View
+                style={[styles.micIndicator, isListening && styles.micIndicatorActive]}
+                testID="mic-indicator"
+              >
                 {isListening
                   ? <Mic size={26} color="white" />
                   : <MicOff size={26} color="#6B7280" />

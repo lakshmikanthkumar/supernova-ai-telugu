@@ -37,7 +37,7 @@ export interface Story {
   xp_reward: number
   word_count: number
   preview: string          // first 80 chars shown on card
-  created_at: string
+  created_at?: string
   sentences?: StorySentence[]
   is_premium?: boolean
   // User-specific (joined)

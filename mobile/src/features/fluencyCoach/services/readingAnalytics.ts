@@ -37,6 +37,30 @@ function wpmLabel(wpm: number): AIFeedback['reading_speed_label'] {
   return 'very_fast'
 }
 
+// Exported for unit testing — computes local scores without AI
+export function computeLocalScores(stats: SessionStats, _sentenceScores: number[]): Pick<AIFeedback, 'fluency_score' | 'pronunciation_score' | 'confidence_score' | 'reading_speed_wpm' | 'reading_speed_label'> {
+  const accuracy        = _sentenceScores.length
+    ? Math.round(_sentenceScores.reduce((a, b) => a + b, 0) / _sentenceScores.length)
+    : avgAccuracy(stats)
+  const wpm             = stats.currentWPM || Math.round(
+    stats.wordsSpoken / Math.max((((stats.endTime ?? Date.now()) - stats.startTime) / 60_000), 0.01)
+  )
+  const fluencyScore    = Math.min(100, Math.max(0,
+    Math.round(accuracy * 0.6 + wpmScore(wpm) * 0.4) - pausePenalty(stats.pauseCount, Math.max(1, _sentenceScores.length))
+  ))
+  const pronunciationScore = Math.min(100, Math.max(0, accuracy - 5))
+  const confidenceScore    = Math.min(100, Math.max(0,
+    accuracy * 0.5 + (stats.pauseCount < 3 ? 50 : wpm >= WPM_GOOD_MIN && wpm <= WPM_GOOD_MAX ? 40 : 20)
+  ))
+  return {
+    fluency_score:        fluencyScore,
+    pronunciation_score:  pronunciationScore,
+    confidence_score:     confidenceScore,
+    reading_speed_wpm:    wpm,
+    reading_speed_label:  wpmLabel(wpm),
+  }
+}
+
 function computeLocalFeedback(story: Story, stats: SessionStats): AIFeedback {
   const accuracy   = avgAccuracy(stats)
   const durationMs = (stats.endTime ?? Date.now()) - stats.startTime

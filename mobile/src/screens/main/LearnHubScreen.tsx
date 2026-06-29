@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { Colors } from '../../constants/theme'
 import { useTheme } from '../../context/ThemeContext'
-import { Sun, Mic, Briefcase, Mail, Phone, Edit3, Volume2, Layers, Target, Bot, Users, Search, Star, ArrowRight, X } from 'lucide-react-native'
+import { Sun, Mic, Briefcase, Mail, Phone, Edit3, Volume2, Layers, Target, Bot, Users, Search, Star, ArrowRight, X, Headphones } from 'lucide-react-native'
 
 const { width } = Dimensions.get('window')
 const CARD_WIDTH = (width - 48) / 2   // 2 columns, 16 outer + 8 gap each side
@@ -25,6 +25,7 @@ interface ModuleDef {
 }
 
 const MODULES: ModuleDef[] = [
+  { name: 'Fluency Coach',       icon: Headphones, route: '/features/fluency-coach', category: 'Speaking', level: 'All Levels', time: '5-15 min', color: '#7B61FF' },
   { name: 'Daily Greetings',     icon: Sun,  route: '/features/daily-greetings',     category: 'Speaking',    level: 'Beginner',     time: '5 min',  color: '#7B61FF', progress: 60 },
   { name: 'Self Introduction',   icon: Mic,  route: '/features/self-introduction',   category: 'Speaking',    level: 'Beginner',     time: '10 min', color: '#5A42F5', progress: 20 },
   { name: 'Office Conversations',icon: Briefcase,  route: '/features/office-conversations',category: 'Speaking',    level: 'Intermediate', time: '15 min', color: '#00D26A', progress: 45 },
@@ -43,7 +44,7 @@ const MODULES: ModuleDef[] = [
 const TOTAL_MODULES = MODULES.length
 
 // Modules marked as AI-recommended (static — would be dynamic in production)
-const RECOMMENDED_NAMES = ['Office Conversations', 'Grammar Engine', 'AI Nova Chat']
+const RECOMMENDED_NAMES = ['Fluency Coach', 'Office Conversations', 'Grammar Engine']
 
 const CATEGORIES = ['All', 'Speaking', 'Writing', 'Vocabulary', 'Grammar', 'Interview']
 

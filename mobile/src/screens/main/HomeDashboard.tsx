@@ -4,7 +4,7 @@ import {
   RefreshControl, Dimensions, TextInput, Alert,
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
-import { Sun, Mic, Briefcase, Mail, MessageSquare, Bot, Bell, User, Flame, Zap, Volume2, ArrowRight, Target, Trophy, BookOpen } from 'lucide-react-native'
+import { Sun, Mic, Briefcase, Mail, MessageSquare, Bot, Bell, User, Flame, Zap, Volume2, ArrowRight, Target, Trophy, BookOpen, Headphones } from 'lucide-react-native'
 import { router } from 'expo-router'
 import * as Speech from 'expo-speech'
 import { Colors } from '../../constants/theme'
@@ -260,6 +260,40 @@ export default function HomeDashboard() {
             <View style={styles.featuredActionRow}>
               <Text style={styles.featuredActionText}>Start Learning</Text>
               <ArrowRight size={16} color='white' />
+            </View>
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
+
+      {/* ── Fluency Coach Banner ── */}
+      <View style={styles.section}>
+        <TouchableOpacity
+          activeOpacity={0.88}
+          onPress={() => router.push('/features/fluency-coach' as any)}
+          accessibilityRole="button"
+          accessibilityLabel="Fluency Coach — read stories aloud, earn up to 50 XP"
+        >
+          <LinearGradient
+            colors={['#7B61FF', '#5A42F5']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.fluencyCard}
+          >
+            <View style={styles.fluencyLeft}>
+              <View style={styles.fluencyIconWrap}>
+                <Headphones size={28} color="white" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={styles.fluencyBadgeRow}>
+                  <Text style={styles.fluencyBadge}>NEW</Text>
+                  <Text style={styles.fluencyBadgeXP}>Up to 50 XP</Text>
+                </View>
+                <Text style={styles.fluencyTitle}>Fluency Coach</Text>
+                <Text style={styles.fluencySubtitle}>Read stories aloud · AI pronunciation feedback</Text>
+              </View>
+            </View>
+            <View style={styles.fluencyArrow}>
+              <ArrowRight size={20} color="white" />
             </View>
           </LinearGradient>
         </TouchableOpacity>
@@ -771,4 +805,36 @@ const styles = StyleSheet.create({
   leaderEmoji: { fontSize: 22, width: 32, textAlign: 'center' },
   leaderName: { flex: 1, fontSize: 14, fontWeight: '600', color: '#111827' },
   leaderXP: { fontSize: 13, color: '#6B7280', fontWeight: '600' },
+
+  // Fluency Coach banner
+  fluencyCard: {
+    borderRadius: 18, padding: 18,
+    flexDirection: 'row', alignItems: 'center',
+    elevation: 4, shadowColor: '#7B61FF',
+    shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.25, shadowRadius: 10,
+  },
+  fluencyLeft:    { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 14 },
+  fluencyIconWrap: {
+    width: 52, height: 52, borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  fluencyBadgeRow:  { flexDirection: 'row', gap: 8, marginBottom: 4 },
+  fluencyBadge:     {
+    backgroundColor: '#FEF3C7', borderRadius: 6,
+    paddingHorizontal: 6, paddingVertical: 2,
+    fontSize: 9, fontWeight: '800', color: '#92400E', letterSpacing: 0.5,
+  },
+  fluencyBadgeXP:   {
+    backgroundColor: 'rgba(255,255,255,0.25)', borderRadius: 6,
+    paddingHorizontal: 6, paddingVertical: 2,
+    fontSize: 9, fontWeight: '800', color: 'white',
+  },
+  fluencyTitle:    { color: 'white', fontSize: 17, fontWeight: '800' },
+  fluencySubtitle: { color: 'rgba(255,255,255,0.82)', fontSize: 12, marginTop: 2 },
+  fluencyArrow:    {
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center', justifyContent: 'center', marginLeft: 8,
+  },
 })

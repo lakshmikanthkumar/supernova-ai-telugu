@@ -17,11 +17,14 @@ import {
 // ── LEVENSHTEIN SIMILARITY ────────────────────────────────────
 // Returns 0 (no match) → 1 (perfect match).
 
-function levenshteinSimilarity(a: string, b: string): number {
-  const la = a.length
-  const lb = b.length
+export function levenshteinSimilarity(a: string, b: string): number {
+  const an = a.toLowerCase()
+  const bn = b.toLowerCase()
+  const la = an.length
+  const lb = bn.length
+  if (la === 0 && lb === 0) return 1
   if (la === 0 || lb === 0) return 0
-  if (a === b) return 1
+  if (an === bn) return 1
 
   const matrix: number[][] = Array.from({ length: la + 1 }, (_, i) =>
     Array.from({ length: lb + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
@@ -29,7 +32,7 @@ function levenshteinSimilarity(a: string, b: string): number {
 
   for (let i = 1; i <= la; i++) {
     for (let j = 1; j <= lb; j++) {
-      const cost = a[i - 1] === b[j - 1] ? 0 : 1
+      const cost = an[i - 1] === bn[j - 1] ? 0 : 1
       matrix[i][j] = Math.min(
         matrix[i - 1][j] + 1,
         matrix[i][j - 1] + 1,
@@ -103,6 +106,24 @@ function matchWords(
   }
 
   return results
+}
+
+// ── PUBLIC ALIGNMENT WRAPPER (used by tests) ──────────────────
+
+export function alignWords(
+  spoken: string[],
+  expected: string[]
+): { matchedCount: number; accuracy: number; wordResults: WordMatchResult[] } {
+  if (expected.length === 0 && spoken.length === 0) {
+    return { matchedCount: 0, accuracy: 100, wordResults: [] }
+  }
+  if (expected.length === 0) {
+    return { matchedCount: 0, accuracy: 0, wordResults: [] }
+  }
+  const wordResults = matchWords(expected, spoken)
+  const matchedCount = wordResults.filter(w => w.isCorrect).length
+  const accuracy = Math.round((matchedCount / expected.length) * 100)
+  return { matchedCount, accuracy, wordResults }
 }
 
 // ── WPM CALCULATOR ────────────────────────────────────────────
