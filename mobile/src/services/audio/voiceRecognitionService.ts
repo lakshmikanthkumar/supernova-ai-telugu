@@ -287,10 +287,12 @@ export async function resetVoiceEngine(): Promise<void> {
   console.log('[VoiceService] Resetting voice engine...')
   voiceState.setIsStopping(true)
   try {
-    await Voice.stop()
-    await Voice.cancel()
-    await Voice.destroy()
+    if (voiceState.getIsListening()) {
+      await Voice.cancel()
+      await new Promise(resolve => setTimeout(resolve, 300))
+    }
     await Voice.removeAllListeners()
+    await Voice.destroy()
   } catch (e) {
     console.warn('[VoiceService] Error during voice engine reset:', e)
   }
@@ -341,6 +343,10 @@ export async function startListening(options: SpeechRecognitionOptions = {}): Pr
     await speechRetry.executeWithRetry(async () => {
         // Ensure clean state before start
         try {
+            if (voiceState.getIsListening()) {
+                await Voice.cancel()
+                await new Promise(resolve => setTimeout(resolve, 200))
+            }
             await Voice.destroy()
             await new Promise(resolve => setTimeout(resolve, 100))
         } catch {}
@@ -414,8 +420,15 @@ export async function destroySpeechRecognition(): Promise<void> {
 
   voiceState.setIsStopping(true)
   try {
+    if (voiceState.getIsListening()) {
+      await Voice.cancel()
+      await new Promise(resolve => setTimeout(resolve, 300))
+    }
+    await Voice.removeAllListeners()
     await Voice.destroy()
-  } catch { /* ignore */ }
+  } catch (e) {
+    console.warn('[VoiceService] Error in destroy:', e)
+  }
 
   await new Promise(resolve => setTimeout(resolve, 200))
   voiceState.setIsListening(false)

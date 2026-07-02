@@ -287,10 +287,13 @@ export async function startListening(options: SpeechRecognitionOptions = {}): Pr
         attempts++
         console.warn(`[Voice] Start failed (${errMsg}), attempt ${attempts}/${maxAttempts}. Retrying...`)
         try {
+          // Safe teardown before retry
+          await Voice.cancel()
+          await new Promise(resolve => setTimeout(resolve, 200))
           await Voice.destroy()
         } catch {}
-        // Exponential backoff
-        await new Promise(resolve => setTimeout(resolve, 500 * attempts))
+        // Exponential backoff with longer delay to let OS release resources
+        await new Promise(resolve => setTimeout(resolve, 800 * attempts))
         return tryStart()
       }
 
@@ -398,8 +401,15 @@ export async function destroySpeechRecognition(): Promise<void> {
   }
   
   try {
+    if (isListening) {
+      await Voice.cancel()
+      await new Promise(resolve => setTimeout(resolve, 300))
+    }
+    await Voice.removeAllListeners()
     await Voice.destroy()
-  } catch { /* ignore */ }
+  } catch (e) {
+    console.warn('[Voice] Error in destroy:', e)
+  }
 
   await new Promise(resolve => setTimeout(resolve, 150))
   isListening = false
